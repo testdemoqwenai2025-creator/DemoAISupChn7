@@ -1,0 +1,1283 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Analytics Dashboard | AI Supply Chain Command Center</title>
+    <meta name="description" content="Enterprise-grade AI analytics dashboard with real-time KPIs, world risk map, scenario simulator, and predictive insights.">
+    
+    <!-- Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Leaflet for World Map -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <style>
+        :root {
+            --bg-primary: #0a0f1c; --bg-secondary: #111827; --bg-tertiary: #1f2937;
+            --text-primary: #f9fafb; --text-secondary: #9ca3af; --text-muted: #6b7280;
+            --accent-1: #6366f1; --accent-2: #06b6d4; --accent-3: #10b981;
+            --accent-4: #f59e0b; --accent-5: #ef4444; --accent-6: #8b5cf6;
+            --glass-bg: rgba(255,255,255,0.03); --glass-border: rgba(255,255,255,0.08);
+            --shadow-glow: 0 0 60px rgba(99,102,241,0.15);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        [data-theme="light"] {
+            --bg-primary: #ffffff; --bg-secondary: #f9fafb; --bg-tertiary: #e5e7eb;
+            --text-primary: #111827; --text-secondary: #4b5563; --text-muted: #9ca3af;
+            --glass-bg: rgba(0,0,0,0.02); --glass-border: rgba(0,0,0,0.08);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary); color: var(--text-primary);
+            min-height: 100vh; overflow-x: hidden;
+            transition: var(--transition);
+        }
+
+        /* Background Effects */
+        .bg-canvas { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+        .orb {
+            position: absolute; border-radius: 50%; filter: blur(100px);
+            opacity: 0.15; animation: float 20s ease-in-out infinite;
+        }
+        .orb-1 { width: 600px; height: 600px; top: -200px; right: -200px; background: var(--accent-1); }
+        .orb-2 { width: 500px; height: 500px; bottom: -150px; left: -150px; background: var(--accent-2); animation-delay: -5s; }
+        .orb-3 { width: 400px; height: 400px; top: 40%; left: 40%; background: var(--accent-3); animation-delay: -10s; }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(30px, -30px) scale(1.05); }
+            66% { transform: translate(-20px, 20px) scale(0.95); }
+        }
+
+        /* Header */
+        header {
+            position: sticky; top: 0; z-index: 100;
+            backdrop-filter: blur(20px); background: rgba(10,15,28,0.8);
+            border-bottom: 1px solid var(--glass-border);
+        }
+        [data-theme="light"] header { background: rgba(255,255,255,0.9); }
+
+        .header-inner {
+            max-width: 1920px; margin: 0 auto; padding: 0 2rem; height: 70px;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+
+        .logo {
+            display: flex; align-items: center; gap: 12px;
+            text-decoration: none; color: inherit;
+        }
+        .logo-icon {
+            width: 44px; height: 44px; border-radius: 12px;
+            background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 4px 20px rgba(99,102,241,0.4);
+        }
+        .logo-text h1 { font-size: 18px; font-weight: 700; }
+        .logo-text p { font-size: 11px; color: var(--text-secondary); }
+
+        nav { display: flex; gap: 4px; }
+        nav a {
+            padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 500;
+            text-decoration: none; transition: var(--transition); color: var(--text-secondary);
+        }
+        nav a:hover { background: var(--glass-bg); color: var(--text-primary); }
+        nav a.active {
+            background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+            color: white; box-shadow: 0 4px 15px rgba(99,102,241,0.35);
+        }
+
+        .header-actions { display: flex; align-items: center; gap: 12px; }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 10px 20px; border-radius: 10px; font-size: 14px; font-weight: 600;
+            cursor: pointer; transition: var(--transition); text-decoration: none;
+            border: none; font-family: inherit;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+            color: white; box-shadow: 0 4px 15px rgba(99,102,241,0.3);
+        }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 25px rgba(99,102,241,0.45); }
+        .btn-secondary {
+            background: var(--glass-bg); color: var(--text-primary);
+            border: 1px solid var(--glass-border);
+        }
+        .btn-secondary:hover { border-color: var(--accent-1); background: rgba(99,102,241,0.1); }
+        .btn-sm { padding: 8px 16px; font-size: 13px; }
+        .btn-danger { background: var(--accent-5); color: white; }
+        .btn-success { background: var(--accent-3); color: white; }
+
+        /* ===== SUPER VISIBLE THEME TOGGLE ===== */
+        .theme-toggle { 
+            width: auto; min-width: 120px; height: 44px; 
+            background: linear-gradient(135deg, #6366f1, #06b6d4) !important;
+            border: 3px solid rgba(255,255,255,0.3) !important; 
+            border-radius: 22px !important;
+            cursor: pointer; transition: all 0.3s ease !important; 
+            display: flex !important; align-items: center; justify-content: center;
+            padding: 0 18px !important; gap: 10px !important;
+            box-shadow: 0 4px 20px rgba(99,102,241,0.5), 0 0 40px rgba(99,102,241,0.2) !important;
+            position: relative;
+            animation: pulse-glow 2s ease-in-out infinite !important;
+            z-index: 1000 !important;
+        }
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 4px 20px rgba(99,102,241,0.5), 0 0 40px rgba(99,102,241,0.2); }
+            50% { box-shadow: 0 4px 30px rgba(99,102,241,0.7), 0 0 60px rgba(99,102,241,0.4); }
+        }
+        .theme-toggle:hover { 
+            transform: translateY(-3px) scale(1.05) !important;
+            box-shadow: 0 8px 35px rgba(99,102,241,0.7), 0 0 70px rgba(99,102,241,0.5) !important;
+            background: linear-gradient(135deg, #7c3aed, #0891b2) !important;
+        }
+        .toggle-thumb {
+            width: 26px; height: 26px; border-radius: 50% !important;
+            background: rgba(255,255,255,0.95) !important;
+            display: flex !important; align-items: center; justify-content: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2) !important;
+        }
+        .toggle-thumb svg, .toggle-thumb i { 
+            width: 16px !important; height: 16px !important; 
+            color: #6366f1 !important; 
+        }
+        .theme-toggle-label {
+            font-size: 13px !important; font-weight: 800 !important; 
+            color: #ffffff !important;
+            text-transform: uppercase !important; letter-spacing: 1px !important;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.3) !important;
+        }
+        
+        /* Light mode toggle styling */
+        [data-theme="light"] .theme-toggle {
+            background: linear-gradient(135deg, #f59e0b, #ef4444) !important;
+            box-shadow: 0 4px 20px rgba(245,158,11,0.5), 0 0 40px rgba(245,158,11,0.2) !important;
+        }
+        [data-theme="light"] .theme-toggle:hover {
+            background: linear-gradient(135deg, #d97706, #dc2626) !important;
+            box-shadow: 0 8px 35px rgba(245,158,11,0.7), 0 0 70px rgba(245,158,11,0.5) !important;
+        }
+
+        /* Main Content */
+        main { position: relative; z-index: 1; max-width: 1920px; margin: 0 auto; padding: 2rem; }
+
+        /* Page Navigation */
+        .page-nav-buttons { display: flex; gap: 10px; margin-bottom: 1rem; }
+        .page-nav-buttons .btn {
+            display: inline-flex; align-items: center; gap: 6px;
+            font-size: 13px; padding: 8px 16px; border-radius: 8px;
+            transition: var(--transition); text-decoration: none;
+        }
+        .page-nav-buttons .btn:hover {
+            transform: translateY(-2px); box-shadow: 0 4px 12px rgba(99,102,241,0.3);
+        }
+
+        /* Page Header */
+        .page-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;
+        }
+        .page-title-section { display: flex; align-items: center; gap: 16px; }
+        .page-title-icon {
+            width: 56px; height: 56px; border-radius: 16px;
+            background: linear-gradient(135deg, rgba(99,102,241,0.2), rgba(6,182,212,0.2));
+            display: flex; align-items: center; justify-content: center;
+            border: 1px solid var(--glass-border);
+        }
+        .page-title h1 { font-size: 2rem; font-weight: 800; }
+        .page-title p { color: var(--text-secondary); margin-top: 4px; }
+
+        .live-badge {
+            display: flex; align-items: center; gap: 8px;
+            padding: 8px 18px; border-radius: 9999px;
+            background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.3);
+            font-size: 13px; font-weight: 600; color: var(--accent-3);
+        }
+        .live-dot {
+            width: 8px; height: 8px; background: var(--accent-3);
+            border-radius: 50%; animation: pulse 2s ease-in-out infinite;
+        }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+        /* KPI Cards Grid */
+        .kpi-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem; margin-bottom: 2rem;
+        }
+        .kpi-card {
+            background: var(--bg-secondary); border: 1px solid var(--glass-border);
+            border-radius: 20px; padding: 1.75rem; transition: var(--transition);
+            position: relative; overflow: hidden;
+        }
+        .kpi-card::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0;
+            height: 3px; background: linear-gradient(90deg, var(--accent-1), var(--accent-2));
+            opacity: 0; transition: var(--transition);
+        }
+        .kpi-card:hover::before { opacity: 1; }
+        .kpi-card:hover { transform: translateY(-5px); box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+
+        .kpi-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.25rem; }
+        .kpi-icon {
+            width: 52px; height: 52px; border-radius: 14px;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .kpi-trend {
+            padding: 4px 10px; border-radius: 8px; font-size: 12px; font-weight: 600;
+        }
+        .trend-up { background: rgba(239,68,68,0.1); color: var(--accent-5); }
+        .trend-down { background: rgba(16,185,129,0.1); color: var(--accent-3); }
+        .trend-neutral { background: rgba(99,102,241,0.1); color: var(--accent-1); }
+
+        .kpi-value { font-size: 2.5rem; font-weight: 800; line-height: 1; margin-bottom: 0.5rem; }
+        .kpi-label { color: var(--text-secondary); font-size: 14px; font-weight: 500; }
+
+        /* Charts Layout */
+        .charts-grid {
+            display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .chart-card {
+            background: var(--bg-secondary); border: 1px solid var(--glass-border);
+            border-radius: 20px; padding: 1.75rem; transition: var(--transition);
+        }
+        .chart-card:hover { border-color: rgba(99,102,241,0.3); }
+        .chart-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        .chart-title { font-size: 1.1rem; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+        .chart-badge {
+            padding: 6px 14px; border-radius: 8px; font-size: 12px; font-weight: 600;
+            background: var(--glass-bg); border: 1px solid var(--glass-border);
+        }
+        .chart-container { height: 300px; position: relative; }
+
+        /* Full Width Chart */
+        .chart-full { grid-column: span 2; }
+
+        /* World Map Section */
+        .world-map-section {
+            background: var(--bg-secondary); border: 1px solid var(--glass-border);
+            border-radius: 20px; padding: 1.75rem; margin-bottom: 2rem;
+        }
+        .map-container { height: 450px; border-radius: 16px; overflow: hidden; margin-top: 1rem; }
+        #worldMap { width: 100%; height: 100%; }
+
+        /* Scenario Simulator */
+        .simulator-panel {
+            background: var(--bg-secondary); border: 1px solid var(--glass-border);
+            border-radius: 20px; padding: 1.75rem; margin-bottom: 2rem;
+        }
+        .simulator-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;
+        }
+        .simulator-inputs { display: flex; flex-direction: column; gap: 1.25rem; }
+        .input-group label { display: block; font-weight: 600; margin-bottom: 8px; font-size: 14px; }
+        .input-group input, .input-group select {
+            width: 100%; padding: 12px 16px; border-radius: 10px;
+            background: var(--bg-tertiary); border: 1px solid var(--glass-border);
+            color: var(--text-primary); font-size: 14px; font-family: inherit;
+            transition: var(--transition);
+        }
+        .input-group input:focus, .input-group select:focus {
+            outline: none; border-color: var(--accent-1);
+            box-shadow: 0 0 0 3px rgba(99,102,241,0.1);
+        }
+        .slider-container { margin-top: 8px; }
+        .slider-container input[type="range"] {
+            width: 100%; accent-color: var(--accent-1);
+        }
+        .slider-value { text-align: right; font-size: 13px; color: var(--text-secondary); margin-top: 4px; }
+
+        .simulator-results {
+            background: var(--bg-tertiary); border-radius: 16px; padding: 1.5rem;
+            border: 1px solid var(--glass-border);
+        }
+        .result-item {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 1rem 0; border-bottom: 1px solid var(--glass-border);
+        }
+        .result-item:last-child { border-bottom: none; }
+        .result-label { font-weight: 500; }
+        .result-value { font-size: 1.5rem; font-weight: 700; }
+        .result-positive { color: var(--accent-3); }
+        .result-negative { color: var(--accent-5); }
+
+        /* AI Chat Widget */
+        .ai-chat-widget {
+            position: fixed; bottom: 30px; right: 30px; z-index: 1000;
+        }
+        .chat-button {
+            width: 64px; height: 64px; border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent-1), var(--accent-6));
+            border: none; color: white; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 8px 32px rgba(99,102,241,0.5);
+            transition: var(--transition); animation: chatPulse 3s ease-in-out infinite;
+        }
+        @keyframes chatPulse {
+            0%, 100% { box-shadow: 0 8px 32px rgba(99,102,241,0.5); }
+            50% { box-shadow: 0 8px 48px rgba(139,92,246,0.7); }
+        }
+        .chat-button:hover { transform: scale(1.1); }
+
+        .chat-window {
+            position: absolute; bottom: 80px; right: 0;
+            width: 420px; height: 560px;
+            background: var(--bg-secondary); border: 1px solid var(--glass-border);
+            border-radius: 24px; display: none; flex-direction: column;
+            overflow: hidden; box-shadow: 0 25px 80px rgba(0,0,0,0.5);
+            animation: slideUp 0.3s ease;
+        }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .chat-window.open { display: flex; }
+
+        .chat-header {
+            padding: 1.25rem; background: linear-gradient(135deg, var(--accent-1), var(--accent-6));
+            color: white; display: flex; align-items: center; gap: 12px;
+        }
+        .chat-avatar {
+            width: 40px; height: 40px; border-radius: 50%;
+            background: rgba(255,255,255,0.2); display: flex;
+            align-items: center; justify-content: center;
+        }
+        .chat-info h3 { font-size: 15px; font-weight: 700; }
+        .chat-info p { font-size: 12px; opacity: 0.9; }
+        .chat-close {
+            margin-left: auto; background: none; border: none;
+            color: white; cursor: pointer; opacity: 0.8;
+        }
+        .chat-close:hover { opacity: 1; }
+
+        .chat-messages {
+            flex: 1; overflow-y: auto; padding: 1.25rem;
+            display: flex; flex-direction: column; gap: 1rem;
+        }
+        .message {
+            max-width: 85%; padding: 12px 16px; border-radius: 16px;
+            font-size: 14px; line-height: 1.5;
+        }
+        .message.ai {
+            background: var(--bg-tertiary); border: 1px solid var(--glass-border);
+            align-self: flex-start; border-bottom-left-radius: 4px;
+        }
+        .message.user {
+            background: linear-gradient(135deg, var(--accent-1), var(--accent-6));
+            color: white; align-self: flex-end; border-bottom-right-radius: 4px;
+        }
+
+        .chat-input-area {
+            padding: 1rem; border-top: 1px solid var(--glass-border);
+            display: flex; gap: 10px;
+        }
+        .chat-input {
+            flex: 1; padding: 12px 16px; border-radius: 12px;
+            background: var(--bg-tertiary); border: 1px solid var(--glass-border);
+            color: var(--text-primary); font-size: 14px; font-family: inherit;
+        }
+        .chat-send {
+            width: 48px; height: 48px; border-radius: 12px;
+            background: linear-gradient(135deg, var(--accent-1), var(--accent-6));
+            border: none; color: white; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: var(--transition);
+        }
+        .chat-send:hover { transform: scale(1.05); }
+
+        /* Quick Actions Bar */
+        .quick-actions-bar {
+            display: flex; gap: 12px; margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+        .action-chip {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 10px 20px; border-radius: 50px;
+            background: var(--bg-secondary); border: 1px solid var(--glass-border);
+            font-size: 13px; font-weight: 600; cursor: pointer;
+            transition: var(--transition);
+        }
+        .action-chip:hover {
+            border-color: var(--accent-1); background: rgba(99,102,241,0.1);
+            transform: translateY(-2px);
+        }
+        .action-chip i { width: 16px; height: 16px; }
+
+        /* Animations */
+        .animate-in {
+            opacity: 0; transform: translateY(20px);
+            animation: fadeInUp 0.6s ease forwards;
+        }
+        @keyframes fadeInUp { to { opacity: 1; transform: translateY(0); } }
+
+        /* Toast Notifications */
+        .toast {
+            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+            padding: 14px 28px; border-radius: 12px; color: white;
+            font-size: 14px; font-weight: 600; z-index: 10000;
+            animation: toastIn 0.3s ease;
+        }
+        @keyframes toastIn { from { opacity: 0; transform: translateX(-50%) translateY(20px); } }
+        .toast-success { background: var(--accent-3); }
+        .toast-error { background: var(--accent-5); }
+        .toast-info { background: var(--accent-1); }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .charts-grid { grid-template-columns: 1fr; }
+            .chart-full { grid-column: span 1; }
+            .simulator-grid { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 768px) {
+            nav { display: none; }
+            main { padding: 1rem; }
+            .kpi-grid { grid-template-columns: 1fr; }
+            .chat-window { width: calc(100vw - 40px); }
+        }
+        /* ===== FLOATING THEME TOGGLE (ALWAYS VISIBLE) ===== */
+        .floating-theme-toggle {
+            position: fixed !important;
+            bottom: 30px !important;
+            right: 30px !important;
+            z-index: 99999 !important;
+            background: linear-gradient(135deg, #6366f1, #06b6d4) !important;
+            color: white !important;
+            border: 4px solid rgba(255,255,255,0.5) !important;
+            padding: 18px 32px !important;
+            border-radius: 50px !important;
+            font-size: 18px !important;
+            font-weight: 900 !important;
+            cursor: pointer !important;
+            display: flex !important;
+            align-items: center !important;
+            gap: 12px !important;
+            box-shadow: 
+                0 8px 32px rgba(99,102,241,0.6),
+                0 0 80px rgba(99,102,241,0.4),
+                inset 0 2px 10px rgba(255,255,255,0.2) !important;
+            transition: all 0.3s ease !important;
+            animation: float-pulse 2.5s ease-in-out infinite !important;
+            text-transform: uppercase !important;
+            letter-spacing: 2px !important;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+        }
+        
+        @keyframes float-pulse {
+            0%, 100% { 
+                transform: translateY(0) scale(1); 
+                box-shadow: 
+                    0 8px 32px rgba(99,102,241,0.6),
+                    0 0 80px rgba(99,102,241,0.4);
+            }
+            50% { 
+                transform: translateY(-8px) scale(1.03); 
+                box-shadow: 
+                    0 12px 40px rgba(99,102,241,0.8),
+                    0 0 100px rgba(99,102,241,0.6);
+            }
+        }
+        
+        .floating-theme-toggle:hover {
+            transform: translateY(-12px) scale(1.08) !important;
+            box-shadow: 
+                0 16px 50px rgba(99,102,241,0.9),
+                0 0 120px rgba(99,102,241,0.7) !important;
+            background: linear-gradient(135deg, #7c3aed, #0891b2) !important;
+        }
+        
+        [data-theme="light"] .floating-theme-toggle {
+            background: linear-gradient(135deg, #f59e0b, #ef4444) !important;
+            box-shadow: 
+                0 8px 32px rgba(245,158,11,0.6),
+                0 0 80px rgba(245,158,11,0.4) !important;
+        }
+        
+        [data-theme="light"] .floating-theme-toggle:hover {
+            background: linear-gradient(135deg, #d97706, #dc2626) !important;
+            box-shadow: 
+                0 16px 50px rgba(245,158,11,0.9),
+                0 0 120px rgba(245,158,11,0.7) !important;
+        }
+        
+        .floating-toggle-icon {
+            font-size: 24px !important;
+            animation: icon-spin 3s linear infinite;
+        }
+        
+        @keyframes icon-spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Mobile adjustment */
+        @media (max-width: 768px) {
+            .floating-theme-toggle {
+                bottom: 20px !important;
+                right: 20px !important;
+                padding: 14px 24px !important;
+                font-size: 14px !important;
+            }
+            .floating-toggle-icon {
+                font-size: 20px !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 🔴 FLOATING THEME TOGGLE (ALWAYS VISIBLE) -->
+    <button class="floating-theme-toggle" onclick="toggleTheme()" id="floatingToggle" aria-label="Toggle dark and light mode">
+        <span class="floating-toggle-icon" id="floatingIcon">🌙</span>
+        <span id="floatingText">☀️ LIGHT MODE</span>
+    </button>
+    <!-- Background -->
+    <div class="bg-canvas">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <!-- Header -->
+    <header>
+        <div class="header-inner">
+            <a href="./index.html" class="logo">
+                <div class="logo-icon"><i data-lucide="brain"></i></div>
+                <div class="logo-text">
+                    <h1>AI Supply Chain</h1>
+                    <p>Enterprise Command Center</p>
+                </div>
+            </a>
+
+            <nav>
+                <a href="./index.html">Home</a>
+                <a href="./about.html">About</a>
+                <a href="./command-center.html">Command Center ⭐</a>
+                <a href="./dashboard.html" class="active">Dashboard</a>
+                <a href="./intelligence.html">Intelligence</a>
+                <a href="./platform.html">Platform</a>
+                <a href="./product.html">Product</a>
+                <a href="./customers.html">Customers</a>
+                <a href="./support.html">Support</a>
+            </nav>
+
+            <div class="header-actions">
+                <button onclick="openModal('loginModal')" class="btn btn-secondary btn-sm">
+                    <i data-lucide="log-in" style="width:14px;"></i> Sign In
+                </button>
+                <button class="theme-toggle" data-tooltip="🌙 Toggle Dark/Light Mode ☀️" onclick="toggleTheme()" aria-label="Toggle dark and light mode">
+                    <div class="toggle-thumb"><i data-lucide="moon" style="width:16px;height:16px;color:#6366f1"></i></div>
+                    <span class="theme-toggle-label">☀️ LIGHT</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main>
+        <!-- Navigation Buttons -->
+        <div class="page-nav-buttons animate-in">
+            <button onclick="window.history.back()" class="btn btn-secondary btn-sm">
+                <i data-lucide="arrow-left" style="width:16px;"></i> Back
+            </button>
+            <a href="./index.html" class="btn btn-primary btn-sm">
+                <i data-lucide="home" style="width:16px;"></i> Home
+            </a>
+        </div>
+
+        <!-- Page Header -->
+        <div class="page-header animate-in">
+            <div class="page-title-section">
+                <div class="page-title-icon">
+                    <i data-lucide="layout-dashboard" style="width:28px;height:28px;color:var(--accent-1)"></i>
+                </div>
+                <div>
+                    <h1>Advanced Analytics Dashboard</h1>
+                    <p>Real-time intelligence, global risk monitoring & predictive insights</p>
+                </div>
+            </div>
+            <span class="live-badge"><span class="live-dot"></span> Live • 847 Suppliers • 156 Orders • 42 Countries</span>
+        </div>
+
+        <!-- Quick Actions Bar -->
+        <div class="quick-actions-bar animate-in">
+            <div class="action-chip" onclick="scrollToSection('world-map')">
+                <i data-lucide="globe-2" style="color:var(--accent-2)"></i> World Risk Map
+            </div>
+            <div class="action-chip" onclick="scrollToSection('simulator')">
+                <i data-lucide="settings-2" style="color:var(--accent-6)"></i> Scenario Simulator
+            </div>
+            <div class="action-chip" onclick="exportReport()">
+                <i data-lucide="download" style="color:var(--accent-3)"></i> Export Report
+            </div>
+            <div class="action-chip" onclick="refreshData()">
+                <i data-lucide="refresh-cw" style="color:var(--accent-4)"></i> Refresh Data
+            </div>
+            <div class="action-chip" onclick="toggleAIChat()">
+                <i data-lucide="message-circle" style="color:var(--accent-1)"></i> AI Assistant
+            </div>
+        </div>
+
+        <!-- KPI Cards -->
+        <div class="kpi-grid">
+            <div class="kpi-card animate-in">
+                <div class="kpi-header">
+                    <div class="kpi-icon" style="background:rgba(239,68,68,0.1)">
+                        <i data-lucide="alert-triangle" style="color:#ef4444;width:24px;"></i>
+                    </div>
+                    <span class="kpi-trend trend-up">+12%</span>
+                </div>
+                <div class="kpi-value" style="color:#ef4444">24</div>
+                <div class="kpi-label">Active Risk Alerts</div>
+            </div>
+
+            <div class="kpi-card animate-in">
+                <div class="kpi-header">
+                    <div class="kpi-icon" style="background:rgba(16,185,129,0.1)">
+                        <i data-lucide="package" style="color:#10b981;width:24px;"></i>
+                    </div>
+                    <span class="kpi-trend trend-down">+23 new</span>
+                </div>
+                <div class="kpi-value" style="color:#10b981">156</div>
+                <div class="kpi-label">Orders in Pipeline</div>
+            </div>
+
+            <div class="kpi-card animate-in">
+                <div class="kpi-header">
+                    <div class="kpi-icon" style="background:rgba(139,92,246,0.1)">
+                        <i data-lucide="brain" style="color:#8b5cf6;width:24px;"></i>
+                    </div>
+                    <span class="kpi-trend trend-up">+2.1%</span>
+                </div>
+                <div class="kpi-value" style="color:#8b5cf6">94.2%</div>
+                <div class="kpi-label">AI Model Accuracy</div>
+            </div>
+
+            <div class="kpi-card animate-in">
+                <div class="kpi-header">
+                    <div class="kpi-icon" style="background:rgba(6,182,212,0.1)">
+                        <i data-lucide="globe-2" style="color:#06b6d4;width:24px;"></i>
+                    </div>
+                    <span class="kpi-trend trend-neutral">42 countries</span>
+                </div>
+                <div class="kpi-value" style="color:#06b6d4">$47.8M</div>
+                <div class="kpi-label">Global Spend YTD</div>
+            </div>
+        </div>
+
+        <!-- Charts Row 1 -->
+        <div class="charts-grid">
+            <div class="chart-card animate-in">
+                <div class="chart-header">
+                    <div class="chart-title"><i data-lucide="activity" style="color:var(--accent-1)"></i> Risk Trend Analysis</div>
+                    <div class="chart-badge"><span class="live-dot" style="background:var(--accent-3)"></span> Live</div>
+                </div>
+                <div class="chart-container"><canvas id="riskTrendChart"></canvas></div>
+            </div>
+
+            <div class="chart-card animate-in">
+                <div class="chart-header">
+                    <div class="chart-title"><i data-lucide="pie-chart" style="color:var(--accent-2)"></i> Risk Distribution</div>
+                </div>
+                <div class="chart-container"><canvas id="riskDistChart"></canvas></div>
+            </div>
+        </div>
+
+        <!-- World Risk Map Section -->
+        <div class="world-map-section animate-in" id="world-map">
+            <div class="chart-header">
+                <div class="chart-title"><i data-lucide="globe-2" style="color:var(--accent-2);font-size:24px"></i> Global Risk Intelligence Map</div>
+                <div class="chart-badge">Interactive • Real-Time Data</div>
+            </div>
+            <div class="map-container">
+                <div id="worldMap"></div>
+            </div>
+        </div>
+
+        <!-- Scenario Simulator Section -->
+        <div class="simulator-panel animate-in" id="simulator">
+            <div class="chart-header">
+                <div class="chart-title"><i data-lucide="settings-2" style="color:var(--accent-6);font-size:24px"></i> Scenario Simulator</div>
+                <div class="chart-badge">What-If Analysis Engine</div>
+            </div>
+            
+            <div class="simulator-grid">
+                <div class="simulator-inputs">
+                    <div class="input-group">
+                        <label><i data-lucide="map-pin" style="width:14px;display:inline"></i> Region/Market</label>
+                        <select id="simRegion">
+                            <option value="apac">Asia-Pacific (APAC)</option>
+                            <option value="emea">Europe, Middle East & Africa (EMEA)</option>
+                            <option value="namer">North America (NAMER)</option>
+                            <option value="latam">Latin America (LATAM)</option>
+                        </select>
+                    </div>
+
+                    <div class="input-group">
+                        <label><i data-lucide="alert-triangle" style="width:14px;display:inline"></i> Disruption Type</label>
+                        <select id="simDisruption">
+                            <option value="natural">Natural Disaster (+40% risk)</option>
+                            <option value="geopolitical">Geopolitical Conflict (+35% risk)</option>
+                            <option value="economic">Economic Crisis (+30% risk)</option>
+                            <option value="pandemic">Health Emergency/Pandemic (+50% risk)</option>
+                            <option value="cyber">Cyber Attack (+25% risk)</option>
+                        </select>
+                    </div>
+
+                    <div class="input-group">
+                        <label><i data-lucide="clock" style="width:14px;display:inline"></i> Duration (weeks)</label>
+                        <div class="slider-container">
+                            <input type="range" min="1" max="26" value="4" id="simDuration" on="updateSimulator()">
+                        </div>
+                        <div class="slider-value" id="durationValue">4 weeks</div>
+                    </div>
+
+                    <div class="input-group">
+                        <label><i data-lucide="percent" style="width:14px;display:inline"></i> Supplier Impact (%)</label>
+                        <div class="slider-container">
+                            <input type="range" min="5" max="100" value="25" id="simImpact" on="updateSimulator()">
+                        </div>
+                        <div class="slider-value" id="impactValue">25%</div>
+                    </div>
+
+                    <button onclick="runSimulation()" class="btn btn-primary" style="margin-top:1rem;">
+                        <i data-lucide="play" style="width:16px"></i> Run Simulation
+                    </button>
+                </div>
+
+                <div class="simulator-results">
+                    <h3 style="margin-bottom:1rem;font-size:1.1rem"><i data-lucide="bar-chart-3" style="width:18px;color:var(--accent-1)"></i> Impact Analysis Results</h3>
+                    
+                    <div class="result-item">
+                        <span class="result-label">Estimated Financial Impact</span>
+                        <span class="result-value result-negative" id="financialImpact">$2.4M</span>
+                    </div>
+                    
+                    <div class="result-item">
+                        <span class="result-label">Supply Chain Disruption Score</span>
+                        <span class="result-value" id="disruptionScore" style="color:var(--accent-4)">67/100</span>
+                    </div>
+                    
+                    <div class="result-item">
+                        <span class="result-label">Recovery Time Estimate</span>
+                        <span class="result-value" id="recoveryTime" style="color:var(--accent-2)">6-8 weeks</span>
+                    </div>
+                    
+                    <div class="result-item">
+                        <span class="result-label">Affected Suppliers</span>
+                        <span class="result-value" id="affectedSuppliers" style="color:var(--accent-5)">212</span>
+                    </div>
+                    
+                    <div class="result-item">
+                        <span class="result-label">Risk Mitigation Savings</span>
+                        <span class="result-value result-positive" id="mitigationSavings">$1.8M</span>
+                    </div>
+
+                    <button onclick="generateMitigationPlan()" class="btn btn-success btn-sm" style="margin-top:1rem;width:100%">
+                        <i data-lucide="shield-check" style="width:14px"></i> Generate Mitigation Plan
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- AI Recommendations Panel -->
+        <div class="chart-card animate-in">
+            <div class="chart-header">
+                <div class="chart-title"><i data-lucide="sparkles" style="color:var(--accent-6)"></i> AI-Powered Recommendations</div>
+                <div class="chart-badge">Based on Current Risk Profile</div>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1rem;">
+                <div style="padding:1.25rem;background:var(--bg-tertiary);border-radius:12px;border:1px solid var(--glass-border);">
+                    <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+                        <i data-lucide="target" style="color:var(--accent-1);width:20px"></i>
+                        <strong>Diversify APAC Suppliers</strong>
+                    </div>
+                    <p style="font-size:13px;color:var(--text-secondary);line-height:1.6;">
+                        Current concentration in China (34%) exceeds recommended threshold (25%). 
+                        Consider qualifying suppliers in Vietnam, India, and Mexico.
+                    </p>
+                    <div style="margin-top:12px;padding:8px 12px;background:rgba(99,102,241,0.1);border-radius:8px;font-size:12px;color:var(--accent-1);">
+                        Potential risk reduction: 23%
+                    </div>
+                </div>
+
+                <div style="padding:1.25rem;background:var(--bg-tertiary);border-radius:12px;border:1px solid var(--glass-border);">
+                    <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+                        <i data-lucide="warehouse" style="color:var(--accent-3);width:20px"></i>
+                        <strong>Increase Safety Stock</strong>
+                    </div>
+                    <p style="font-size:13px;color:var(--text-secondary);line-height:1.6;">
+                        For critical semiconductors, increase safety stock from 2 weeks to 4 weeks coverage. 
+                        Storage cost increase: $45K/month vs potential disruption cost: $2.1M.
+                    </p>
+                    <div style="margin-top:12px;padding:8px 12px;background:rgba(16,185,129,0.1);border-radius:8px;font-size:12px;color:var(--accent-3);">
+                        ROI: 4,667%
+                    </div>
+                </div>
+
+                <div style="padding:1.25rem;background:var(--bg-tertiary);border-radius:12px;border:1px solid var(--glass-border);">
+                    <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+                        <i data-lucide="route" style="color:var(--accent-2);width:20px"></i>
+                        <strong>Alternative Logistics Routes</strong>
+                    </div>
+                    <p style="font-size:13px;color:var(--text-secondary);line-height:1.6;">
+                        Red Sea disruption risk elevated. Pre-qualify Cape of Good Hope route 
+                        and air freight options for high-priority shipments.
+                    </p>
+                    <div style="margin-top:12px;padding:8px 12px;background:rgba(6,182,212,0.1);border-radius:8px;font-size:12px;color:var(--accent-2);">
+                        Lead time buffer: +14 days
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- AI Chat Widget -->
+    <div class="ai-chat-widget">
+        <button class="chat-button" onclick="toggleAIChat()" aria-label="Open AI Chat">
+            <i data-lucide="message-circle" style="width:28px;height:28px"></i>
+        </button>
+        
+        <div class="chat-window" id="chatWindow">
+            <div class="chat-header">
+                <div class="chat-avatar">
+                    <i data-lucide="bot" style="width:22px;height:22px"></i>
+                </div>
+                <div class="chat-info">
+                    <h3>AI Supply Chain Expert</h3>
+                    <p>Always online • Powered by GPT-4</p>
+                </div>
+                <button class="chat-close" onclick="toggleAIChat()">
+                    <i data-lucide="x" style="width:20px;height:20px"></i>
+                </button>
+            </div>
+            
+            <div class="chat-messages" id="chatMessages">
+                <div class="message ai">
+                    Hello! I'm your AI Supply Chain Expert. I can help you with:
+                    <br><br>
+                    🌍 <strong>Risk Analysis</strong> - Global supply chain risks<br>
+                    📊 <strong>Data Insights</strong> - KPI explanations<br>
+                    🔧 <strong>Optimization</strong> - Process improvements<br>
+                    📋 <strong>Compliance</strong> - Regulatory guidance<br><br>
+                    What would you like to explore today?
+                </div>
+            </div>
+            
+            <div class="chat-input-area">
+                <input type="text" class="chat-input" id="chatInput" placeholder="Ask me anything about your supply chain..." 
+                       onkeypress="if(event.key==='Enter')sendMessage()">
+                <button class="chat-send" onclick="sendMessage()">
+                    <i data-lucide="send" style="width:18px;height:18px"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        // Theme Management
+        function toggleTheme() {
+            console.log('🎨 toggleTheme() called!');
+            
+            const current = document.documentElement.getAttribute('data-theme');
+            const next = current === 'dark' ? 'light' : 'dark';
+            
+            document.documentElement.setAttribute('data-theme', next);
+            localStorage.setItem('theme', next);
+            
+            // Update floating button
+            const floatingIcon = document.getElementById('floatingIcon');
+            const floatingText = document.getElementById('floatingText');
+            
+            if (floatingIcon && floatingText) {
+                floatingIcon.textContent = next === 'dark' ? '🌙' : '☀️';
+                floatingText.textContent = next === 'dark' ? '☀️ LIGHT MODE' : '🌙 DARK MODE';
+            }
+            
+            // Update header toggle buttons if they exist
+            document.querySelectorAll('.toggle-thumb').forEach(thumb => {
+                thumb.innerHTML = next === 'dark' ? '<i data-lucide="moon" style="width:16px;height:16px;color:#6366f1"></i>' : '<i data-lucide="sun" style="width:16px;height:16px;color:#f59e0b"></i>';
+            });
+            
+            document.querySelectorAll('.theme-toggle-label').forEach(label => {
+                label.textContent = next === 'dark' ? '☀️ LIGHT' : '🌙 DARK';
+                label.style.color = '#ffffff';
+            });
+            
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+            
+            console.log(`✅ Theme switched to: ${next.toUpperCase()}`);
+        }
+
+        // Load saved theme
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedTheme = localStorage.getItem('theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+        });
+        
+        // Initialize floating button state
+        window.addEventListener('DOMContentLoaded', () => {
+            const currentTheme = document.documentElement.getAttribute('data-theme') || 'dark';
+            const floatingIcon = document.getElementById('floatingIcon');
+            const floatingText = document.getElementById('floatingText');
+            
+            if (floatingIcon && floatingText) {
+                floatingIcon.textContent = currentTheme === 'dark' ? '🌙' : '☀️';
+                floatingText.textContent = currentTheme === 'dark' ? '☀️ LIGHT MODE' : '🌙 DARK MODE';
+            }
+            
+            console.log('✅ Floating toggle ready! Click bottom-right button.');
+        });
+
+        // Toast notifications
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        // Scroll to section
+        function scrollToSection(id) {
+            document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Export Report
+        function exportReport() {
+            showToast('Generating comprehensive report...', 'info');
+            setTimeout(() => showToast('Report downloaded successfully!', 'success'), 1500);
+        }
+
+        // Refresh Data
+        function refreshData() {
+            showToast('Refreshing live data...', 'info');
+            setTimeout(() => showToast('All data updated!', 'success'), 2000);
+        }
+
+        // ===== CHARTS INITIALIZATION =====
+        Chart.defaults.color = '#94A3B8';
+        Chart.defaults.borderColor = 'rgba(255, 255, 255, 0.06)';
+        Chart.defaults.font.family = 'Inter';
+
+        // Risk Trend Chart
+        const riskCtx = document.getElementById('riskTrendChart').getContext('2d');
+        const gradient = riskCtx.createLinearGradient(0, 0, 0, 280);
+        gradient.addColorStop(0, 'rgba(99, 102, 241, 0.4)');
+        gradient.addColorStop(1, 'rgba(99, 102, 241, 0)');
+
+        new Chart(riskCtx, {
+            type: 'line',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
+                datasets: [{
+                    label: 'Risk Index',
+                    data: [45, 52, 38, 65, 58, 42, 72],
+                    borderColor: '#6366f1',
+                    backgroundColor: gradient,
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 6,
+                    pointHoverRadius: 8,
+                    pointBackgroundColor: '#6366f1',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { beginAtZero: false, min: 20, max: 100, grid: { color: 'rgba(255,255,255,0.04)' } },
+                    x: { grid: { display: false } }
+                }
+            }
+        });
+
+        // Risk Distribution Doughnut
+        new Chart(document.getElementById('riskDistChart'), {
+            type: 'doughnut',
+            data: {
+                labels: ['Low Risk', 'Medium', 'High', 'Critical'],
+                datasets: [{ 
+                    data: [35, 30, 22, 13], 
+                    backgroundColor: ['#10b981', '#f59e0b', '#f97316', '#ef4444'],
+                    borderWidth: 0,
+                    hoverOffset: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '65%',
+                plugins: { 
+                    legend: { 
+                        position: 'bottom',
+                        labels: { padding: 20, usePointStyle: true }
+                    } 
+                }
+            }
+        });
+
+        // ===== WORLD RISK MAP =====
+        const map = L.map('worldMap').setView([20, 0], 2);
+
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+            attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
+            subdomains: 'abcd',
+            maxZoom: 19
+        }).addTo(map);
+
+        // Risk locations data
+        const riskLocations = [
+            { lat: 31.2304, lng: 121.4737, city: 'Shanghai', risk: 'high', score: 78, type: 'Supply Disruption' },
+            { lat: 35.6762, lng: 139.6503, city: 'Tokyo', risk: 'medium', score: 45, type: 'Logistics Delay' },
+            { lat: 51.5074, lng: -0.1278, city: 'London', risk: 'low', score: 22, type: 'Normal Operations' },
+            { lat: 40.7128, lng: -74.0060, city: 'New York', risk: 'medium', score: 41, type: 'Port Congestion' },
+            { lat: 1.3521, lng: 103.8198, city: 'Singapore', risk: 'high', score: 72, type: 'Trade Route Risk' },
+            { lat: 25.2048, lng: 55.2708, city: 'Dubai', risk: 'critical', score: 89, type: 'Geopolitical Tension' },
+            { lat: -23.5505, lng: -46.6333, city: 'São Paulo', risk: 'medium', score: 48, type: 'Economic Uncertainty' },
+            { lat: 28.6139, lng: 77.2090, city: 'New Delhi', risk: 'high', score: 67, type: 'Supplier Concentration' },
+            { lat: 52.5200, lng: 13.4050, city: 'Berlin', risk: 'low', score: 18, type: 'Stable' },
+            { lat: 37.7749, lng: -122.4194, city: 'San Francisco', risk: 'low', score: 25, type: 'Tech Sector Stable' },
+            { lat: 55.7558, lng: 37.6173, city: 'Moscow', risk: 'critical', score: 95, type: 'Sanctions Impact' },
+            { lat: 39.9042, lng: 116.4074, city: 'Beijing', risk: 'high', score: 71, type: 'Regulatory Changes' }
+        ];
+
+        // Custom marker icons based on risk level
+        const riskColors = {
+            low: '#10b981',
+            medium: '#f59e0b',
+            high: '#ef4444',
+            critical: '#dc2626'
+        };
+
+        riskLocations.forEach(loc => {
+            const color = riskColors[loc.risk];
+            
+            const customIcon = L.divIcon({
+                className: 'custom-marker',
+                html: `<div style="
+                    width: ${loc.score/3 + 15}px; 
+                    height: ${loc.score/3 + 15}px; 
+                    background: ${color}; 
+                    border-radius: 50%; 
+                    border: 3px solid white;
+                    box-shadow: 0 4px 15px ${color}66;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    color: white;
+                    font-weight: bold;
+                    font-size: 11px;
+                ">${loc.score}</div>`,
+                iconSize: [loc.score/3 + 15, loc.score/3 + 15],
+                iconAnchor: [(loc.score/3 + 15)/2, (loc.score/3 + 15)/2]
+            });
+
+            L.marker([loc.lat, loc.lng], { icon: customIcon })
+                .addTo(map)
+                .bindPopup(`
+                    <div style="min-width: 200px; font-family: Inter, sans-serif;">
+                        <h3 style="margin: 0 0 8px 0; font-size: 16px; font-weight: 700;">${loc.city}</h3>
+                        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                            <span style="
+                                padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 600;
+                                background: ${color}22; color: ${color};
+                            ">${loc.risk.toUpperCase()} RISK</span>
+                            <span style="font-weight: 700; color: ${color};">Score: ${loc.score}</span>
+                        </div>
+                        <p style="margin: 0; font-size: 13px; color: #64748b;">${loc.type}</p>
+                        <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #e2e8f0;">
+                            <a href="#" style="color: #6366f1; font-size: 13px; font-weight: 600; text-decoration: none;">
+                                View Detailed Analysis →
+                            </a>
+                        </div>
+                    </div>
+                `);
+        });
+
+        // ===== SCENARIO SIMULATOR =====
+        const simDuration = document.getElementById('simDuration');
+        const simImpact = document.getElementById('simImpact');
+
+        if(simDuration) {
+            simDuration.addEventListener('input', function() {
+                document.getElementById('durationValue').textContent = this.value + ' weeks';
+            });
+        }
+
+        if(simImpact) {
+            simImpact.addEventListener('input', function() {
+                document.getElementById('impactValue').textContent = this.value + '%';
+            });
+        }
+
+        function runSimulation() {
+            const region = document.getElementById('simRegion').value;
+            const disruption = document.getElementById('simDisruption').value;
+            const duration = parseInt(document.getElementById('simDuration').value);
+            const impact = parseInt(document.getElementById('simImpact').value);
+
+            // Calculate impacts (simplified model)
+            const baseCost = region === 'apac' ? 4800000 : region === 'emea' ? 3200000 : 2400000;
+            const multiplier = disruption === 'pandemic' ? 1.5 : disruption === 'natural' ? 1.3 : disruption === 'geopolitical' ? 1.2 : 1.1;
+            const financialImpact = Math.round(baseCost * (duration / 4) * (impact / 25) * multiplier);
+            const disruptionScore = Math.min(95, Math.round((impact * 0.7) + (duration * 2) + (multiplier * 10)));
+            const recoveryWeeks = Math.round(duration * 1.5);
+            const affectedSuppliers = Math.round(847 * (impact / 100));
+            const mitigationSavings = Math.round(financialImpact * 0.75);
+
+            // Animate results
+            animateValue('financialImpact', '$' + (financialImpact / 1000000).toFixed(1) + 'M');
+            animateValue('disruptionScore', disruptionScore + '/100');
+            animateValue('recoveryTime', (recoveryWeeks - 2) + '-' + recoveryWeeks + ' weeks');
+            animateValue('affectedSuppliers', affectedSuppliers.toString());
+            animateValue('mitigationSavings', '$' + (mitigationSavings / 1000000).toFixed(1) + 'M');
+
+            showToast('Simulation complete! Review results below.', 'success');
+        }
+
+        function animateValue(elementId, newValue) {
+            const el = document.getElementById(elementId);
+            if(el) el.textContent = newValue;
+        }
+
+        function generateMitigationPlan() {
+            showToast('Generating customized mitigation plan...', 'info');
+            setTimeout(() => {
+                showToast('Mitigation plan ready! Check your email.', 'success');
+            }, 2000);
+        }
+
+        // ===== AI CHAT WIDGET =====
+        let chatOpen = false;
+
+        function toggleAIChat() {
+            const chatWindow = document.getElementById('chatWindow');
+            chatOpen = !chatOpen;
+            chatWindow.classList.toggle('open', chatOpen);
+            
+            if(chatOpen) {
+                document.getElementById('chatInput').focus();
+            }
+        }
+
+        const aiResponses = {
+            'risk': `Based on current data, here are the key risk factors:
+
+🔴 **Critical Risks (Score >70):**
+• Dubai - Geopolitical tension (Score: 89)
+• Moscow - Sanctions impact (Score: 95)
+
+🟡 **Elevated Risks (Score 50-70):**
+• Shanghai - Supply disruption (Score: 78)
+• Singapore - Trade route risk (Score: 72)
+• Beijing - Regulatory changes (Score: 71)
+
+**Recommendation:** Diversify suppliers away from high-risk regions immediately.`,
+
+            'supplier': `📊 **Supplier Portfolio Analysis:**
+
+**Total Monitored:** 847 suppliers
+**At-Risk Suppliers:** 24 (2.8%)
+**Geographic Concentration:**
+• APAC: 52% (above 40% threshold)
+• EMEA: 28%
+• Americas: 20%
+
+**Top Concerns:**
+1. TechComp Asia - Financial stress indicators
+2. SemiconTech Inc. - Semiconductor shortage
+3. EuroManufacturing GmbH - Credit rating risk
+
+Would you like detailed reports on any specific supplier?`,
+
+            'cost': `💰 **Cost Optimization Opportunities Identified:**
+
+1. **Logistics Consolidation**
+   - Potential savings: $340K/year
+   - Combine LTL shipments in EU region
+
+2. **Inventory Optimization**
+   - Working capital release: $2.1M
+   - Implement JIT for stable SKUs
+
+3. **Supplier Negotiation**
+   - 12 contracts up for renewal
+   - Estimated savings: $180K
+
+**Total Opportunity:** $2.62M annually
+
+Shall I create a detailed implementation plan?`,
+
+            'default': `Great question! Based on our AI analysis of your supply chain data, I can provide insights on:
+
+📈 **Performance Metrics** - KPI trends and benchmarks
+🌍 **Global Risks** - Real-time threat assessment  
+📦 **Inventory** - Stock optimization recommendations
+🤝 **Suppliers** - Performance and risk analysis
+💰 **Costs** - Savings opportunities
+
+Could you be more specific about what you'd like to explore?`
+        };
+
+        function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+            if(!message) return;
+
+            // Add user message
+            addMessage(message, 'user');
+            input.value = '';
+
+            // Generate AI response
+            setTimeout(() => {
+                let response = aiResponses.default;
+                const lowerMsg = message.toLowerCase();
+                
+                if(lowerMsg.includes('risk')) response = aiResponses.risk;
+                else if(lowerMsg.includes('supplier') || lowerMsg.includes('vendor')) response = aiResponses.supplier;
+                else if(lowerMsg.includes('cost') || lowerMsg.includes('saving') || lowerMsg.includes('price')) response = aiResponses.cost;
+                
+                addMessage(response, 'ai');
+            }, 800);
+        }
+
+        function addMessage(text, sender) {
+            const messagesContainer = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}`;
+            messageDiv.innerHTML = text.replace(/\n/g, '<br>');
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        // Scroll animations
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if(entry.isIntersecting) {
+                    entry.target.classList.add('animated');
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.animate-in').forEach(el => observer.observe(el));
+    </script>
+</body>
+</html>

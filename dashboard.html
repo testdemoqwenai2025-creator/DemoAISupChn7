@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | AI Supply Chain Advanced - Analytics & Insights</title>
+    <meta name="description" content="AI-powered supply chain dashboard with KPIs, live data feeds, risk trends, and demand forecasting.">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary: #10B981; --secondary: #06B6D4; --accent: #8B5CF6;
+            --warning: #F59E0B; --danger: #EF4444; --success: #22C55E;
+            --dark: #0F172A; --dark-lighter: #1E293B;
+            --gray-100: #F1F5F9; --gray-200: #E2E8F0; --gray-300: #CBD5E1;
+            --gray-400: #94A3B8; --gray-500: #64748B; --gray-600: #475569;
+            --gradient-start: #059669; --gradient-end: #0891B2;
+        }
+        
+        body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: linear-gradient(135deg, var(--dark) 0%, var(--dark-lighter) 50%, var(--dark) 100%); color: white; min-height: 100vh; overflow-x: hidden; }
+        .bg-animation { position: fixed; inset: 0; overflow: hidden; pointer-events: none; z-index: 0; }
+        .bg-orb { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.15; animation: pulse 8s ease-in-out infinite; }
+        .bg-orb-1 { width: 500px; height: 500px; top: -100px; right: -100px; background: var(--primary); }
+        .bg-orb-2 { width: 400px; height: 400px; top: 50%; left: -100px; background: var(--secondary); animation-delay: 2s; }
+        .bg-orb-3 { width: 350px; height: 350px; bottom: -50px; right: 30%; background: var(--accent); animation-delay: 4s; }
+        @keyframes pulse { 0%, 100% { transform: scale(1); opacity: 0.15; } 50% { transform: scale(1.1); opacity: 0.25; } }
+        
+        header { position: sticky; top: 0; z-index: 100; backdrop-filter: blur(20px); background: rgba(15, 23, 42, 0.85); border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
+        .header-content { max-width: 1920px; margin: 0 auto; padding: 0 2rem; height: 64px; display: flex; align-items: center; justify-content: space-between; }
+        .logo-section { display: flex; align-items: center; gap: 12px; text-decoration: none; color: inherit; }
+        .logo-icon { width: 40px; height: 40px; border-radius: 12px; background: linear-gradient(135deg, var(--primary), var(--secondary)); display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 20px rgba(16, 185, 129, 0.35); }
+        .logo-text h1 { font-size: 18px; font-weight: 700; background: linear-gradient(90deg, var(--primary), var(--secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .logo-text p { font-size: 11px; color: var(--gray-400); }
+        
+        nav { display: flex; gap: 4px; flex-wrap: wrap; }
+        nav a { padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 500; text-decoration: none; transition: all 0.3s ease; color: var(--gray-300); white-space: nowrap; }
+        nav a:hover { background: rgba(255, 255, 255, 0.1); color: white; }
+        nav a.active { background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end)); color: white; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.35); }
+        .mobile-menu-btn { display: none; background: none; border: none; color: white; cursor: pointer; padding: 8px; }
+        
+        main { position: relative; z-index: 1; max-width: 1400px; margin: 0 auto; padding: 1.5rem; }
+        
+        .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem; }
+        
+        /* Page Navigation Buttons */
+
+        /* Light mode toggle styling */
+        .page-title h1 { font-size: 1.75rem; font-weight: 700; display: flex; align-items: center; gap: 10px; }
+        .live-badge { display: flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 9999px; background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.3); font-size: 12px; font-weight: 600; color: var(--primary); }
+        .live-dot { width: 8px; height: 8px; background: var(--primary); border-radius: 50%; animation: livePulse 2s ease-in-out infinite; }
+        @keyframes livePulse { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.3); opacity: 0.7; } }
+        
+        /* KPI Cards */
+        .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+        .kpi-card { background: rgba(30, 41, 59, 0.5); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px; padding: 1.5rem; transition: all 0.3s ease; cursor: pointer; }
+        .kpi-card:hover { transform: translateY(-3px) scale(1.02); border-color: rgba(16, 185, 129, 0.3); }
+        .kpi-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem; }
+        .kpi-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; }
+        .kpi-trend { display: flex; align-items: center; gap: 4px; font-size: 13px; font-weight: 600; padding: 4px 10px; border-radius: 8px; }
+        .trend-up { background: rgba(34, 197, 94, 0.15); color: var(--success); }
+        .trend-down { background: rgba(239, 68, 68, 0.15); color: var(--danger); }
+        .trend-neutral { background: rgba(139, 92, 246, 0.15); color: var(--accent); }
+        .kpi-value { font-size: 32px; font-weight: 700; margin-bottom: 4px; }
+        .kpi-label { font-size: 14px; color: var(--gray-400); }
+        
+        /* Charts */
+        .charts-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem; }
+        @media (max-width: 1024px) { .charts-grid { grid-template-columns: 1fr; } }
+        
+        .chart-card { background: rgba(30, 41, 59, 0.5); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px; padding: 1.5rem; }
+        .chart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+        .chart-title { display: flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 600; }
+        .chart-badge { padding: 4px 12px; border-radius: 6px; font-size: 11px; font-weight: 500; background: rgba(139, 92, 246, 0.15); color: var(--accent); }
+        .chart-container { height: 280px; position: relative; }
+        
+        .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem; }
+        @media (max-width: 768px) { .two-col { grid-template-columns: 1fr; } }
+        
+        /* Alerts */
+        .alerts-section { background: rgba(30, 41, 59, 0.5); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px; padding: 1.5rem; }
+        .alerts-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+        .alert-count { display: flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 8px; background: rgba(239, 68, 68, 0.15); color: var(--danger); font-size: 13px; font-weight: 600; animation: alertPulse 2s ease-in-out infinite; }
+        @keyframes alertPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
+        
+        .alert-item { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 10px; margin-bottom: 8px; background: rgba(255, 255, 255, 0.02); transition: all 0.2s ease; }
+        .alert-item:hover { background: rgba(255, 255, 255, 0.05); }
+        .alert-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+        .alert-dot.critical { background: var(--danger); box-shadow: 0 0 10px rgba(239, 68, 68, 0.5); }
+        .alert-dot.warning { background: var(--warning); }
+        .alert-dot.info { background: var(--secondary); }
+        .alert-content { flex: 1; min-width: 0; }
+        .alert-supplier { font-weight: 600; font-size: 13px; }
+        .alert-desc { font-size: 12px; color: var(--gray-400); }
+        .alert-time { font-size: 11px; color: var(--gray-500); white-space: nowrap; }
+        
+        /* Regional */
+        .region-item { padding: 12px; border-radius: 10px; background: rgba(255, 255, 255, 0.02); margin-bottom: 8px; }
+        .region-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        .region-name { font-weight: 600; font-size: 13px; }
+        .region-score { font-size: 18px; font-weight: 700; color: var(--primary); }
+        .progress-bar { height: 6px; background: rgba(255, 255, 255, 0.1); border-radius: 3px; overflow: hidden; }
+        .progress-fill { height: 100%; border-radius: 3px; transition: width 0.5s ease; }
+        
+        footer { position: relative; z-index: 1; border-top: 1px solid rgba(255, 255, 255, 0.1); padding: 1.5rem; text-align: center; color: var(--gray-500); font-size: 12px; margin-top: 2rem; }
+        footer a { color: var(--primary); text-decoration: none; }
+        
+        @media (max-width: 1024px) {
+            nav { display: none; position: absolute; top: 64px; left: 0; right: 0; background: rgba(15, 23, 42, 0.95); padding: 1rem; flex-direction: column; }
+            nav.open { display: flex; } .mobile-menu-btn { display: block; } nav a { padding: 12px 16px; }
+        }
+        @media (max-width: 640px) { main { padding: 1rem; } .header-content { padding: 0 1rem; } .kpi-grid { grid-template-columns: 1fr 1fr; } }
+
+        /* Mobile adjustment */
+        @media (max-width: 768px) {
+        }
+            /* Elegant Theme Toggle (CC-consistent) */
+        .cc-theme-toggle {
+            width: 36px; height: 36px;
+            padding: 0; border-radius: 8px;
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.1);
+            color: var(--gray-400);
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+        }
+        .cc-theme-toggle:hover {
+            background: rgba(255,255,255,0.08);
+            color: var(--primary);
+            border-color: rgba(16,185,129,0.3);
+        }
+        .cc-theme-toggle svg { width: 16px; height: 16px; }
+
+        /* Light Theme */
+        [data-theme="light"] body {
+            background: linear-gradient(135deg, #F8FAFC 0%, #F1F5F9 50%, #F8FAFC 100%);
+            color: #1E293B;
+        }
+        [data-theme="light"] header {
+            background: rgba(248,250,252,0.9);
+            border-bottom-color: rgba(0,0,0,0.08);
+        }
+        [data-theme="light"] nav a { color: #64748B; }
+        [data-theme="light"] nav a:hover { background: rgba(0,0,0,0.05); color: #1E293B; }
+        [data-theme="light"] nav a.active { color: white; }
+        [data-theme="light"] .glass {
+            background: rgba(255,255,255,0.7);
+            border-color: rgba(0,0,0,0.08);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+        }
+        [data-theme="light"] .glass:hover {
+            border-color: rgba(16,185,129,0.3);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+        [data-theme="light"] .section-title,
+        [data-theme="light"] h1,
+        [data-theme="light"] h2,
+        [data-theme="light"] h3 { color: #0F172A; }
+        [data-theme="light"] .section-subtitle,
+        [data-theme="light"] .hero p,
+        [data-theme="light"] .team-card .bio,
+        [data-theme="light"] .value-card p,
+        [data-theme="light"] .contact-info li,
+        [data-theme="light"] .stat-label,
+        [data-theme="light"] .timeline-item p,
+        [data-theme="light"] .job-item { color: #475569; }
+        [data-theme="light"] .logo-text h1 {
+            background: linear-gradient(90deg, #059669, #0891B2);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        [data-theme="light"] .logo-text p { color: #94A3B8; }
+        [data-theme="light"] .badge {
+            color: #059669; border-color: rgba(0,0,0,0.12);
+            background: rgba(16,185,129,0.06);
+        }
+        [data-theme="light"] .gradient-text {
+            background: linear-gradient(90deg, #059669, #0891B2, #7C3AED);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        [data-theme="light"] .value-icon { background: rgba(16,185,129,0.08); }
+        [data-theme="light"] .job-item { background: rgba(0,0,0,0.02); }
+        [data-theme="light"] .btn-outline { border-color: rgba(0,0,0,0.15); color: #1E293B; }
+        [data-theme="light"] .btn-outline:hover { background: rgba(0,0,0,0.05); }
+        [data-theme="light"] .cc-theme-toggle {
+            color: #94A3B8;
+            border-color: rgba(0,0,0,0.1);
+        }
+        [data-theme="light"] .cc-theme-toggle:hover {
+            background: rgba(16,185,129,0.08);
+            color: #059669;
+            border-color: rgba(16,185,129,0.3);
+        }
+        [data-theme="light"] .bg-orb { opacity: 0.06; }
+        [data-theme="light"] footer { border-top-color: rgba(0,0,0,0.08); color: #94A3B8; }
+        [data-theme="light"] .social-link { border-color: rgba(0,0,0,0.12); color: #94A3B8; }
+        [data-theme="light"] .social-link:hover { background: rgba(16,185,129,0.1); border-color: #10B981; color: #10B981; }
+        [data-theme="light"] .team-card .role { color: #059669; }
+        [data-theme="light"] .timeline-year { background: rgba(16,185,129,0.08); color: #059669; }
+        [data-theme="light"] .job-badge { background: rgba(139,92,246,0.08); color: #7C3AED; }
+        [data-theme="light"] .stat-value {
+            background: linear-gradient(90deg, #059669, #0891B2);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        [data-theme="light"] .timeline-line { background: rgba(0,0,0,0.08); }
+        [data-theme="light"] .mobile-menu-btn { color: #334155; }
+        [data-theme="light"] nav.open { background: rgba(248,250,252,0.98); border-bottom: 1px solid rgba(0,0,0,0.08); }
+    </style>
+</head>
+<body>
+    <div class="bg-animation"><div class="bg-orb bg-orb-1"></div><div class="bg-orb bg-orb-2"></div><div class="bg-orb bg-orb-3"></div></div>
+
+    <header>
+        <div class="header-content">
+            <a href="./index.html" class="logo-section">
+                <div class="logo-icon"><i data-lucide="brain" style="width:24px;height:24px;color:white;"></i></div>
+                <div class="logo-text"><h1>AI Supply Chain</h1><p>Advanced Platform</p></div>
+            </a>
+            <button class="mobile-menu-btn" onclick="document.querySelector('nav').classList.toggle('open')"><i data-lucide="menu" style="width:24px;height:24px;"></i></button>
+            <nav>
+                <a href="./index.html">Home</a>
+                <a href="./about.html">About</a>
+                <a href="./cc-app/">Command Center ⭐</a>
+                <a href="./dashboard.html" class="active">Dashboard</a>
+                <a href="./intelligence.html">Intelligence</a>
+                <a href="./platform.html">Platform</a>
+                <a href="./product.html">Product</a>
+                <a href="./customers.html">Customers</a>
+                <a href="./industries.html">Industries</a>
+                <a href="./events.html">Events</a>
+                <a href="./support.html">Support</a>
+            </nav>
+            <div class="header-actions" style="display:flex;align-items:center;gap:12px;">
+                <div class="live-badge"><span class="live-dot"></span> LIVE</div>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <!-- Page Header -->
+        <div class="page-header">
+            <!-- Navigation Buttons -->
+            
+            <div class="page-title"><h1><i data-lucide="bar-chart-3" style="color:var(--primary);"></i> Analytics Dashboard</h1></div>
+            <div class="live-badge"><span class="live-dot"></span> Real-Time Data</div>
+        </div>
+
+        <!-- KPI Cards -->
+        <div class="kpi-grid">
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <div class="kpi-icon" style="background:rgba(244,63,94,0.15);color:#f43f5e;"><i data-lucide="alert-triangle" style="width:22px;height:22px;"></i></div>
+                    <div class="kpi-trend trend-up"><i data-lucide="arrow-up-right" style="width:14px;height:14px;"></i> +12%</div>
+                </div>
+                <div class="kpi-value" style="color:#f43f5e;">24</div>
+                <div class="kpi-label">Active Risks</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <div class="kpi-icon" style="background:rgba(16,185,129,0.15);color:#10b981;"><i data-lucide="shield" style="width:22px;height:22px;"></i></div>
+                    <div class="kpi-trend trend-down"><i data-lucide="arrow-down-right" style="width:14px;height:14px;"></i> +23</div>
+                </div>
+                <div class="kpi-value" style="color:#10b981;">847</div>
+                <div class="kpi-label">Suppliers Monitored</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <div class="kpi-icon" style="background:rgba(139,92,246,0.15);color:#8b5cf6;"><i data-lucide="brain" style="width:22px;height:22px;"></i></div>
+                    <div class="kpi-trend trend-down"><i data-lucide="arrow-up-right" style="width:14px;height:14px;"></i> +2.1%</div>
+                </div>
+                <div class="kpi-value" style="color:#8b5cf6;">94.2%</div>
+                <div class="kpi-label">AI Model Accuracy</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <div class="kpi-icon" style="background:rgba(6,182,212,0.15);color:#06b6d4;"><i data-lucide="zap" style="width:22px;height:22px;"></i></div>
+                    <div class="kpi-trend trend-down"><i data-lucide="arrow-down-right" style="width:14px;height:14px;"></i> -0.3s</div>
+                </div>
+                <div class="kpi-value" style="color:#06b6d4;">1.8s</div>
+                <div class="kpi-label">Avg Response Time</div>
+            </div>
+        </div>
+
+        <!-- Main Charts Row -->
+        <div class="charts-grid">
+            <!-- Risk Trend Chart -->
+            <div class="chart-card">
+                <div class="chart-header">
+                    <div class="chart-title"><i data-lucide="activity" style="color:var(--primary);"></i> Risk Trend (Live)</div>
+                    <div class="chart-badge"><span class="live-dot" style="width:6px;height:6px;background:var(--primary);"></span> Live</div>
+                </div>
+                <div class="chart-container"><canvas id="riskTrendChart"></canvas></div>
+            </div>
+            
+            <!-- Risk Distribution Pie -->
+            <div class="chart-card">
+                <div class="chart-header">
+                    <div class="chart-title"><i data-lucide="shield" style="color:var(--primary);"></i> Risk Distribution</div>
+                </div>
+                <div class="chart-container"><canvas id="riskDistChart"></canvas></div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:1rem;">
+                    <div style="display:flex;align-items:center;gap:6px;font-size:12px;"><span style="width:10px;height:10px;border-radius:50%;background:#10b981;display:inline-block;"></span> Low <span style="margin-left:auto;font-weight:600;">35%</span></div>
+                    <div style="display:flex;align-items:center;gap:6px;font-size:12px;"><span style="width:10px;height:10px;border-radius:50%;background:#f59e0b;display:inline-block;"></span> Medium <span style="margin-left:auto;font-weight:600;">30%</span></div>
+                    <div style="display:flex;align-items:center;gap:6px;font-size:12px;"><span style="width:10px;height:10px;border-radius:50%;background:#f97316;display:inline-block;"></span> High <span style="margin-left:auto;font-weight:600;">22%</span></div>
+                    <div style="display:flex;align-items:center;gap:6px;font-size:12px;"><span style="width:10px;height:10px;border-radius:50%;background:#f43f5e;display:inline-block;"></span> Critical <span style="margin-left:auto;font-weight:600;">13%</span></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Second Row: Demand Forecast & Risk Radar -->
+        <div class="two-col">
+            <!-- Demand Forecasting -->
+            <div class="chart-card">
+                <div class="chart-header">
+                    <div class="chart-title"><i data-lucide="trending-up" style="color:var(--accent);"></i> Demand Forecast</div>
+                    <div class="chart-badge">Next 5 Weeks</div>
+                </div>
+                <div class="chart-container"><canvas id="demandChart"></canvas></div>
+            </div>
+            
+            <!-- Risk Categories Radar -->
+            <div class="chart-card">
+                <div class="chart-header">
+                    <div class="chart-title"><i data-lucide="brain" style="color:var(--secondary);"></i> Risk Categories</div>
+                </div>
+                <div class="chart-container"><canvas id="radarChart"></canvas></div>
+            </div>
+        </div>
+
+        <!-- Bottom Section: Live Alerts & Regional Data -->
+        <div style="display:grid;grid-template-columns:2fr 1fr;gap:1.5rem;">
+            <!-- Live Alerts Feed -->
+            <div class="alerts-section">
+                <div class="alerts-header">
+                    <div class="chart-title"><i data-lucide="eye" style="color:#f43f5e;"></i> Live Alerts</div>
+                    <div class="alert-count"><span class="live-dot" style="width:6px;height:6px;background:white;"></span> 4 Active</div>
+                </div>
+                <div class="alert-list">
+                    <div class="alert-item">
+                        <div class="alert-dot critical"></div>
+                        <div class="alert-content">
+                            <div class="alert-supplier">TechComp Asia</div>
+                            <div class="alert-desc">Potential disruption detected - Financial stress indicators</div>
+                        </div>
+                        <div class="alert-time">2m ago</div>
+                    </div>
+                    <div class="alert-item">
+                        <div class="alert-dot warning"></div>
+                        <div class="alert-content">
+                            <div class="alert-supplier">EuroManufacturing GmbH</div>
+                            <div class="alert-desc">Financial stress detected - Credit rating downgrade risk</div>
+                        </div>
+                        <div class="alert-time">15m ago</div>
+                    </div>
+                    <div class="alert-item">
+                        <div class="alert-dot info"></div>
+                        <div class="alert-content">
+                            <div class="alert-supplier">GlobalLogistics Co</div>
+                            <div class="alert-desc">Route optimization recommended for APAC-EU corridor</div>
+                        </div>
+                        <div class="alert-time">32m ago</div>
+                    </div>
+                    <div class="alert-item">
+                        <div class="alert-dot critical"></div>
+                        <div class="alert-content">
+                            <div class="alert-supplier">SemiconTech Inc.</div>
+                            <div class="alert-desc">Supply constraint alert - Semiconductor shortage impact</div>
+                        </div>
+                        <div class="alert-time">1h ago</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Regional Overview -->
+            <div class="chart-card" style="padding:1.25rem;">
+                <div class="chart-header" style="margin-bottom:1rem;">
+                    <div class="chart-title"><i data-lucide="globe" style="color:var(--primary);font-size:16px;"></i> Regional View</div>
+                </div>
+                <div class="region-item">
+                    <div class="region-header"><span class="region-name">APAC</span><span class="region-score">342</span></div>
+                    <div class="progress-bar"><div class="progress-fill" style="width:62%;background:linear-gradient(90deg,#f59e0b,#f97316);"></div></div>
+                    <div style="font-size:11px;color:var(--gray-500);margin-top:4px;">Risk Score: 62</div>
+                </div>
+                <div class="region-item">
+                    <div class="region-header"><span class="region-name">Europe</span><span class="region-score">256</span></div>
+                    <div class="progress-bar"><div class="progress-fill" style="width:38%;background:var(--success);"></div></div>
+                    <div style="font-size:11px;color:var(--gray-500);margin-top:4px;">Risk Score: 38</div>
+                </div>
+                <div class="region-item">
+                    <div class="region-header"><span class="region-name">N. America</span><span class="region-score">189</span></div>
+                    <div class="progress-bar"><div class="progress-fill" style="width:25%;background:var(--success);"></div></div>
+                    <div style="font-size:11px;color:var(--gray-500);margin-top:4px;">Risk Score: 25</div>
+                </div>
+                <div class="region-item">
+                    <div class="region-header"><span class="region-name">LATAM</span><span class="region-score">42</span></div>
+                    <div class="progress-bar"><div class="progress-fill" style="width:48%;background:linear-gradient(90deg,#eab308,#f59e0b);"></div></div>
+                    <div style="font-size:11px;color:var(--gray-500);margin-top:4px;">Risk Score: 48</div>
+                </div>
+                <div class="region-item">
+                    <div class="region-header"><span class="region-name">MEA</span><span class="region-score">18</span></div>
+                    <div class="progress-bar"><div class="progress-fill" style="width:71%;background:linear-gradient(90deg,#ef4444,#dc2626);"></div></div>
+                    <div style="font-size:11px;color:var(--gray-500);margin-top:4px;">Risk Score: 71</div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer><p>&copy; 2026 AI Supply Chain Advanced. All rights reserved. | <a href="./support.html">Support</a></p></footer>
+
+    <script>    lucide.createIcons();
+
+    function toggleTheme() {
+        var current = document.documentElement.getAttribute('data-theme');
+        var next = current === 'light' ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-theme', next);
+        localStorage.setItem('theme', next);
+        document.querySelectorAll('.cc-theme-toggle').forEach(function(btn) {
+            btn.innerHTML = next === 'dark' ? '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path></svg>' : '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path></svg>';
+        });
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+    document.addEventListener('DOMContentLoaded', function() {
+        var saved = localStorage.getItem('theme') || 'dark';
+        document.documentElement.setAttribute('data-theme', saved);
+        document.querySelectorAll('.cc-theme-toggle').forEach(function(btn) {
+            btn.innerHTML = saved === 'dark' ? '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path></svg>' : '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path></svg>';
+        });
+    });</script>
+</body>
+</html>

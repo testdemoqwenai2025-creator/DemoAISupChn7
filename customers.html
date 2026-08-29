@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Success | AI Supply Chain Advanced - Testimonials & Case Studies</title>
+    <meta name="description" content">See how enterprises worldwide are transforming their supply chains with AI-powered intelligence. Read testimonials and case studies.">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary: #10B981; --secondary: #06B6D4; --accent: #8B5CF6;
+            --warning: #F59E0B; --danger: #EF4444; --success: #22C55E;
+            --dark: #0F172A; --dark-lighter: #1E293B;
+            --gray-100: #F1F5F9; --gray-200: #E2E8F0; --gray-300: #CBD5E1;
+            --gray-400: #94A3B8; --gray-500: #64748B; --gray-600: #475569;
+            --gradient-start: #059669; --gradient-end: #0891B2;
+        }
+        
+        body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: linear-gradient(135deg, var(--dark) 0%, var(--dark-lighter) 50%, var(--dark) 100%); color: white; min-height: 100vh; overflow-x: hidden; }
+        .bg-animation { position: fixed; inset: 0; overflow: hidden; pointer-events: none; z-index: 0; }
+        .bg-orb { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.15; animation: pulse 8s ease-in-out infinite; }
+        .bg-orb-1 { width: 500px; height: 500px; top: -100px; right: -100px; background: var(--primary); }
+        .bg-orb-2 { width: 400px; height: 400px; top: 50%; left: -100px; background: var(--secondary); animation-delay: 2s; }
+        .bg-orb-3 { width: 350px; height: 350px; bottom: -50px; right: 30%; background: var(--accent); animation-delay: 4s; }
+        @keyframes pulse { 0%, 100% { transform: scale(1); opacity: 0.15; } 50% { transform: scale(1.1); opacity: 0.25; } }
+        
+        header { position: sticky; top: 0; z-index: 100; backdrop-filter: blur(20px); background: rgba(15, 23, 42, 0.85); border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
+        .header-content { max-width: 1920px; margin: 0 auto; padding: 0 2rem; height: 64px; display: flex; align-items: center; justify-content: space-between; }
+        .logo-section { display: flex; align-items: center; gap: 12px; text-decoration: none; color: inherit; }
+        .logo-icon { width: 40px; height: 40px; border-radius: 12px; background: linear-gradient(135deg, var(--primary), var(--secondary)); display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 20px rgba(16, 185, 129, 0.35); }
+        .logo-text h1 { font-size: 18px; font-weight: 700; background: linear-gradient(90deg, var(--primary), var(--secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .logo-text p { font-size: 11px; color: var(--gray-400); }
+        
+        nav { display: flex; gap: 4px; flex-wrap: wrap; }
+        nav a { padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 500; text-decoration: none; transition: all 0.3s ease; color: var(--gray-300); white-space: nowrap; }
+        nav a:hover { background: rgba(255, 255, 255, 0.1); color: white; }
+        nav a.active { background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end)); color: white; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.35); }
+        .mobile-menu-btn { display: none; background: none; border: none; color: white; cursor: pointer; padding: 8px; }
+        
+        main { position: relative; z-index: 1; max-width: 1280px; margin: 0 auto; padding: 2rem; }
+        
+        .hero { text-align: center; padding: 4rem 0; border-bottom: 1px solid rgba(255, 255, 255, 0.1); margin-bottom: 2rem; }
+        .badge { display: inline-flex; align-items: center; gap: 6px; padding: 6px 16px; border-radius: 9999px; border: 1px solid rgba(255, 255, 255, 0.2); font-size: 13px; font-weight: 500; margin-bottom: 1.5rem; color: #f59e0b; }
+        h1 { font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 800; line-height: 1.1; margin-bottom: 1.5rem; }
+        .gradient-text { background: linear-gradient(90deg, var(--primary), var(--secondary), var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .hero p { font-size: 1.25rem; color: var(--gray-300); max-width: 650px; margin: 0 auto; line-height: 1.7; }
+        
+        section { padding: 4rem 0; }
+        .section-title { font-size: 2rem; font-weight: 700; text-align: center; margin-bottom: 1rem; }
+        
+        .glass { background: rgba(30, 41, 59, 0.5); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px; padding: 2rem; transition: all 0.3s ease; }
+        .glass:hover { transform: translateY(-3px); border-color: rgba(16, 185, 129, 0.3); }
+        
+        /* Stats */
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 2rem; text-align: center; max-width: 900px; margin: 0 auto; }
+        .stat-value { font-size: 2.5rem; font-weight: 800; background: linear-gradient(90deg, var(--primary), var(--secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 0.5rem; }
+        .stat-label { color: var(--gray-400); font-size: 15px; }
+        
+        /* Testimonials */
+        .testimonials-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem; margin-top: 2rem; }
+        @media (max-width: 768px) { .testimonials-grid { grid-template-columns: 1fr; } }
+        
+        .testimonial-card { position: relative; }
+        .quote-icon { width: 32px; height: 32px; color: rgba(16, 185, 129, 0.25); margin-bottom: 1rem; }
+        .testimonial-quote { font-size: 15px; color: var(--gray-300); line-height: 1.7; margin-bottom: 1.5rem; font-style: italic; }
+        .author-row { display: flex; align-items: center; gap: 12px; margin-bottom: 1.25rem; }
+        .author-avatar { width: 48px; height: 48px; border-radius: 50%; background: linear-gradient(135deg, var(--primary), var(--secondary)); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; flex-shrink: 0; }
+        .author-name { font-weight: 600; font-size: 14px; }
+        .author-role { font-size: 13px; color: var(--gray-400); }
+        .author-company { font-size: 12px; color: var(--primary); }
+        .results-section { padding-top: 1.25rem; border-top: 1px solid rgba(255, 255, 255, 0.08); }
+        .results-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: var(--gray-500); margin-bottom: 10px; }
+        .result-item { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--gray-300); margin-bottom: 6px; }
+        .result-item i { color: var(--success); width: 16px; height: 16px; }
+        
+        /* Case Studies */
+        .case-studies { max-width: 750px; margin: 2rem auto 0; }
+        .case-card { margin-bottom: 1.5rem; transition: all 0.3s ease; cursor: pointer; }
+        .case-card:hover { border-color: rgba(16, 185, 129, 0.3); }
+        .case-content { display: flex; gap: 1.5rem; }
+        @media (max-width: 640px) { .case-content { flex-direction: column; } }
+        .case-icon-col { flex-shrink: 0; width: 80px; text-align: center; }
+        .case-icon { width: 44px; height: 44px; margin: 0 auto 8px; color: var(--primary); }
+        .case-company-short { font-weight: 600; font-size: 14px; }
+        .case-details { flex: 1; }
+        .case-challenge, .case-solution { margin-bottom: 1rem; }
+        .case-label { font-size: 12px; font-weight: 600; margin-bottom: 6px; }
+        .challenge-label { color: #f43f5e; }
+        .solution-label { color: var(--success); }
+        .case-text { font-size: 14px; color: var(--gray-400); line-height: 1.6; }
+        .results-box { display: flex; gap: 10px; align-items: flex-start; padding: 1rem; background: rgba(16, 185, 129, 0.08); border-radius: 10px; border: 1px solid rgba(16, 185, 129, 0.15); }
+        .results-box i { color: var(--success); width: 20px; height: 20px; flex-shrink: 0; margin-top: 2px; }
+        .results-box span { font-size: 13px; }
+        .results-box strong { color: var(--success); }
+        
+        /* CTA */
+        .cta-section { text-align: center; padding: 4rem 2rem; }
+        .cta-card { max-width: 600px; margin: 0 auto; padding: 3rem; background: linear-gradient(135deg, rgba(16, 185, 129, 0.06), rgba(6, 182, 212, 0.04)); border: 1px solid rgba(16, 185, 129, 0.2); border-radius: 20px; }
+        .cta-icon { width: 56px; height: 56px; margin: 0 auto 1.25rem; color: var(--primary); }
+        .cta-card h2 { font-size: 1.875rem; font-weight: 700; margin-bottom: 1rem; }
+        .cta-card p { color: var(--gray-400); margin-bottom: 2rem; line-height: 1.7; max-width: 420px; margin-left: auto; margin-right: auto; }
+        
+        .btn { display: inline-flex; align-items: center; gap: 8px; padding: 12px 28px; border-radius: 10px; font-size: 15px; font-weight: 600; border: none; cursor: pointer; transition: all 0.3s ease; text-decoration: none; }
+        .btn-primary { background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end)); color: white; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.35); }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 25px rgba(16, 185, 129, 0.5); }
+        
+        footer { position: relative; z-index: 1; border-top: 1px solid rgba(255, 255, 255, 0.1); padding: 2rem; text-align: center; color: var(--gray-500); font-size: 0.875rem; margin-top: 4rem; }
+        footer a { color: var(--primary); text-decoration: none; }
+        
+        @media (max-width: 1024px) {
+            nav { display: none; position: absolute; top: 64px; left: 0; right: 0; background: rgba(15, 23, 42, 0.95); padding: 1rem; flex-direction: column; }
+            nav.open { display: flex; } .mobile-menu-btn { display: block; } nav a { padding: 12px 16px; }
+        }
+        @media (max-width: 640px) { main { padding: 1rem; } .header-content { padding: 0 1rem; } h1 { font-size: 2rem; } .stats-grid { grid-template-columns: repeat(2, 1fr); } }
+
+        /* Theme Toggle & Navigation Buttons */
+        :root, [data-theme="dark"] {
+            --glass-bg: rgba(30, 41, 59, 0.5);
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+        [data-theme="light"] {
+            --glass-bg: rgba(255, 255, 255, 0.8);
+            --glass-border: rgba(0, 0, 0, 0.1);
+        }
+
+        /* Light mode toggle styling */
+        .btn-secondary { background: rgba(100,116,139,0.3); color: white; border: 1px solid rgba(255,255,255,0.15); }
+        .btn-secondary:hover { background: rgba(100,116,139,0.5); }
+        .btn-sm { padding: 8px 16px; font-size: 13px; }
+        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+        /* Mobile adjustment */
+        @media (max-width: 768px) {
+        }
+            /* Elegant Theme Toggle (CC-consistent) */
+        .cc-theme-toggle {
+            width: 36px; height: 36px;
+            padding: 0; border-radius: 8px;
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.1);
+            color: var(--gray-400);
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+        }
+        .cc-theme-toggle:hover {
+            background: rgba(255,255,255,0.08);
+            color: var(--primary);
+            border-color: rgba(16,185,129,0.3);
+        }
+        .cc-theme-toggle svg { width: 16px; height: 16px; }
+
+        /* Light Theme */
+        [data-theme="light"] body {
+            background: linear-gradient(135deg, #F8FAFC 0%, #F1F5F9 50%, #F8FAFC 100%);
+            color: #1E293B;
+        }
+        [data-theme="light"] header {
+            background: rgba(248,250,252,0.9);
+            border-bottom-color: rgba(0,0,0,0.08);
+        }
+        [data-theme="light"] nav a { color: #64748B; }
+        [data-theme="light"] nav a:hover { background: rgba(0,0,0,0.05); color: #1E293B; }
+        [data-theme="light"] nav a.active { color: white; }
+        [data-theme="light"] .glass {
+            background: rgba(255,255,255,0.7);
+            border-color: rgba(0,0,0,0.08);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+        }
+        [data-theme="light"] .glass:hover {
+            border-color: rgba(16,185,129,0.3);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+        [data-theme="light"] .section-title,
+        [data-theme="light"] h1,
+        [data-theme="light"] h2,
+        [data-theme="light"] h3 { color: #0F172A; }
+        [data-theme="light"] .section-subtitle,
+        [data-theme="light"] .hero p,
+        [data-theme="light"] .team-card .bio,
+        [data-theme="light"] .value-card p,
+        [data-theme="light"] .contact-info li,
+        [data-theme="light"] .stat-label,
+        [data-theme="light"] .timeline-item p,
+        [data-theme="light"] .job-item { color: #475569; }
+        [data-theme="light"] .logo-text h1 {
+            background: linear-gradient(90deg, #059669, #0891B2);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        [data-theme="light"] .logo-text p { color: #94A3B8; }
+        [data-theme="light"] .badge {
+            color: #059669; border-color: rgba(0,0,0,0.12);
+            background: rgba(16,185,129,0.06);
+        }
+        [data-theme="light"] .gradient-text {
+            background: linear-gradient(90deg, #059669, #0891B2, #7C3AED);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        [data-theme="light"] .value-icon { background: rgba(16,185,129,0.08); }
+        [data-theme="light"] .job-item { background: rgba(0,0,0,0.02); }
+        [data-theme="light"] .btn-outline { border-color: rgba(0,0,0,0.15); color: #1E293B; }
+        [data-theme="light"] .btn-outline:hover { background: rgba(0,0,0,0.05); }
+        [data-theme="light"] .cc-theme-toggle {
+            color: #94A3B8;
+            border-color: rgba(0,0,0,0.1);
+        }
+        [data-theme="light"] .cc-theme-toggle:hover {
+            background: rgba(16,185,129,0.08);
+            color: #059669;
+            border-color: rgba(16,185,129,0.3);
+        }
+        [data-theme="light"] .bg-orb { opacity: 0.06; }
+        [data-theme="light"] footer { border-top-color: rgba(0,0,0,0.08); color: #94A3B8; }
+        [data-theme="light"] .social-link { border-color: rgba(0,0,0,0.12); color: #94A3B8; }
+        [data-theme="light"] .social-link:hover { background: rgba(16,185,129,0.1); border-color: #10B981; color: #10B981; }
+        [data-theme="light"] .team-card .role { color: #059669; }
+        [data-theme="light"] .timeline-year { background: rgba(16,185,129,0.08); color: #059669; }
+        [data-theme="light"] .job-badge { background: rgba(139,92,246,0.08); color: #7C3AED; }
+        [data-theme="light"] .stat-value {
+            background: linear-gradient(90deg, #059669, #0891B2);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        [data-theme="light"] .timeline-line { background: rgba(0,0,0,0.08); }
+        [data-theme="light"] .mobile-menu-btn { color: #334155; }
+        [data-theme="light"] nav.open { background: rgba(248,250,252,0.98); border-bottom: 1px solid rgba(0,0,0,0.08); }
+    </style>
+</head>
+<body>
+    <div class="bg-animation"><div class="bg-orb bg-orb-1"></div><div class="bg-orb bg-orb-2"></div><div class="bg-orb bg-orb-3"></div></div>
+
+    <header>
+        <div class="header-content">
+            <a href="./index.html" class="logo-section">
+                <div class="logo-icon"><i data-lucide="brain" style="width:24px;height:24px;color:white;"></i></div>
+                <div class="logo-text"><h1>AI Supply Chain</h1><p>Advanced Platform</p></div>
+            </a>
+            <button class="mobile-menu-btn" onclick="document.querySelector('nav').classList.toggle('open')"><i data-lucide="menu" style="width:24px;height:24px;"></i></button>
+            <nav>
+                <a href="./index.html">Home</a>
+                <a href="./about.html">About</a>
+                <a href="./cc-app/">Command Center ⭐</a>
+                <a href="./dashboard.html">Dashboard</a>
+                <a href="./intelligence.html">Intelligence</a>
+                <a href="./platform.html">Platform</a>
+                <a href="./product.html">Product</a>
+                <a href="./customers.html" class="active">Customers</a>
+                <a href="./industries.html">Industries</a>
+                <a href="./events.html">Events</a>
+                <a href="./support.html">Support</a>
+            </nav>
+                        <button class="cc-theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path></svg></button>
+            <a href="./cc-app/" class="btn btn-primary" style="padding:8px 16px;font-size:13px;">Launch App</a>
+        </div>
+    </header>
+
+    <main>
+        <!-- Hero -->
+        <section class="hero">
+            <div class="badge"><i data-lucide="star" style="width:16px;height:16px;"></i> Customer Success</div>
+            <h1>Trusted by Industry <span class="gradient-text">Leaders</span></h1>
+            <p>See how enterprises worldwide are transforming their supply chains with AI-powered intelligence.</p>
+        </section>
+
+        <!-- Stats -->
+        <section style="border-bottom:1px solid rgba(255,255,255,0.08);padding:3rem 0;">
+            <div class="stats-grid">
+                <div><div class="stat-value">500+</div><div class="stat-label">Enterprise Customers</div></div>
+                <div><div class="stat-value">50M+</div><div class="stat-label">Suppliers Monitored</div></div>
+                <div><div class="stat-value">99.9%</div><div class="stat-label">Platform Uptime</div></div>
+                <div><div class="stat-value">4.9/5</div><div class="stat-label">Customer Satisfaction</div></div>
+            </div>
+        </section>
+
+        <!-- Testimonials -->
+        <section id="testimonials">
+            <h2 class="section-title">What Our Customers Say</h2>
+            
+            <div class="testimonials-grid">
+                <div class="glass testimonial-card">
+                    <i data-lucide="quote" class="quote-icon"></i>
+                    <p class="testimonial-quote">"The AI risk predictions have been remarkably accurate. We've prevented 3 major disruptions in just 6 months, saving us millions in potential losses."</p>
+                    <div class="author-row">
+                        <div class="author-avatar">JM</div>
+                        <div>
+                            <div class="author-name">Jennifer Martinez</div>
+                            <div class="author-role">VP Supply Chain</div>
+                            <div class="author-company">GlobalTech Manufacturing</div>
+                        </div>
+                    </div>
+                    <div class="results-section">
+                        <div class="results-label">Key Results</div>
+                        <div class="result-item"><i data-lucide="trending-up"></i> 45% reduction in disruptions</div>
+                        <div class="result-item"><i data-lucide="trending-up"></i> $2.3M cost savings</div>
+                        <div class="result-item"><i data-lucide="trending-up"></i> 94% prediction accuracy</div>
+                    </div>
+                </div>
+                
+                <div class="glass testimonial-card">
+                    <i data-lucide="quote" class="quote-icon"></i>
+                    <p class="testimonial-quote">"Finally, explainable AI that our team trusts. The SHAP visualizations make it easy to understand why risks are flagged, which has dramatically improved adoption."</p>
+                    <div class="author-row">
+                        <div class="author-avatar">DC</div>
+                        <div>
+                            <div class="author-name">David Chen</div>
+                            <div class="author-role">Chief Procurement Officer</div>
+                            <div class="author-company">InnovateCorp</div>
+                        </div>
+                    </div>
+                    <div class="results-section">
+                        <div class="results-label">Key Results</div>
+                        <div class="result-item"><i data-lucide="trending-up"></i> Faster decision making</div>
+                        <div class="result-item"><i data-lucide="trending-up"></i> Team adoption 92%</div>
+                        <div class="result-item"><i data-lucide="trending-up"></i> Audit-ready reports</div>
+                    </div>
+                </div>
+                
+                <div class="glass testimonial-card">
+                    <i data-lucide="quote" class="quote-icon"></i>
+                    <p class="testimonial-quote">"The compliance tracking alone saved us hundreds of hours. UFLPA and EUDR monitoring is now automated, giving our team time to focus on strategic initiatives."</p>
+                    <div class="author-row">
+                        <div class="author-avatar">SW</div>
+                        <div>
+                            <div class="author-name">Sarah Williams</div>
+                            <div class="author-role">Director of Compliance</div>
+                            <div class="author-company">EuroTrade Industries</div>
+                        </div>
+                    </div>
+                    <div class="results-section">
+                        <div class="results-label">Key Results</div>
+                        <div class="result-item"><i data-lucide="trending-up"></i> 80% time savings</div>
+                        <div class="result-item"><i data-lucide="trending-up"></i> Zero compliance violations</div>
+                        <div class="result-item"><i data-lucide="trending-up"></i> Automated reporting</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Case Studies -->
+        <section id="cases" style="background:rgba(255,255,255,0.02);border-radius:24px;padding:4rem 2rem;margin:4rem 0;">
+            <h2 class="section-title">Case Studies</h2>
+            
+            <div class="case-studies">
+                <div class="glass case-card">
+                    <div class="case-content">
+                        <div class="case-icon-col">
+                            <i data-lucide="building-2" class="case-icon"></i>
+                            <div class="case-company-short">Fortune 500 Auto</div>
+                        </div>
+                        <div class="case-details">
+                            <div class="case-challenge">
+                                <div class="case-label challenge-label">Challenge</div>
+                                <p class="case-text">Lack of visibility into Tier 2/3 suppliers causing frequent production stoppages and quality issues.</p>
+                            </div>
+                            <div class="case-solution">
+                                <div class="case-label solution-label">Solution</div>
+                                <p class="case-text">Implemented multi-tier supplier mapping with AI risk scoring and automated alerting for critical components.</p>
+                            </div>
+                            <div class="results-box">
+                                <i data-lucide="zap"></i>
+                                <span><strong>Results:</strong> 67% reduction in supply chain disruptions, $15M annual savings</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="glass case-card">
+                    <div class="case-content">
+                        <div class="case-icon-col">
+                            <i data-lucide="building-2" class="case-icon"></i>
+                            <div class="case-company-short">Global Pharma</div>
+                        </div>
+                        <div class="case-details">
+                            <div class="case-challenge">
+                                <div class="case-label challenge-label">Challenge</div>
+                                <p class="case-text">Cold chain integrity monitoring across 40+ countries with complex regulatory requirements.</p>
+                            </div>
+                            <div class="case-solution">
+                                <div class="case-label solution-label">Solution</div>
+                                <p class="case-text">Real-time IoT integration with predictive temperature alerts and compliance automation.</p>
+                            </div>
+                            <div class="results-box">
+                                <i data-lucide="zap"></i>
+                                <span><strong>Results:</strong> 99.97% cold chain compliance, zero spoilage incidents in 18 months</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="glass case-card">
+                    <div class="case-content">
+                        <div class="case-icon-col">
+                            <i data-lucide="building-2" class="case-icon"></i>
+                            <div class="case-company-short">Major Retailer</div>
+                        </div>
+                        <div class="case-details">
+                            <div class="case-challenge">
+                                <div class="case-label challenge-label">Challenge</div>
+                                <p class="case-text">Demand forecasting accuracy leading to overstock/stockout issues across 2000+ locations.</p>
+                            </div>
+                            <div class="case-solution">
+                                <div class="case-label solution-label">Solution</div>
+                                <p class="case-text">AI demand sensing with external data integration including weather, events, and economic indicators.</p>
+                            </div>
+                            <div class="results-box">
+                                <i data-lucide="zap"></i>
+                                <span><strong>Results:</strong> 35% improvement in forecast accuracy, $8M inventory optimization</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- CTA -->
+        <section class="cta-section">
+            <div class="cta-card glass">
+                <i data-lucide="star" class="cta-icon"></i>
+                <h2>Join Our Success Stories</h2>
+                <p>Ready to transform your supply chain? Start with a personalized demo tailored to your industry.</p>
+                <a href="#" class="btn btn-primary">Request Demo <i data-lucide="arrow-right" style="width:18px;height:18px;"></i></a>
+            </div>
+        </section>
+    </main>
+
+    <footer><p>&copy; 2026 AI Supply Chain Advanced. All rights reserved. | <a href="./support.html">Support</a></p></footer>
+
+    <script>    lucide.createIcons();
+
+    function toggleTheme() {
+        var current = document.documentElement.getAttribute('data-theme');
+        var next = current === 'light' ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-theme', next);
+        localStorage.setItem('theme', next);
+        document.querySelectorAll('.cc-theme-toggle').forEach(function(btn) {
+            btn.innerHTML = next === 'dark' ? '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path></svg>' : '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path></svg>';
+        });
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+    document.addEventListener('DOMContentLoaded', function() {
+        var saved = localStorage.getItem('theme') || 'dark';
+        document.documentElement.setAttribute('data-theme', saved);
+        document.querySelectorAll('.cc-theme-toggle').forEach(function(btn) {
+            btn.innerHTML = saved === 'dark' ? '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path></svg>' : '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path></svg>';
+        });
+    });</script>
+</body>
+</html>

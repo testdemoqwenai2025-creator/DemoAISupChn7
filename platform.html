@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Platform Architecture | AI Supply Chain Advanced - Enterprise Infrastructure</title>
+    <meta name="description" content="Explore our enterprise-grade AI infrastructure with cloud-native architecture, 50+ integrations, and bank-grade security.">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary: #10B981; --secondary: #06B6D4; --accent: #8B5CF6;
+            --warning: #F59E0B; --danger: #EF4444; --success: #22C55E;
+            --dark: #0F172A; --dark-lighter: #1E293B;
+            --gray-100: #F1F5F9; --gray-200: #E2E8F0; --gray-300: #CBD5E1;
+            --gray-400: #94A3B8; --gray-500: #64748B; --gray-600: #475569;
+            --gradient-start: #059669; --gradient-end: #0891B2;
+        }
+        
+        body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: linear-gradient(135deg, var(--dark) 0%, var(--dark-lighter) 50%, var(--dark) 100%); color: white; min-height: 100vh; overflow-x: hidden; }
+        .bg-animation { position: fixed; inset: 0; overflow: hidden; pointer-events: none; z-index: 0; }
+        .bg-orb { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.15; animation: pulse 8s ease-in-out infinite; }
+        .bg-orb-1 { width: 500px; height: 500px; top: -100px; right: -100px; background: var(--primary); }
+        .bg-orb-2 { width: 400px; height: 400px; top: 50%; left: -100px; background: var(--secondary); animation-delay: 2s; }
+        .bg-orb-3 { width: 350px; height: 350px; bottom: -50px; right: 30%; background: var(--accent); animation-delay: 4s; }
+        @keyframes pulse { 0%, 100% { transform: scale(1); opacity: 0.15; } 50% { transform: scale(1.1); opacity: 0.25; } }
+        
+        header { position: sticky; top: 0; z-index: 100; backdrop-filter: blur(20px); background: rgba(15, 23, 42, 0.85); border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
+        .header-content { max-width: 1920px; margin: 0 auto; padding: 0 2rem; height: 64px; display: flex; align-items: center; justify-content: space-between; }
+        .logo-section { display: flex; align-items: center; gap: 12px; text-decoration: none; color: inherit; }
+        .logo-icon { width: 40px; height: 40px; border-radius: 12px; background: linear-gradient(135deg, var(--primary), var(--secondary)); display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 20px rgba(16, 185, 129, 0.35); }
+        .logo-text h1 { font-size: 18px; font-weight: 700; background: linear-gradient(90deg, var(--primary), var(--secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .logo-text p { font-size: 11px; color: var(--gray-400); }
+        
+        nav { display: flex; gap: 4px; flex-wrap: wrap; }
+        nav a { padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 500; text-decoration: none; transition: all 0.3s ease; color: var(--gray-300); white-space: nowrap; }
+        nav a:hover { background: rgba(255, 255, 255, 0.1); color: white; }
+        nav a.active { background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end)); color: white; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.35); }
+        .mobile-menu-btn { display: none; background: none; border: none; color: white; cursor: pointer; padding: 8px; }
+        
+        main { position: relative; z-index: 1; max-width: 1280px; margin: 0 auto; padding: 2rem; }
+        
+        .hero { text-align: center; padding: 4rem 0; border-bottom: 1px solid rgba(255, 255, 255, 0.1); margin-bottom: 4rem; position: relative; overflow: hidden; }
+        .hero::before { content:''; position:absolute;top:25%;right:20%;width:500px;height:500px;background:var(--primary);border-radius:50%;filter:blur(120px);opacity:0.06; }
+        .badge { display: inline-flex; align-items: center; gap: 6px; padding: 6px 16px; border-radius: 9999px; border: 1px solid rgba(255, 255, 255, 0.2); font-size: 13px; font-weight: 500; margin-bottom: 1.5rem; color: var(--primary); }
+        h1 { font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 800; line-height: 1.1; margin-bottom: 1.5rem; }
+        .gradient-text { background: linear-gradient(90deg, var(--primary), var(--secondary), var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .hero p { font-size: 1.25rem; color: var(--gray-300); max-width: 650px; margin: 0 auto 2rem; line-height: 1.7; }
+        
+        section { padding: 4rem 0; }
+        .section-title { font-size: 2rem; font-weight: 700; text-align: center; margin-bottom: 1rem; }
+        .section-subtitle { text-align: center; color: var(--gray-400); max-width: 600px; margin: 0 auto 3rem; line-height: 1.7; }
+        
+        .glass { background: rgba(30, 41, 59, 0.5); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px; padding: 2rem; transition: all 0.3s ease; }
+        .glass:hover { transform: translateY(-3px); border-color: rgba(16, 185, 129, 0.3); }
+        
+        /* Features Grid */
+        .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem; margin-top: 2rem; }
+        .feature-card { cursor: pointer; }
+        .feature-icon { width: 60px; height: 60px; border-radius: 14px; display: flex; align-items: center; justify-content: center; margin-bottom: 1.25rem; transition: transform 0.3s ease; }
+        .feature-card:hover .feature-icon { transform: scale(1.1); }
+        .feature-card h3 { font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem; }
+        .feature-card p { font-size: 0.875rem; color: var(--gray-400); line-height: 1.6; margin-bottom: 1rem; }
+        .feature-list { list-style: none; }
+        .feature-list li { display: flex; align-items: center; gap: 8px; font-size: 13px; margin-bottom: 6px; color: var(--gray-300); }
+        .feature-list i { color: var(--primary); width: 16px; height: 16px; flex-shrink: 0; }
+        
+        /* Architecture */
+        .arch-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: center; margin-top: 2rem; }
+        @media (max-width: 768px) { .arch-grid { grid-template-columns: 1fr; } }
+        
+        .arch-layer { margin-bottom: 1.25rem; }
+        .arch-layer-title { display: flex; align-items: center; gap: 8px; font-weight: 600; margin-bottom: 0.75rem; font-size: 15px; }
+        .arch-badges { display: flex; flex-wrap: wrap; gap: 8px; }
+        .arch-badge { padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 500; background: rgba(139, 92, 246, 0.1); color: var(--gray-300); border: 1px solid rgba(139, 92, 246, 0.15); }
+        
+        .arch-diagram { padding: 2rem; }
+        .arch-layer-box { padding: 1.25rem; border-radius: 12px; border: 2px solid rgba(255, 255, 255, 0.08); margin-bottom: 1rem; transition: all 0.3s ease; display: flex; justify-content: space-between; align-items: center; }
+        .arch-layer-box:hover { border-color: rgba(139, 92, 246, 0.3); }
+        .arch-layer-box.highlight { background: linear-gradient(135deg, rgba(139, 92, 246, 0.08), rgba(6, 182, 212, 0.08)); border-color: rgba(139, 92, 246, 0.25); }
+        .layer-tech { display: flex; gap: 8px; margin-top: 0.75rem; }
+        .layer-badge { padding: 4px 10px; border-radius: 4px; font-size: 11px; background: rgba(255, 255, 255, 0.05); color: var(--gray-400); border: 1px solid rgba(255, 255, 255, 0.1); }
+        
+        /* Integrations */
+        .integrations-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 1rem; margin-top: 2rem; }
+        .integration-card { text-align: center; padding: 1.5rem 1rem; transition: all 0.3s ease; cursor: pointer; }
+        .integration-card:hover { border-color: rgba(16, 185, 129, 0.3); transform: translateY(-2px); }
+        .integration-icon { width: 48px; height: 48px; margin: 0 auto 0.75rem; border-radius: 12px; background: rgba(255, 255, 255, 0.05); display: flex; align-items: center; justify-content: center; transition: all 0.3s ease; }
+        .integration-card:hover .integration-icon { background: rgba(16, 185, 129, 0.1); }
+        .integration-card:hover .integration-icon i { color: var(--primary); }
+        .integration-name { font-weight: 600; font-size: 14px; }
+        .integration-cat { font-size: 11px; color: var(--gray-500); margin-top: 4px; }
+        
+        /* Security */
+        .security-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; margin-top: 2rem; }
+        @media (max-width: 768px) { .security-grid { grid-template-columns: 1fr; } }
+        
+        .security-item { display: flex; gap: 1rem; padding: 1.25rem; background: rgba(255, 255, 255, 0.02); border-radius: 12px; margin-bottom: 1rem; }
+        .security-item i { color: var(--primary); width: 24px; height: 24px; flex-shrink: 0; margin-top: 2px; }
+        .security-item h4 { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
+        .security-item p { font-size: 13px; color: var(--gray-400); }
+        
+        .metric-row { margin-bottom: 1.5rem; }
+        .metric-header { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 14px; }
+        .metric-value { font-weight: 700; color: var(--primary); }
+        .progress-bar { height: 8px; background: rgba(255, 255, 255, 0.06); border-radius: 4px; overflow: hidden; }
+        .progress-fill { height: 100%; border-radius: 4px; background: linear-gradient(90deg, var(--primary), var(--secondary)); transition: width 1s ease; }
+        
+        /* CTA */
+        .cta-section { text-align: center; padding: 4rem 2rem; }
+        .cta-card { max-width: 650px; margin: 0 auto; padding: 3rem; background: linear-gradient(135deg, rgba(16, 185, 129, 0.05), rgba(6, 182, 212, 0.05)); border: 1px solid rgba(16, 185, 129, 0.2); border-radius: 20px; }
+        .cta-icon { width: 56px; height: 56px; margin: 0 auto 1.25rem; color: var(--primary); }
+        .cta-card h2 { font-size: 1.875rem; font-weight: 700; margin-bottom: 1rem; }
+        .cta-card p { color: var(--gray-400); margin-bottom: 2rem; line-height: 1.7; max-width: 450px; margin-left: auto; margin-right: auto; }
+        
+        .btn { display: inline-flex; align-items: center; gap: 8px; padding: 12px 28px; border-radius: 10px; font-size: 15px; font-weight: 600; border: none; cursor: pointer; transition: all 0.3s ease; text-decoration: none; }
+        .btn-primary { background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end)); color: white; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.35); }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 25px rgba(16, 185, 129, 0.5); }
+        .btn-outline { background: transparent; border: 1px solid rgba(255, 255, 255, 0.2); color: white; }
+        .btn-outline:hover { background: rgba(255, 255, 255, 0.1); }
+        
+        footer { position: relative; z-index: 1; border-top: 1px solid rgba(255, 255, 255, 0.1); padding: 2rem; text-align: center; color: var(--gray-500); font-size: 0.875rem; margin-top: 4rem; }
+        footer a { color: var(--primary); text-decoration: none; }
+        
+        @media (max-width: 1024px) {
+            nav { display: none; position: absolute; top: 64px; left: 0; right: 0; background: rgba(15, 23, 42, 0.95); padding: 1rem; flex-direction: column; }
+            nav.open { display: flex; } .mobile-menu-btn { display: block; } nav a { padding: 12px 16px; }
+        }
+        @media (max-width: 640px) { main { padding: 1rem; } .header-content { padding: 0 1rem; } h1 { font-size: 2rem; } .features-grid { grid-template-columns: 1fr; } }
+
+        /* Light mode toggle styling */
+        .btn-secondary { background: rgba(100,116,139,0.2); color: white; border: 1px solid rgba(255,255,255,0.15); }
+        .btn-secondary:hover { background: rgba(100,116,139,0.35); }
+        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+        /* Mobile adjustment */
+        @media (max-width: 768px) {
+        }
+            /* Elegant Theme Toggle (CC-consistent) */
+        .cc-theme-toggle {
+            width: 36px; height: 36px;
+            padding: 0; border-radius: 8px;
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.1);
+            color: var(--gray-400);
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+        }
+        .cc-theme-toggle:hover {
+            background: rgba(255,255,255,0.08);
+            color: var(--primary);
+            border-color: rgba(16,185,129,0.3);
+        }
+        .cc-theme-toggle svg { width: 16px; height: 16px; }
+
+        /* Light Theme */
+        [data-theme="light"] body {
+            background: linear-gradient(135deg, #F8FAFC 0%, #F1F5F9 50%, #F8FAFC 100%);
+            color: #1E293B;
+        }
+        [data-theme="light"] header {
+            background: rgba(248,250,252,0.9);
+            border-bottom-color: rgba(0,0,0,0.08);
+        }
+        [data-theme="light"] nav a { color: #64748B; }
+        [data-theme="light"] nav a:hover { background: rgba(0,0,0,0.05); color: #1E293B; }
+        [data-theme="light"] nav a.active { color: white; }
+        [data-theme="light"] .glass {
+            background: rgba(255,255,255,0.7);
+            border-color: rgba(0,0,0,0.08);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+        }
+        [data-theme="light"] .glass:hover {
+            border-color: rgba(16,185,129,0.3);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+        [data-theme="light"] .section-title,
+        [data-theme="light"] h1,
+        [data-theme="light"] h2,
+        [data-theme="light"] h3 { color: #0F172A; }
+        [data-theme="light"] .section-subtitle,
+        [data-theme="light"] .hero p,
+        [data-theme="light"] .team-card .bio,
+        [data-theme="light"] .value-card p,
+        [data-theme="light"] .contact-info li,
+        [data-theme="light"] .stat-label,
+        [data-theme="light"] .timeline-item p,
+        [data-theme="light"] .job-item { color: #475569; }
+        [data-theme="light"] .logo-text h1 {
+            background: linear-gradient(90deg, #059669, #0891B2);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        [data-theme="light"] .logo-text p { color: #94A3B8; }
+        [data-theme="light"] .badge {
+            color: #059669; border-color: rgba(0,0,0,0.12);
+            background: rgba(16,185,129,0.06);
+        }
+        [data-theme="light"] .gradient-text {
+            background: linear-gradient(90deg, #059669, #0891B2, #7C3AED);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        [data-theme="light"] .value-icon { background: rgba(16,185,129,0.08); }
+        [data-theme="light"] .job-item { background: rgba(0,0,0,0.02); }
+        [data-theme="light"] .btn-outline { border-color: rgba(0,0,0,0.15); color: #1E293B; }
+        [data-theme="light"] .btn-outline:hover { background: rgba(0,0,0,0.05); }
+        [data-theme="light"] .cc-theme-toggle {
+            color: #94A3B8;
+            border-color: rgba(0,0,0,0.1);
+        }
+        [data-theme="light"] .cc-theme-toggle:hover {
+            background: rgba(16,185,129,0.08);
+            color: #059669;
+            border-color: rgba(16,185,129,0.3);
+        }
+        [data-theme="light"] .bg-orb { opacity: 0.06; }
+        [data-theme="light"] footer { border-top-color: rgba(0,0,0,0.08); color: #94A3B8; }
+        [data-theme="light"] .social-link { border-color: rgba(0,0,0,0.12); color: #94A3B8; }
+        [data-theme="light"] .social-link:hover { background: rgba(16,185,129,0.1); border-color: #10B981; color: #10B981; }
+        [data-theme="light"] .team-card .role { color: #059669; }
+        [data-theme="light"] .timeline-year { background: rgba(16,185,129,0.08); color: #059669; }
+        [data-theme="light"] .job-badge { background: rgba(139,92,246,0.08); color: #7C3AED; }
+        [data-theme="light"] .stat-value {
+            background: linear-gradient(90deg, #059669, #0891B2);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        [data-theme="light"] .timeline-line { background: rgba(0,0,0,0.08); }
+        [data-theme="light"] .mobile-menu-btn { color: #334155; }
+        [data-theme="light"] nav.open { background: rgba(248,250,252,0.98); border-bottom: 1px solid rgba(0,0,0,0.08); }
+    </style>
+</head>
+<body>
+    <div class="bg-animation"><div class="bg-orb bg-orb-1"></div><div class="bg-orb bg-orb-2"></div><div class="bg-orb bg-orb-3"></div></div>
+
+    <header>
+        <div class="header-content">
+            <a href="./index.html" class="logo-section">
+                <div class="logo-icon"><i data-lucide="brain" style="width:24px;height:24px;color:white;"></i></div>
+                <div class="logo-text"><h1>AI Supply Chain</h1><p>Advanced Platform</p></div>
+            </a>
+            <button class="mobile-menu-btn" onclick="document.querySelector('nav').classList.toggle('open')"><i data-lucide="menu" style="width:24px;height:24px;"></i></button>
+            <nav>
+                <a href="./index.html">Home</a>
+                <a href="./about.html">About</a>
+                <a href="./cc-app/">Command Center ⭐</a>
+                <a href="./dashboard.html">Dashboard</a>
+                <a href="./intelligence.html">Intelligence</a>
+                <a href="./platform.html" class="active">Platform</a>
+                <a href="./product.html">Product</a>
+                <a href="./customers.html">Customers</a>
+                <a href="./industries.html">Industries</a>
+                <a href="./events.html">Events</a>
+                <a href="./support.html">Support</a>
+            </nav>
+                        <button class="cc-theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path></svg></button>
+            <a href="./cc-app/" class="btn btn-primary" style="padding:8px 16px;font-size:13px;">Launch App</a>
+        </div>
+    </header>
+
+    <main>
+        <!-- Hero -->
+        <section class="hero">
+            <div class="badge"><i data-lucide="cpu" style="width:16px;height:16px;"></i> Platform Architecture</div>
+            <h1>Enterprise-Grade <span class="gradient-text">AI Infrastructure</span></h1>
+            <p>Built for scale. Designed for resilience. Powered by explainable AI.</p>
+            <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:1rem;">
+                <a href="#features" class="btn btn-primary">View Architecture <i data-lucide="arrow-right" style="width:18px;height:18px;"></i></a>
+                <a href="#" class="btn btn-outline"><i data-lucide="plug" style="width:18px;height:18px;"></i> API Documentation</a>
+            </div>
+        </section>
+
+        <!-- Core Capabilities -->
+        <section id="features">
+            <h2 class="section-title">Core Capabilities</h2>
+            <p class="section-subtitle">Six integrated modules powering intelligent supply chain operations</p>
+            
+            <div class="features-grid">
+                <div class="glass feature-card">
+                    <div class="feature-icon" style="background:linear-gradient(135deg,rgba(139,92,246,0.15),rgba(139,92,246,0.05));color:#8b5cf6;">
+                        <i data-lucide="brain" style="width:28px;height:28px;"></i>
+                    </div>
+                    <h3>AI Risk Engine</h3>
+                    <p>Machine learning models trained on global supply chain data for predictive risk assessment.</p>
+                    <ul class="feature-list">
+                        <li><i data-lucide="check-circle-2"></i> Predictive Analytics</li>
+                        <li><i data-lucide="check-circle-2"></i> Pattern Recognition</li>
+                        <li><i data-lucide="check-circle-2"></i> Anomaly Detection</li>
+                        <li><i data-lucide="check-circle-2"></i> SHAP Explainability</li>
+                    </ul>
+                </div>
+                
+                <div class="glass feature-card">
+                    <div class="feature-icon" style="background:linear-gradient(135deg,rgba(16,185,129,0.15),rgba(16,185,129,0.05));color:#10b981;">
+                        <i data-lucide="shield" style="width:28px;height:28px;"></i>
+                    </div>
+                    <h3>Risk Intelligence</h3>
+                    <p>Real-time monitoring across all risk dimensions with automated alerting.</p>
+                    <ul class="feature-list">
+                        <li><i data-lucide="check-circle-2"></i> Geopolitical Tracking</li>
+                        <li><i data-lucide="check-circle-2"></i> Financial Health Monitoring</li>
+                        <li><i data-lucide="check-circle-2"></i> Environmental Scanning</li>
+                        <li><i data-lucide="check-circle-2"></i> Compliance Checks</li>
+                    </ul>
+                </div>
+                
+                <div class="glass feature-card">
+                    <div class="feature-icon" style="background:linear-gradient(135deg,rgba(6,182,212,0.15),rgba(6,182,212,0.05));color:#06b6d4;">
+                        <i data-lucide="globe" style="width:28px;height:28px;"></i>
+                    </div>
+                    <h3>Global Visibility</h3>
+                    <p>Multi-tier supplier mapping across 190+ countries with real-time updates.</p>
+                    <ul class="feature-list">
+                        <li><i data-lucide="check-circle-2"></i> Supplier Directory</li>
+                        <li><i data-lucide="check-circle-2"></i> Tier Mapping</li>
+                        <li><i data-lucide="check-circle-2"></i> Regional Dashboards</li>
+                        <li><i data-lucide="check-circle-2"></i> Dependency Analysis</li>
+                    </ul>
+                </div>
+                
+                <div class="glass feature-card">
+                    <div class="feature-icon" style="background:linear-gradient(135deg,rgba(245,158,11,0.15),rgba(245,158,11,0.05));color:#f59e0b;">
+                        <i data-lucide="zap" style="width:28px;height:28px;"></i>
+                    </div>
+                    <h3>Real-Time Alerts</h3>
+                    <p>Instant notifications when risks materialize with smart escalation workflows.</p>
+                    <ul class="feature-list">
+                        <li><i data-lucide="check-circle-2"></i> WebSocket Streaming</li>
+                        <li><i data-lucide="check-circle-2"></i> Smart Escalations</li>
+                        <li><i data-lucide="check-circle-2"></i> Mobile Push</li>
+                        <li><i data-lucide="check-circle-2"></i> Email Digests</li>
+                    </ul>
+                </div>
+                
+                <div class="glass feature-card">
+                    <div class="feature-icon" style="background:linear-gradient(135deg,rgba(244,63,94,0.15),rgba(244,63,94,0.05));color:#f43f5e;">
+                        <i data-lucide="bar-chart-3" style="width:28px;height:28px;"></i>
+                    </div>
+                    <h3>Demand Forecasting</h3>
+                    <p>AI-powered demand prediction with scenario modeling and confidence intervals.</p>
+                    <ul class="feature-list">
+                        <li><i data-lucide="check-circle-2"></i> ML Forecasting</li>
+                        <li><i data-lucide="check-circle-2"></i> Scenario Planning</li>
+                        <li><i data-lucide="check-circle-2"></i> Confidence Intervals</li>
+                        <li><i data-lucide="check-circle-2"></i> Trend Analysis</li>
+                    </ul>
+                </div>
+                
+                <div class="glass feature-card">
+                    <div class="feature-icon" style="background:linear-gradient(135deg,rgba(16,185,129,0.15),rgba(6,182,212,0.05));color:var(--primary);">
+                        <i data-lucide="lock" style="width:28px;height:28px;"></i>
+                    </div>
+                    <h3>Compliance Hub</h3>
+                    <p>Regulatory framework tracking and gap analysis across global jurisdictions.</p>
+                    <ul class="feature-list">
+                        <li><i data-lucide="check-circle-2"></i> UFLPA Monitoring</li>
+                        <li><i data-lucide="check-circle-2"></i> EUDR Compliance</li>
+                        <li><i data-lucide="check-circle-2"></i> CSDDD Tracking</li>
+                        <li><i data-lucide="check-circle-2"></i> GDPR / SOX / REACH</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Architecture Stack -->
+        <section id="architecture" style="background:rgba(255,255,255,0.02);border-radius:24px;padding:4rem 2rem;margin:4rem 0;">
+            <div class="arch-grid">
+                <div>
+                    <h2 class="section-title" style="text-align:left;">Modern Stack Architecture</h2>
+                    <p style="color:var(--gray-400);line-height:1.7;margin-bottom:2rem;">Cloud-native microservices architecture designed for enterprise reliability and scalability.</p>
+                    
+                    <div class="arch-layer">
+                        <div class="arch-layer-title"><i data-lucide="layers" style="width:18px;height:18px;color:var(--primary);"></i> Data Ingestion</div>
+                        <div class="arch-badges">
+                            <span class="arch-badge">API Connectors</span>
+                            <span class="arch-badge">Web Scrapers</span>
+                            <span class="arch-badge">IoT Sensors</span>
+                            <span class="arch-badge">File Imports</span>
+                        </div>
+                    </div>
+                    
+                    <div class="arch-layer">
+                        <div class="arch-layer-title"><i data-lucide="layers" style="width:18px;height:18px;color:var(--primary);"></i> Processing Engine</div>
+                        <div class="arch-badges">
+                            <span class="arch-badge">Stream Processing</span>
+                            <span class="arch-badge">Batch ETL</span>
+                            <span class="arch-badge">ML Pipeline</span>
+                            <span class="arch-badge">Event Router</span>
+                        </div>
+                    </div>
+                    
+                    <div class="arch-layer">
+                        <div class="arch-layer-title"><i data-lucide="layers" style="width:18px;height:18px;color:var(--primary);"></i> AI/ML Layer</div>
+                        <div class="arch-badges">
+                            <span class="arch-badge">Risk Models</span>
+                            <span class="arch-badge">Forecast Models</span>
+                            <span class="arch-badge">NLP Engine</span>
+                            <span class="arch-badge">SHAP Explainer</span>
+                        </div>
+                    </div>
+                    
+                    <div class="arch-layer">
+                        <div class="arch-layer-title"><i data-lucide="layers" style="width:18px;height:18px;color:var(--primary);"></i> Application Layer</div>
+                        <div class="arch-badges">
+                            <span class="arch-badge">Dashboard</span>
+                            <span class="arch-badge">Alerts</span>
+                            <span class="arch-badge">Reports</span>
+                            <span class="arch-badge">API Gateway</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="glass arch-diagram">
+                    <div class="arch-layer-box">
+                        <span style="font-weight:600;">Presentation Layer</span>
+                    </div>
+                    <div class="arch-layer-box">
+                        <span style="font-weight:600;">Application Services</span>
+                    </div>
+                    <div class="arch-layer-box highlight">
+                        <span style="font-weight:600;">AI/ML Engine</span>
+                        <span style="padding:4px 10px;border-radius:6px;background:rgba(139,92,246,0.2);color:var(--accent);font-size:11px;font-weight:600;">AI Core</span>
+                        <div class="layer-tech">
+                            <span class="layer-badge">PyTorch</span>
+                            <span class="layer-badge">TensorFlow</span>
+                            <span class="layer-badge">SHAP</span>
+                        </div>
+                    </div>
+                    <div class="arch-layer-box">
+                        <span style="font-weight:600;">Data Layer</span>
+                    </div>
+                    <div style="padding-top:1rem;margin-top:1rem;border-top:1px solid rgba(255,255,255,0.1);display:flex;justify-content:space-between;font-size:12px;color:var(--gray-500);">
+                        <span><i data-lucide="cloud" style="width:14px;height:14px;display:inline;"></i> AWS/Azure/GCP</span>
+                        <span><i data-lucide="database" style="width:14px;height:14px;display:inline;"></i> PostgreSQL</span>
+                        <span><i data-lucide="network" style="width:14px;height:14px;display:inline;"></i> Redis</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Integrations -->
+        <section id="integrations">
+            <h2 class="section-title">Enterprise Integrations</h2>
+            <p class="section-subtitle">Connect with your existing technology stack seamlessly</p>
+            
+            <div class="integrations-grid">
+                <div class="glass integration-card">
+                    <div class="integration-icon"><i data-lucide="box" style="width:22px;height:22px;color:var(--gray-400);"></i></div>
+                    <div class="integration-name">SAP</div>
+                    <div class="integration-cat">ERP</div>
+                </div>
+                <div class="glass integration-card">
+                    <div class="integration-icon"><i data-lucide="box" style="width:22px;height:22px;color:var(--gray-400);"></i></div>
+                    <div class="integration-name">Oracle</div>
+                    <div class="integration-cat">ERP</div>
+                </div>
+                <div class="glass integration-card">
+                    <div class="integration-icon"><i data-lucide="box" style="width:22px;height:22px;color:var(--gray-400);"></i></div>
+                    <div class="integration-name">Salesforce</div>
+                    <div class="integration-cat">CRM</div>
+                </div>
+                <div class="glass integration-card">
+                    <div class="integration-icon"><i data-lucide="box" style="width:22px;height:22px;color:var(--gray-400);"></i></div>
+                    <div class="integration-name">ServiceNow</div>
+                    <div class="integration-cat">ITSM</div>
+                </div>
+                <div class="glass integration-card">
+                    <div class="integration-icon"><i data-lucide="box" style="width:22px;height:22px;color:var(--gray-400);"></i></div>
+                    <div class="integration-name">Workday</div>
+                    <div class="integration-cat">HCM</div>
+                </div>
+                <div class="glass integration-card">
+                    <div class="integration-icon"><i data-lucide="box" style="width:22px;height:22px;color:var(--gray-400);"></i></div>
+                    <div class="integration-name">Kinaxis</div>
+                    <div class="integration-cat">SCM</div>
+                </div>
+                <div class="glass integration-card">
+                    <div class="integration-icon"><i data-lucide="box" style="width:22px;height:22px;color:var(--gray-400);"></i></div>
+                    <div class="integration-name">Blue Yonder</div>
+                    <div class="integration-cat">SCM</div>
+                </div>
+                <div class="glass integration-card">
+                    <div class="integration-icon"><i data-lucide="box" style="width:22px;height:22px;color:var(--gray-400);"></i></div>
+                    <div class="integration-name">Coupa</div>
+                    <div class="integration-cat">Spend</div>
+                </div>
+            </div>
+            
+            <div style="text-align:center;margin-top:2rem;">
+                <a href="#" class="btn btn-outline"><i data-lucide="plug" style="width:16px;height:16px;"></i> View All 50+ Integrations</a>
+            </div>
+        </section>
+
+        <!-- Security & Performance -->
+        <section id="security" style="background:rgba(255,255,255,0.02);border-radius:24px;padding:4rem 2rem;margin:4rem 0;">
+            <div class="security-grid">
+                <div>
+                    <h2 class="section-title" style="text-align:left;">Enterprise Security</h2>
+                    <p style="color:var(--gray-400);line-height:1.7;margin-bottom:2rem;">Bank-grade security with compliance certifications for regulated industries.</p>
+                    
+                    <div class="security-item">
+                        <i data-lucide="shield"></i>
+                        <div><h4>SOC 2 Type II</h4><p>Annual audit completed by independent auditors</p></div>
+                    </div>
+                    <div class="security-item">
+                        <i data-lucide="shield"></i>
+                        <div><h4>GDPR Compliant</h4><p>EU data protection ready with DPA available</p></div>
+                    </div>
+                    <div class="security-item">
+                        <i data-lucide="shield"></i>
+                        <div><h4>ISO 27001</h4><p>Information security management certified</p></div>
+                    </div>
+                    <div class="security-item">
+                        <i data-lucide="shield"></i>
+                        <div><h4>AES-256 Encryption</h4><p>Data encrypted at rest and in transit</p></div>
+                    </div>
+                </div>
+                
+                <div class="glass" style="padding:2rem;">
+                    <h3 style="font-size:1.125rem;font-weight:600;margin-bottom:1.5rem;">Performance Metrics</h3>
+                    
+                    <div class="metric-row">
+                        <div class="metric-header"><span>API Response Time</span><span class="metric-value">&lt; 100ms</span></div>
+                        <div class="progress-bar"><div class="progress-fill" style="width:95%;"></div></div>
+                    </div>
+                    <div class="metric-row">
+                        <div class="metric-header"><span>System Uptime</span><span class="metric-value">99.99%</span></div>
+                        <div class="progress-bar"><div class="progress-fill" style="width:99.99%;"></div></div>
+                    </div>
+                    <div class="metric-row">
+                        <div class="metric-header"><span>Data Freshness</span><span class="metric-value">&lt; 5 min</span></div>
+                        <div class="progress-bar"><div class="progress-fill" style="width:98%;"></div></div>
+                    </div>
+                    <div class="metric-row">
+                        <div class="metric-header"><span>Prediction Accuracy</span><span class="metric-value">94.2%</span></div>
+                        <div class="progress-bar"><div class="progress-fill" style="width:94.2%;"></div></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- CTA -->
+        <section class="cta-section">
+            <div class="cta-card glass">
+                <div class="cta-icon"><i data-lucide="settings" style="width:56px;height:56px;"></i></div>
+                <h2>Ready to Integrate?</h2>
+                <p>Get started with our REST APIs or explore pre-built connectors for your technology stack.</p>
+                <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:1rem;">
+                                <button class="cc-theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path></svg></button>
+            <a href="./cc-app/" class="btn btn-primary">Start Integration <i data-lucide="arrow-right" style="width:18px;height:18px;"></i></a>
+                    <a href="./support.html" class="btn btn-outline">Contact Sales</a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer><p>&copy; 2026 AI Supply Chain Advanced. All rights reserved. | <a href="./support.html">Support</a></p></footer>
+
+    <script>    lucide.createIcons();
+
+    function toggleTheme() {
+        var current = document.documentElement.getAttribute('data-theme');
+        var next = current === 'light' ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-theme', next);
+        localStorage.setItem('theme', next);
+        document.querySelectorAll('.cc-theme-toggle').forEach(function(btn) {
+            btn.innerHTML = next === 'dark' ? '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path></svg>' : '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path></svg>';
+        });
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+    document.addEventListener('DOMContentLoaded', function() {
+        var saved = localStorage.getItem('theme') || 'dark';
+        document.documentElement.setAttribute('data-theme', saved);
+        document.querySelectorAll('.cc-theme-toggle').forEach(function(btn) {
+            btn.innerHTML = saved === 'dark' ? '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path></svg>' : '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path></svg>';
+        });
+    });</script>
+</body>
+</html>

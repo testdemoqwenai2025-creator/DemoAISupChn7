@@ -1,0 +1,1035 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Platform Architecture | Enterprise AI Supply Chain Infrastructure</title>
+    <meta name="description" content="Enterprise-grade platform architecture with microservices, API integrations, security, and scalability for global supply chain operations.">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        :root {
+            --bg-primary: #0a0f1c; --bg-secondary: #111827; --bg-tertiary: #1f2937;
+            --text-primary: #f9fafb; --text-secondary: #9ca3af; --text-muted: #6b7280;
+            --accent-1: #6366f1; --accent-2: #06b6d4; --accent-3: #10b981;
+            --accent-4: #f59e0b; --accent-5: #ef4444; --accent-6: #8b5cf6;
+            --glass-bg: rgba(255,255,255,0.03); --glass-border: rgba(255,255,255,0.08);
+            --shadow-glow: 0 0 60px rgba(99,102,241,0.15);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        [data-theme="light"] {
+            --bg-primary: #ffffff; --bg-secondary: #f9fafb; --bg-tertiary: #e5e7eb;
+            --text-primary: #111827; --text-secondary: #4b5563; --text-muted: #9ca3af;
+            --glass-bg: rgba(0,0,0,0.02); --glass-border: rgba(0,0,0,0.08);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary); color: var(--text-primary);
+            min-height: 100vh; overflow-x: hidden;
+            transition: var(--transition);
+        }
+
+        .bg-animation { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+        .bg-orb { position: absolute; border-radius: 50%; filter: blur(100px); opacity: 0.12; animation: float 20s ease-in-out infinite; }
+        .bg-orb-1 { width: 600px; height: 600px; top: -200px; right: -200px; background: var(--accent-2); }
+        .bg-orb-2 { width: 500px; height: 500px; bottom: -150px; left: -150px; background: var(--accent-1); animation-delay: -5s; }
+        .bg-orb-3 { width: 400px; height: 400px; top: 40%; left: 40%; background: var(--accent-3); animation-delay: -10s; }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(30px, -30px) scale(1.05); }
+            66% { transform: translate(-20px, 20px) scale(0.95); }
+        }
+
+        header {
+            position: sticky; top: 0; z-index: 100;
+            backdrop-filter: blur(20px); background: rgba(10,15,28,0.8);
+            border-bottom: 1px solid var(--glass-border);
+        }
+        [data-theme="light"] header { background: rgba(255,255,255,0.9); }
+
+        .header-content {
+            max-width: 1920px; margin: 0 auto; padding: 0 2rem; height: 70px;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+
+        .logo-section { display: flex; align-items: center; gap: 12px; text-decoration: none; color: inherit; }
+        .logo-icon {
+            width: 44px; height: 44px; border-radius: 12px;
+            background: linear-gradient(135deg, var(--accent-2), var(--accent-3));
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 4px 20px rgba(6,182,212,0.4);
+        }
+        .logo-text h1 { font-size: 18px; font-weight: 700; background: linear-gradient(90deg, var(--accent-2), var(--accent-3)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .logo-text p { font-size: 11px; color: var(--text-secondary); }
+
+        nav { display: flex; gap: 4px; }
+        nav a {
+            padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 500;
+            text-decoration: none; transition: var(--transition); color: var(--text-secondary);
+        }
+        nav a:hover { background: var(--glass-bg); color: var(--text-primary); }
+        nav a.active {
+            background: linear-gradient(135deg, var(--accent-2), var(--accent-3));
+            color: white; box-shadow: 0 4px 15px rgba(6,182,212,0.35);
+        }
+
+        .header-actions { display: flex; align-items: center; gap: 12px; }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 10px 20px; border-radius: 10px; font-size: 14px; font-weight: 600;
+            cursor: pointer; transition: var(--transition); text-decoration: none;
+            border: none; font-family: inherit;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-2), var(--accent-3));
+            color: white; box-shadow: 0 4px 15px rgba(6,182,212,0.3);
+        }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 25px rgba(6,182,212,0.45); }
+        .btn-secondary {
+            background: var(--glass-bg); color: var(--text-primary);
+            border: 1px solid var(--glass-border);
+        }
+        .btn-sm { padding: 8px 16px; font-size: 13px; }
+
+        /* ===== SUPER VISIBLE THEME TOGGLE ===== */
+        .theme-toggle { 
+            width: auto; min-width: 120px; height: 44px; 
+            background: linear-gradient(135deg, #6366f1, #06b6d4) !important;
+            border: 3px solid rgba(255,255,255,0.3) !important; 
+            border-radius: 22px !important;
+            cursor: pointer; transition: all 0.3s ease !important; 
+            display: flex !important; align-items: center; justify-content: center;
+            padding: 0 18px !important; gap: 10px !important;
+            box-shadow: 0 4px 20px rgba(99,102,241,0.5), 0 0 40px rgba(99,102,241,0.2) !important;
+            position: relative;
+            animation: pulse-glow 2s ease-in-out infinite !important;
+            z-index: 1000 !important;
+        }
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 4px 20px rgba(99,102,241,0.5), 0 0 40px rgba(99,102,241,0.2); }
+            50% { box-shadow: 0 4px 30px rgba(99,102,241,0.7), 0 0 60px rgba(99,102,241,0.4); }
+        }
+        .theme-toggle:hover { 
+            transform: translateY(-3px) scale(1.05) !important;
+            box-shadow: 0 8px 35px rgba(99,102,241,0.7), 0 0 70px rgba(99,102,241,0.5) !important;
+            background: linear-gradient(135deg, #7c3aed, #0891b2) !important;
+        }
+        .toggle-thumb {
+            width: 26px; height: 26px; border-radius: 50% !important;
+            background: rgba(255,255,255,0.95) !important;
+            display: flex !important; align-items: center; justify-content: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2) !important;
+        }
+        .toggle-thumb svg, .toggle-thumb i { 
+            width: 16px !important; height: 16px !important; 
+            color: #6366f1 !important; 
+        }
+        .theme-toggle-label {
+            font-size: 13px !important; font-weight: 800 !important; 
+            color: #ffffff !important;
+            text-transform: uppercase !important; letter-spacing: 1px !important;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.3) !important;
+        }
+        
+        /* Light mode toggle styling */
+        [data-theme="light"] .theme-toggle {
+            background: linear-gradient(135deg, #f59e0b, #ef4444) !important;
+            box-shadow: 0 4px 20px rgba(245,158,11,0.5), 0 0 40px rgba(245,158,11,0.2) !important;
+        }
+        [data-theme="light"] .theme-toggle:hover {
+            background: linear-gradient(135deg, #d97706, #dc2626) !important;
+            box-shadow: 0 8px 35px rgba(245,158,11,0.7), 0 0 70px rgba(245,158,11,0.5) !important;
+        }
+
+        main { position: relative; z-index: 1; max-width: 1400px; margin: 0 auto; padding: 2rem; }
+
+        /* Page Navigation */
+        .page-nav-buttons { display: flex; gap: 10px; margin-bottom: 1rem; }
+        .page-nav-buttons .btn {
+            display: inline-flex; align-items: center; gap: 6px;
+            font-size: 13px; padding: 8px 16px; border-radius: 8px;
+            transition: var(--transition); text-decoration: none;
+        }
+        .page-nav-buttons .btn:hover {
+            transform: translateY(-2px); box-shadow: 0 4px 12px rgba(99,102,241,0.3);
+        }
+
+        /* Hero Section */
+        .hero { text-align: center; padding: 4rem 2rem; }
+        .badge {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 8px 20px; border-radius: 50px;
+            background: rgba(6,182,212,0.1); border: 1px solid rgba(6,182,212,0.3);
+            font-size: 13px; font-weight: 600; color: var(--accent-2);
+            margin-bottom: 1.5rem;
+        }
+        .hero h1 { font-size: 3.5rem; font-weight: 900; line-height: 1.1; margin-bottom: 1.5rem; }
+        .gradient-text { background: linear-gradient(135deg, var(--accent-2), var(--accent-3)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .hero p { font-size: 1.25rem; color: var(--text-secondary); max-width: 700px; margin: 0 auto 2rem; line-height: 1.7; }
+
+        /* Glass Card */
+        .glass {
+            background: var(--bg-secondary); border: 1px solid var(--glass-border);
+            border-radius: 20px; padding: 2rem; transition: var(--transition);
+        }
+        .glass:hover { transform: translateY(-5px); border-color: rgba(6,182,212,0.3); box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+
+        /* Section Title */
+        .section-title { font-size: 2rem; font-weight: 800; text-align: center; margin: 4rem 0 2rem; }
+
+        /* Architecture Diagram */
+        .architecture-section { margin-top: 3rem; }
+        .arch-diagram {
+            background: var(--bg-secondary); border: 1px solid var(--glass-border);
+            border-radius: 24px; padding: 3rem; position: relative;
+        }
+        
+        .arch-layer {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem; margin-bottom: 2rem;
+        }
+        
+        .arch-component {
+            background: var(--bg-tertiary); border: 1px solid var(--glass-border);
+            border-radius: 16px; padding: 1.5rem; text-align: center;
+            transition: var(--transition); position: relative;
+        }
+        .arch-component:hover {
+            transform: translateY(-5px); border-color: var(--accent-2);
+            box-shadow: 0 10px 40px rgba(6,182,212,0.2);
+        }
+        .arch-icon {
+            width: 56px; height: 56px; border-radius: 14px; margin: 0 auto 1rem;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .arch-component h3 { font-size: 1rem; font-weight: 700; margin-bottom: 0.5rem; }
+        .arch-component p { font-size: 13px; color: var(--text-secondary); }
+
+        .layer-label {
+            position: absolute; left: -120px; top: 50%; transform: translateY(-50%);
+            writing-mode: vertical-rl; text-orientation: mixed;
+            font-size: 11px; font-weight: 700; letter-spacing: 2px;
+            color: var(--text-secondary); text-transform: uppercase;
+        }
+
+        /* Integration Cards */
+        .integrations-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 2rem; }
+        .integration-card {
+            background: var(--bg-secondary); border: 1px solid var(--glass-border);
+            border-radius: 20px; padding: 2rem; transition: var(--transition);
+        }
+        .integration-card:hover { transform: translateY(-5px); border-color: var(--accent-1); }
+        .integration-icon {
+            width: 64px; height: 64px; border-radius: 16px; margin-bottom: 1.25rem;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .integration-card h3 { font-size: 1.25rem; font-weight: 700; margin-bottom: 0.75rem; }
+        .integration-card p { color: var(--text-secondary); font-size: 14px; line-height: 1.7; margin-bottom: 1rem; }
+        .integration-status {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 6px 14px; border-radius: 8px; font-size: 12px; font-weight: 600;
+        }
+        .status-connected { background: rgba(16,185,129,0.1); color: var(--accent-3); }
+        .status-pending { background: rgba(245,158,11,0.1); color: var(--accent-4); }
+
+        /* Tech Stack */
+        .tech-stack { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 2rem; }
+        .tech-item {
+            padding: 12px 24px; border-radius: 12px;
+            background: var(--bg-secondary); border: 1px solid var(--glass-border);
+            font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 8px;
+            transition: var(--transition);
+        }
+        .tech-item:hover { border-color: var(--accent-2); transform: translateY(-2px); }
+
+        /* Security Features */
+        .security-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-top: 2rem; }
+        .security-card {
+            background: var(--bg-secondary); border: 1px solid var(--glass-border);
+            border-radius: 16px; padding: 1.75rem; transition: var(--transition);
+        }
+        .security-card:hover { border-color: var(--accent-3); }
+        .security-icon {
+            width: 48px; height: 48px; border-radius: 12px; margin-bottom: 1rem;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .security-card h3 { font-size: 1.1rem; font-weight: 700; margin-bottom: 0.5rem; }
+        .security-card p { font-size: 13px; color: var(--text-secondary); line-height: 1.6; }
+
+        /* Stats Bar */
+        .stats-bar {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem; margin-top: 3rem; padding: 2rem;
+            background: var(--bg-secondary); border: 1px solid var(--glass-border);
+            border-radius: 20px;
+        }
+        .stat-item { text-align: center; }
+        .stat-value { font-size: 2.5rem; font-weight: 900; margin-bottom: 0.25rem; }
+        .stat-label { font-size: 13px; color: var(--text-secondary); }
+
+        /* AI Chat Widget */
+        .ai-chat-widget { position: fixed; bottom: 30px; right: 30px; z-index: 1000; }
+        .chat-button {
+            width: 64px; height: 64px; border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent-2), var(--accent-3));
+            border: none; color: white; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 8px 32px rgba(6,182,212,0.5);
+            transition: var(--transition); animation: chatPulse 3s ease-in-out infinite;
+        }
+        @keyframes chatPulse {
+            0%, 100% { box-shadow: 0 8px 32px rgba(6,182,212,0.5); }
+            50% { box-shadow: 0 8px 48px rgba(16,185,129,0.7); }
+        }
+        .chat-button:hover { transform: scale(1.1); }
+
+        .chat-window {
+            position: absolute; bottom: 80px; right: 0;
+            width: 420px; height: 560px;
+            background: var(--bg-secondary); border: 1px solid var(--glass-border);
+            border-radius: 24px; display: none; flex-direction: column;
+            overflow: hidden; box-shadow: 0 25px 80px rgba(0,0,0,0.5);
+            animation: slideUp 0.3s ease;
+        }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .chat-window.open { display: flex; }
+
+        .chat-header {
+            padding: 1.25rem; background: linear-gradient(135deg, var(--accent-2), var(--accent-3));
+            color: white; display: flex; align-items: center; gap: 12px;
+        }
+        .chat-avatar {
+            width: 40px; height: 40px; border-radius: 50%;
+            background: rgba(255,255,255,0.2); display: flex;
+            align-items: center; justify-content: center;
+        }
+        .chat-info h3 { font-size: 15px; font-weight: 700; }
+        .chat-info p { font-size: 12px; opacity: 0.9; }
+        .chat-close { margin-left: auto; background: none; border: none; color: white; cursor: pointer; opacity: 0.8; }
+        .chat-close:hover { opacity: 1; }
+
+        .chat-messages { flex: 1; overflow-y: auto; padding: 1.25rem; display: flex; flex-direction: column; gap: 1rem; }
+        .message { max-width: 85%; padding: 12px 16px; border-radius: 16px; font-size: 14px; line-height: 1.5; }
+        .message.ai { background: var(--bg-tertiary); border: 1px solid var(--glass-border); align-self: flex-start; border-bottom-left-radius: 4px; }
+        .message.user { background: linear-gradient(135deg, var(--accent-2), var(--accent-3)); color: white; align-self: flex-end; border-bottom-right-radius: 4px; }
+
+        .chat-input-area { padding: 1rem; border-top: 1px solid var(--glass-border); display: flex; gap: 10px; }
+        .chat-input {
+            flex: 1; padding: 12px 16px; border-radius: 12px;
+            background: var(--bg-tertiary); border: 1px solid var(--glass-border);
+            color: var(--text-primary); font-size: 14px; font-family: inherit;
+        }
+        .chat-send {
+            width: 48px; height: 48px; border-radius: 12px;
+            background: linear-gradient(135deg, var(--accent-2), var(--accent-3));
+            border: none; color: white; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: var(--transition);
+        }
+        .chat-send:hover { transform: scale(1.05); }
+
+        /* Animations */
+        .animate-in { opacity: 0; transform: translateY(20px); animation: fadeInUp 0.6s ease forwards; }
+        @keyframes fadeInUp { to { opacity: 1; transform: translateY(0); } }
+
+        /* Toast */
+        .toast {
+            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+            padding: 14px 28px; border-radius: 12px; color: white;
+            font-size: 14px; font-weight: 600; z-index: 10000;
+            animation: toastIn 0.3s ease;
+        }
+        @keyframes toastIn { from { opacity: 0; transform: translateX(-50%) translateY(20px); } }
+        .toast-success { background: var(--accent-3); }
+        .toast-error { background: var(--accent-5); }
+        .toast-info { background: var(--accent-2); }
+
+        footer {
+            text-align: center; padding: 3rem 2rem; color: var(--text-secondary);
+            border-top: 1px solid var(--glass-border); margin-top: 4rem;
+        }
+        footer a { color: var(--accent-2); text-decoration: none; }
+
+        @media (max-width: 768px) { nav { display: none; } main { padding: 1rem; } .hero h1 { font-size: 2.5rem; } }
+        /* ===== FLOATING THEME TOGGLE (ALWAYS VISIBLE) ===== */
+        .floating-theme-toggle {
+            position: fixed !important;
+            bottom: 30px !important;
+            right: 30px !important;
+            z-index: 99999 !important;
+            background: linear-gradient(135deg, #6366f1, #06b6d4) !important;
+            color: white !important;
+            border: 4px solid rgba(255,255,255,0.5) !important;
+            padding: 18px 32px !important;
+            border-radius: 50px !important;
+            font-size: 18px !important;
+            font-weight: 900 !important;
+            cursor: pointer !important;
+            display: flex !important;
+            align-items: center !important;
+            gap: 12px !important;
+            box-shadow: 
+                0 8px 32px rgba(99,102,241,0.6),
+                0 0 80px rgba(99,102,241,0.4),
+                inset 0 2px 10px rgba(255,255,255,0.2) !important;
+            transition: all 0.3s ease !important;
+            animation: float-pulse 2.5s ease-in-out infinite !important;
+            text-transform: uppercase !important;
+            letter-spacing: 2px !important;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+        }
+        
+        @keyframes float-pulse {
+            0%, 100% { 
+                transform: translateY(0) scale(1); 
+                box-shadow: 
+                    0 8px 32px rgba(99,102,241,0.6),
+                    0 0 80px rgba(99,102,241,0.4);
+            }
+            50% { 
+                transform: translateY(-8px) scale(1.03); 
+                box-shadow: 
+                    0 12px 40px rgba(99,102,241,0.8),
+                    0 0 100px rgba(99,102,241,0.6);
+            }
+        }
+        
+        .floating-theme-toggle:hover {
+            transform: translateY(-12px) scale(1.08) !important;
+            box-shadow: 
+                0 16px 50px rgba(99,102,241,0.9),
+                0 0 120px rgba(99,102,241,0.7) !important;
+            background: linear-gradient(135deg, #7c3aed, #0891b2) !important;
+        }
+        
+        [data-theme="light"] .floating-theme-toggle {
+            background: linear-gradient(135deg, #f59e0b, #ef4444) !important;
+            box-shadow: 
+                0 8px 32px rgba(245,158,11,0.6),
+                0 0 80px rgba(245,158,11,0.4) !important;
+        }
+        
+        [data-theme="light"] .floating-theme-toggle:hover {
+            background: linear-gradient(135deg, #d97706, #dc2626) !important;
+            box-shadow: 
+                0 16px 50px rgba(245,158,11,0.9),
+                0 0 120px rgba(245,158,11,0.7) !important;
+        }
+        
+        .floating-toggle-icon {
+            font-size: 24px !important;
+            animation: icon-spin 3s linear infinite;
+        }
+        
+        @keyframes icon-spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Mobile adjustment */
+        @media (max-width: 768px) {
+            .floating-theme-toggle {
+                bottom: 20px !important;
+                right: 20px !important;
+                padding: 14px 24px !important;
+                font-size: 14px !important;
+            }
+            .floating-toggle-icon {
+                font-size: 20px !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 🔴 FLOATING THEME TOGGLE (ALWAYS VISIBLE) -->
+    <button class="floating-theme-toggle" onclick="toggleTheme()" id="floatingToggle" aria-label="Toggle dark and light mode">
+        <span class="floating-toggle-icon" id="floatingIcon">🌙</span>
+        <span id="floatingText">☀️ LIGHT MODE</span>
+    </button>
+    <div class="bg-animation"><div class="bg-orb bg-orb-1"></div><div class="bg-orb bg-orb-2"></div><div class="bg-orb bg-orb-3"></div></div>
+
+    <header>
+        <div class="header-content">
+            <a href="./index.html" class="logo-section">
+                <div class="logo-icon"><i data-lucide="server" style="width:24px;height:24px;color:white;"></i></div>
+                <div class="logo-text"><h1>AI Supply Chain</h1><p>Platform Infrastructure</p></div>
+            </a>
+            <nav>
+                <a href="./index.html">Home</a>
+                <a href="./about.html">About</a>
+                <a href="./command-center.html">Command Center ⭐</a>
+                <a href="./dashboard.html">Dashboard</a>
+                <a href="./intelligence.html">Intelligence</a>
+                <a href="./platform.html" class="active">Platform</a>
+                <a href="./product.html">Product</a>
+                <a href="./customers.html">Customers</a>
+                <a href="./support.html">Support</a>
+            </nav>
+            <div class="header-actions">
+                <button class="theme-toggle" data-tooltip="🌙 Toggle Dark/Light Mode ☀️" onclick="toggleTheme()" aria-label="Toggle dark and light mode">
+                    <div class="toggle-thumb"><i data-lucide="moon" style="width:16px;height:16px;color:#6366f1"></i></div>
+                    <span class="theme-toggle-label">☀️ LIGHT</span>
+                </button>
+                <a href="./command-center.html" class="btn btn-primary btn-sm">Launch App</a>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <!-- Navigation Buttons -->
+        <div class="page-nav-buttons animate-in">
+            <button onclick="window.history.back()" class="btn btn-secondary btn-sm">
+                <i data-lucide="arrow-left" style="width:16px;"></i> Back
+            </button>
+            <a href="./index.html" class="btn btn-primary btn-sm">
+                <i data-lucide="home" style="width:16px;"></i> Home
+            </a>
+        </div>
+
+        <!-- Hero -->
+        <section class="hero animate-in">
+            <div class="badge"><i data-lucide="layers" style="width:16px;height:16px;"></i> Enterprise Platform v3.0</div>
+            <h1>Scalable <span class="gradient-text">Infrastructure</span></h1>
+            <p>Built for global enterprises. Microservices architecture, real-time processing, and enterprise-grade security at scale.</p>
+            
+            <div class="tech-badges" style="display:flex;justify-content:center;gap:12px;flex-wrap:wrap;">
+                <span class="tech-badge">☁️ Cloud-Native</span>
+                <span class="tech-badge">🔒 SOC 2 Type II</span>
+                <span class="tech-badge">⚡ 99.99% Uptime</span>
+                <span class="tech-badge">🌍 Global CDN</span>
+            </div>
+        </section>
+
+        <!-- Architecture Diagram -->
+        <section class="architecture-section">
+            <h2 class="section-title">System Architecture</h2>
+            
+            <div class="arch-diagram animate-in">
+                <!-- Presentation Layer -->
+                <div style="margin-bottom:2rem;">
+                    <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:var(--accent-2);margin-bottom:1rem;">Presentation Layer</div>
+                    <div class="arch-layer">
+                        <div class="arch-component">
+                            <div class="arch-icon" style="background:rgba(99,102,241,0.1)">
+                                <i data-lucide="monitor" style="width:28px;color:#6366f1"></i>
+                            </div>
+                            <h3>Web Dashboard</h3>
+                            <p>React-based UI</p>
+                        </div>
+                        <div class="arch-component">
+                            <div class="arch-icon" style="background:rgba(139,92,246,0.1)">
+                                <i data-lucide="smartphone" style="width:28px;color:#8b5cf6"></i>
+                            </div>
+                            <h3>Mobile Apps</h3>
+                            <p>iOS & Android</p>
+                        </div>
+                        <div class="arch-component">
+                            <div class="arch-icon" style="background:rgba(236,72,153,0.1)">
+                                <i data-lucide="code-2" style="width:28px;color:#ec4899"></i>
+                            </div>
+                            <h3>API Gateway</h3>
+                            <p>REST & GraphQL</p>
+                        </div>
+                        <div class="arch-component">
+                            <div class="arch-icon" style="background:rgba(6,182,212,0.1)">
+                                <i data-lucide="plug" style="width:28px;color:#06b6d4"></i>
+                            </div>
+                            <h3>Webhooks</h3>
+                            <p>Event-driven</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Arrow -->
+                <div style="text-align:center;margin:1rem 0;">
+                    <i data-lucide="chevron-down" style="width:32px;height:32px;color:var(--text-muted)"></i>
+                </div>
+
+                <!-- Application Layer -->
+                <div style="margin-bottom:2rem;">
+                    <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:var(--accent-6);margin-bottom:1rem;">Application Layer</div>
+                    <div class="arch-layer">
+                        <div class="arch-component">
+                            <div class="arch-icon" style="background:rgba(139,92,246,0.1)">
+                                <i data-lucide="brain" style="width:28px;color:#8b5cf6"></i>
+                            </div>
+                            <h3>AI/ML Engine</h3>
+                            <p>PyTorch & TensorFlow</p>
+                        </div>
+                        <div class="arch-component">
+                            <div class="arch-icon" style="background:rgba(16,185,129,0.1)">
+                                <i data-lucide="database" style="width:28px;color:#10b981"></i>
+                            </div>
+                            <h3>Data Processing</h3>
+                            <p>Apache Spark</p>
+                        </div>
+                        <div class="arch-component">
+                            <div class="arch-icon" style="background:rgba(245,158,11,0.1)">
+                                <i data-lucide="bell-ring" style="width:28px;color:#f59e0b"></i>
+                            </div>
+                            <h3>Alert System</h3>
+                            <p>Real-time notifications</p>
+                        </div>
+                        <div class="arch-component">
+                            <div class="arch-icon" style="background:rgba(239,68,68,0.1)">
+                                <i data-lucide="shield-check" style="width:28px;color:#ef4444"></i>
+                            </div>
+                            <h3>Auth Service</h3>
+                            <p>OAuth 2.0 / SSO</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Arrow -->
+                <div style="text-align:center;margin:1rem 0;">
+                    <i data-lucide="chevron-down" style="width:32px;height:32px;color:var(--text-muted)"></i>
+                </div>
+
+                <!-- Data Layer -->
+                <div>
+                    <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:var(--accent-3);margin-bottom:1rem;">Data Layer</div>
+                    <div class="arch-layer">
+                        <div class="arch-component">
+                            <div class="arch-icon" style="background:rgba(16,185,129,0.1)">
+                                <i data-lucide="database" style="width:28px;color:#10b981"></i>
+                            </div>
+                            <h3>PostgreSQL</h3>
+                            <p>Primary database</p>
+                        </div>
+                        <div class="arch-component">
+                            <div class="arch-icon" style="background:rgba(239,68,68,0.1)">
+                                <i data-lucide="flame" style="width:28px;color:#ef4444"></i>
+                            </div>
+                            <h3>Redis Cache</h3>
+                            <p>In-memory store</p>
+                        </div>
+                        <div class="arch-component">
+                            <div class="arch-icon" style="background:rgba(6,182,212,0.1)">
+                                <i data-lucide="cloud" style="width:28px;color:#06b6d4"></i>
+                            </div>
+                            <h3>S3 Storage</h3>
+                            <p>Object storage</p>
+                        </div>
+                        <div class="arch-component">
+                            <div class="arch-icon" style="background:rgba(139,92,246,0.1)">
+                                <i data-lucide="search" style="width:28px;color:#8b5cf6"></i>
+                            </div>
+                            <h3>Elasticsearch</h3>
+                            <p>Search & analytics</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Integrations -->
+        <section id="integrations">
+            <h2 class="section-title">Enterprise Integrations</h2>
+            
+            <div class="integrations-grid">
+                <div class="integration-card animate-in">
+                    <div class="integration-icon" style="background:rgba(255,193,7,0.1)">
+                        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/sap/sap-original.svg" alt="SAP" style="width:32px;height:32px">
+                    </div>
+                    <h3>SAP S/4HANA</h3>
+                    <p>Real-time synchronization of purchase orders, invoices, and material master data.</p>
+                    <span class="integration-status status-connected">
+                        <span style="width:8px;height:8px;background:currentColor;border-radius:50%;display:inline-block"></span>
+                        Connected
+                    </span>
+                </div>
+
+                <div class="integration-card animate-in">
+                    <div class="integration-icon" style="background:rgba(0,119,182,0.1)">
+                        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/salesforce/salesforce-original.svg" alt="Salesforce" style="width:32px;height:32px">
+                    </div>
+                    <h3>Salesforce</h3>
+                    <p>Bi-directional sync for supplier relationships and CRM data integration.</p>
+                    <span class="integration-status status-connected">
+                        <span style="width:8px;height:8px;background:currentColor;border-radius:50%;display:inline-block"></span>
+                        Connected
+                    </span>
+                </div>
+
+                <div class="integration-card animate-in">
+                    <div class="integration-icon" style="background:rgba(0,136,206,0.1)">
+                        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/workday/workday-original.svg" alt="Workday" style="width:32px;height:32px">
+                    </div>
+                    <h3>Workday</h3>
+                    <p>HCM and procurement workflow automation with approval routing.</p>
+                    <span class="integration-status status-pending">
+                        <span style="width:8px;height:8px;background:currentColor;border-radius:50%;display:inline-block"></span>
+                        Pending Setup
+                    </span>
+                </div>
+
+                <div class="integration-card animate-in">
+                    <div class="integration-icon" style="background:rgba(66,133,244,0.1)">
+                        <i data-lucide="google-drive" style="width:32px;height:32px;color:#4285F4"></i>
+                    </div>
+                    <h3>Google Workspace</h3>
+                    <p>Document collaboration, Sheets integration, and automated reporting.</p>
+                    <span class="integration-status status-connected">
+                        <span style="width:8px;height:8px;background:currentColor;border-radius:50%;display:inline-block"></span>
+                        Connected
+                    </span>
+                </div>
+
+                <div class="integration-card animate-in">
+                    <div class="integration-icon" style="background:rgba(88,101,242,0.1)">
+                        <i data-lucide="slack" style="width:32px;height:32px;color:#5865F2"></i>
+                    </div>
+                    <h3>Slack / Teams</h3>
+                    <p>Real-time alerts, approval requests, and team notifications.</p>
+                    <span class="integration-status status-connected">
+                        <span style="width:8px;height:8px;background:currentColor;border-radius:50%;display:inline-block"></span>
+                        Connected
+                    </span>
+                </div>
+
+                <div class="integration-card animate-in">
+                    <div class="integration-icon" style="background:rgba(232,119,34,0.1)">
+                        <i data-lucide="package" style="width:32px;height:32px;color:#E87722"></i>
+                    </div>
+                    <h3>Custom ERP</h3>
+                    <p>RESTful APIs for seamless integration with any legacy or custom system.</p>
+                    <span class="integration-status status-pending">
+                        <span style="width:8px;height:8px;background:currentColor;border-radius:50%;display:inline-block"></span>
+                        Available
+                    </span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Security Features -->
+        <section id="security">
+            <h2 class="section-title">Enterprise Security</h2>
+            
+            <div class="security-grid">
+                <div class="security-card animate-in">
+                    <div class="security-icon" style="background:rgba(16,185,129,0.1)">
+                        <i data-lucide="shield-check" style="width:24px;color:#10b981"></i>
+                    </div>
+                    <h3>SOC 2 Type II Certified</h3>
+                    <p>Annual audits by independent third-party assessors ensure compliance with strict security standards.</p>
+                </div>
+
+                <div class="security-card animate-in">
+                    <div class="security-icon" style="background:rgba(99,102,241,0.1)">
+                        <i data-lucide="lock" style="width:24px;color:#6366f1"></i>
+                    </div>
+                    <h3>End-to-End Encryption</h3>
+                    <p>AES-256 encryption for data at rest and TLS 1.3 for all data in transit.</p>
+                </div>
+
+                <div class="security-card animate-in">
+                    <div class="security-icon" style="background:rgba(245,158,11,0.1)">
+                        <i data-lucide="user-check" style="width:24px;color:#f59e0b"></i>
+                    </div>
+                    <h3>SSO & MFA</h3>
+                    <p>Enterprise SSO support (SAML, Okta, Azure AD) with mandatory multi-factor authentication.</p>
+                </div>
+
+                <div class="security-card animate-in">
+                    <div class="security-icon" style="background:rgba(239,68,68,0.1)">
+                        <i data-lucide="file-search" style="width:24px;color:#ef4444"></i>
+                    </div>
+                    <h3>Audit Logging</h3>
+                    <p>Complete audit trail of all user actions, data access, and system changes with 7-year retention.</p>
+                </div>
+
+                <div class="security-card animate-in">
+                    <div class="security-icon" style="background:rgba(6,182,212,0.1)">
+                        <i data-lucide="globe" style="width:24px;color:#06b6d4"></i>
+                    </div>
+                    <h3>GDRP Compliant</h3>
+                    <p>Data residency options across EU, US, and APAC regions with full GDPR compliance.</p>
+                </div>
+
+                <div class="security-card animate-in">
+                    <div class="security-icon" style="background:rgba(139,92,246,0.1)">
+                        <i data-lucide="scan-line" style="width:24px;color:#8b5cf6"></i>
+                    </div>
+                    <h3>Penetration Testing</h3>
+                    <p>Quarterly penetration tests by leading cybersecurity firms with continuous vulnerability scanning.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Tech Stack -->
+        <section id="techstack">
+            <h2 class="section-title">Technology Stack</h2>
+            
+            <div class="tech-stack animate-in">
+                <div class="tech-item"><i data-lucide="container" style="width:16px;color:#3178C6"></i> Kubernetes</div>
+                <div class="tech-item"><i data-lucide="database" style="width:16px;color:#336791"></i> PostgreSQL</div>
+                <div class="tech-item"><i data-lucide="flame" style="width:16px;color:#DC382D"></i> Redis</div>
+                <div class="tech-item"><i data-lucide="cloud" style="width:16px;color:#FF9900"></i> AWS</div>
+                <div class="tech-item"><i data-lucide="brain" style="width:16px;color:#FF6F00"></i> PyTorch</div>
+                <div class="tech-item"><i data-lucide="code-2" style="width:16px;color:#61DAFB"></i> React</div>
+                <div class="tech-item"><i data-lucide="server" style="width:16px,color:#339933"></i> Node.js</div>
+                <div class="tech-item"><i data-lucide="search" style="width:16px;color:#005571"></i> Elasticsearch</div>
+                <div class="tech-item"><i data-lucide="git-branch" style="width:16px;color:#F05032"></i> GitLab CI/CD</div>
+                <div class="tech-item"><i data-lucide="bar-chart-3" style="width:16px;color:#FF6384"></i> Grafana</div>
+            </div>
+        </section>
+
+        <!-- Performance Stats -->
+        <div class="stats-bar animate-in">
+            <div class="stat-item">
+                <div class="stat-value" style="color:var(--accent-2)">99.99%</div>
+                <div class="stat-label">Uptime SLA</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" style="color:var(--accent-3)">&lt;50ms</div>
+                <div class="stat-label">API Response</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" style="color:var(--accent-6)">10PB+</div>
+                <div class="stat-label">Data Processed</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" style="color:var(--accent-4)">150+</div>
+                <div class="stat-label">API Endpoints</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" style="color:var(--accent-1)">42</div>
+                <div class="stat-label">Global Regions</div>
+            </div>
+        </div>
+    </main>
+
+    <!-- AI Chat Widget -->
+    <div class="ai-chat-widget">
+        <button class="chat-button" onclick="toggleAIChat()" aria-label="Open AI Chat">
+            <i data-lucide="message-circle" style="width:28px;height:28px"></i>
+        </button>
+        
+        <div class="chat-window" id="chatWindow">
+            <div class="chat-header">
+                <div class="chat-avatar"><i data-lucide="server" style="width:22px;height:22px"></i></div>
+                <div class="chat-info">
+                    <h3>Platform Expert</h3>
+                    <p>Architecture, integrations, security</p>
+                </div>
+                <button class="chat-close" onclick="toggleAIChat()"><i data-lucide="x" style="width:20px;height:20px"></i></button>
+            </div>
+            
+            <div class="chat-messages" id="chatMessages">
+                <div class="message ai">
+                    Hello! I'm your Platform Architecture Expert. I can help you understand:
+                    <br><br>
+                    🏗️ **System Architecture** - How components work together<br>
+                    🔗 **Integrations** - Connect your existing systems<br>
+                    🔒 **Security** - Compliance and data protection<br>
+                    ⚡ **Performance** - Scalability and optimization<br><br>
+                    What would you like to know?
+                </div>
+            </div>
+            
+            <div class="chat-input-area">
+                <input type="text" class="chat-input" id="chatInput" placeholder="Ask about platform architecture..." onkeypress="if(event.key==='Enter')sendMessage()">
+                <button class="chat-send" onclick="sendMessage()"><i data-lucide="send" style="width:18px;height:18px"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <footer><p>&copy; 2026 AI Supply Chain Advanced. All rights reserved. | <a href="./support.html">Support</a></p></footer>
+
+    <script>
+        lucide.createIcons();
+
+        // Theme Toggle
+        function toggleTheme() {
+            console.log('🎨 toggleTheme() called!');
+            
+            const current = document.documentElement.getAttribute('data-theme');
+            const next = current === 'dark' ? 'light' : 'dark';
+            
+            document.documentElement.setAttribute('data-theme', next);
+            localStorage.setItem('theme', next);
+            
+            // Update floating button
+            const floatingIcon = document.getElementById('floatingIcon');
+            const floatingText = document.getElementById('floatingText');
+            
+            if (floatingIcon && floatingText) {
+                floatingIcon.textContent = next === 'dark' ? '🌙' : '☀️';
+                floatingText.textContent = next === 'dark' ? '☀️ LIGHT MODE' : '🌙 DARK MODE';
+            }
+            
+            // Update header toggle buttons if they exist
+            document.querySelectorAll('.toggle-thumb').forEach(thumb => {
+                thumb.innerHTML = next === 'dark' ? '<i data-lucide="moon" style="width:16px;height:16px;color:#6366f1"></i>' : '<i data-lucide="sun" style="width:16px;height:16px;color:#f59e0b"></i>';
+            });
+            
+            document.querySelectorAll('.theme-toggle-label').forEach(label => {
+                label.textContent = next === 'dark' ? '☀️ LIGHT' : '🌙 DARK';
+                label.style.color = '#ffffff';
+            });
+            
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+            
+            console.log(`✅ Theme switched to: ${next.toUpperCase()}`);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedTheme = localStorage.getItem('theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+        });
+        
+        // Initialize floating button state
+        window.addEventListener('DOMContentLoaded', () => {
+            const currentTheme = document.documentElement.getAttribute('data-theme') || 'dark';
+            const floatingIcon = document.getElementById('floatingIcon');
+            const floatingText = document.getElementById('floatingText');
+            
+            if (floatingIcon && floatingText) {
+                floatingIcon.textContent = currentTheme === 'dark' ? '🌙' : '☀️';
+                floatingText.textContent = currentTheme === 'dark' ? '☀️ LIGHT MODE' : '🌙 DARK MODE';
+            }
+            
+            console.log('✅ Floating toggle ready! Click bottom-right button.');
+        });
+
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        // AI Chat
+        let chatOpen = false;
+
+        function toggleAIChat() {
+            const chatWindow = document.getElementById('chatWindow');
+            chatOpen = !chatOpen;
+            chatWindow.classList.toggle('open', chatOpen);
+            if(chatOpen) document.getElementById('chatInput').focus();
+        }
+
+        const aiResponses = {
+            'api': `Our **API Architecture** is designed for enterprise scale:
+
+🔹 **RESTful API**: 150+ endpoints covering all features  
+🔹 **GraphQL**: Flexible queries for complex data needs  
+🔹 **Rate Limiting**: Tiered limits (1K-100K req/min)  
+🔹 **Authentication**: OAuth 2.0 + API Keys  
+🔹 **Documentation**: Interactive Swagger/OpenAPI docs  
+
+**Quick Start:**
+\`\`\`bash
+curl -X GET "https://api.aisupplychain.ai/v3/suppliers" \\
+  -H "Authorization: Bearer YOUR_TOKEN"
+\`\`\`
+
+Would you like specific endpoint examples?`,
+
+            'security': `**Enterprise Security Features:**
+
+🔒 **Encryption**
+• AES-256 at rest
+• TLS 1.3 in transit
+• Field-level encryption for PII
+
+🛡️ **Access Control**
+• Role-Based Access (RBAC)
+• Attribute-Based Access (ABAC)
+• IP allowlisting
+
+✅ **Compliance**
+• SOC 2 Type II
+• GDPR ready
+• HIPAA available
+
+📋 **Audit Logs**
+• All actions logged
+• 7-year retention
+• Real-time streaming to SIEM`,
+
+            'deploy': `**Deployment Options:**
+
+☁️ **Cloud (Recommended)**
+• AWS, Azure, GCP
+• Multi-region deployment
+• Auto-scaling enabled
+
+🏢 **On-Premise**
+• Private cloud support
+• Air-gapped option available
+• Dedicated infrastructure
+
+🚀 **Hybrid**
+• Edge computing nodes
+• Local data caching
+• Sync with cloud core
+
+**Typical Deployment Time:** 2-4 weeks
+**Support:** 24/7 enterprise SLA`,
+
+            'default': `I can help you understand our platform! Try asking about:
+
+🔗 **Integrations** - SAP, Salesforce, etc.
+🔐 **Security** - Compliance & encryption
+⚙️ **API** - Endpoints & authentication
+🚀 **Deployment** - Cloud, on-prem, hybrid
+📊 **Performance** - Scaling & optimization
+
+What would you like to explore?`
+        };
+
+        function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+            if(!message) return;
+
+            addMessage(message, 'user');
+            input.value = '';
+
+            setTimeout(() => {
+                let response = aiResponses.default;
+                const lowerMsg = message.toLowerCase();
+                
+                if(lowerMsg.includes('api') || lowerMsg.includes('endpoint')) response = aiResponses.api;
+                else if(lowerMsg.includes('security') || lowerMsg.includes('compliance')) response = aiResponses.security;
+                else if(lowerMsg.includes('deploy') || lowerMsg.includes('host')) response = aiResponses.deploy;
+                
+                addMessage(response, 'ai');
+            }, 800);
+        }
+
+        function addMessage(text, sender) {
+            const messagesContainer = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}`;
+            messageDiv.innerHTML = text.replace(/\n/g, '<br>');
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        // Scroll animations
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if(entry.isIntersecting) entry.target.classList.add('animated');
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.animate-in').forEach(el => observer.observe(el));
+    </script>
+</body>
+</html>

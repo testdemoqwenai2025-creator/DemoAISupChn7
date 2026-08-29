@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Help & Support | AI Supply Chain Advanced - FAQ, Resources, Contact</title>
+    <meta name="description" content="Find answers, connect with experts, and get help with AI Supply Chain platform. Access documentation, tutorials, and developer resources.">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary: #10B981; --secondary: #06B6D4; --accent: #8B5CF6;
+            --warning: #F59E0B; --danger: #EF4444; --success: #22C55E;
+            --dark: #0F172A; --dark-lighter: #1E293B;
+            --gray-100: #F1F5F9; --gray-200: #E2E8F0; --gray-300: #CBD5E1;
+            --gray-400: #94A3B8; --gray-500: #64748B; --gray-600: #475569;
+            --gradient-start: #059669; --gradient-end: #0891B2;
+        }
+        
+        body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: linear-gradient(135deg, var(--dark) 0%, var(--dark-lighter) 50%, var(--dark) 100%); color: white; min-height: 100vh; overflow-x: hidden; }
+        .bg-animation { position: fixed; inset: 0; overflow: hidden; pointer-events: none; z-index: 0; }
+        .bg-orb { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.15; animation: pulse 8s ease-in-out infinite; }
+        .bg-orb-1 { width: 500px; height: 500px; top: -100px; right: -100px; background: var(--primary); }
+        .bg-orb-2 { width: 400px; height: 400px; top: 50%; left: -100px; background: var(--secondary); animation-delay: 2s; }
+        .bg-orb-3 { width: 350px; height: 350px; bottom: -50px; right: 30%; background: var(--accent); animation-delay: 4s; }
+        @keyframes pulse { 0%, 100% { transform: scale(1); opacity: 0.15; } 50% { transform: scale(1.1); opacity: 0.25; } }
+        
+        header { position: sticky; top: 0; z-index: 100; backdrop-filter: blur(20px); background: rgba(15, 23, 42, 0.85); border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
+        .header-content { max-width: 1920px; margin: 0 auto; padding: 0 2rem; height: 64px; display: flex; align-items: center; justify-content: space-between; }
+        .logo-section { display: flex; align-items: center; gap: 12px; text-decoration: none; color: inherit; }
+        .logo-icon { width: 40px; height: 40px; border-radius: 12px; background: linear-gradient(135deg, var(--primary), var(--secondary)); display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 20px rgba(16, 185, 129, 0.35); }
+        .logo-text h1 { font-size: 18px; font-weight: 700; background: linear-gradient(90deg, var(--primary), var(--secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .logo-text p { font-size: 11px; color: var(--gray-400); }
+        
+        nav { display: flex; gap: 4px; flex-wrap: wrap; }
+        nav a { padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 500; text-decoration: none; transition: all 0.3s ease; color: var(--gray-300); white-space: nowrap; }
+        nav a:hover { background: rgba(255, 255, 255, 0.1); color: white; }
+        nav a.active { background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end)); color: white; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.35); }
+        .mobile-menu-btn { display: none; background: none; border: none; color: white; cursor: pointer; padding: 8px; }
+        
+        main { position: relative; z-index: 1; max-width: 1100px; margin: 0 auto; padding: 2rem; }
+        
+        .hero { text-align: center; padding: 4rem 0; border-bottom: 1px solid rgba(255, 255, 255, 0.1); margin-bottom: 2rem; }
+        .badge { display: inline-flex; align-items: center; gap: 6px; padding: 6px 16px; border-radius: 9999px; border: 1px solid rgba(255, 255, 255, 0.2); font-size: 13px; font-weight: 500; margin-bottom: 1.5rem; color: var(--secondary); }
+        h1 { font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 800; line-height: 1.1; margin-bottom: 1.5rem; }
+        .gradient-text { background: linear-gradient(90deg, var(--primary), var(--secondary), var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .hero p { font-size: 1.25rem; color: var(--gray-300); max-width: 600px; margin: 0 auto 2rem; line-height: 1.7; }
+        
+        /* Search */
+        .search-container { max-width: 550px; margin: 0 auto; position: relative; }
+        .search-box { display: flex; align-items: center; gap: 12px; padding: 16px 20px; background: rgba(30, 41, 59, 0.5); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 14px; backdrop-filter: blur(10px); }
+        .search-box input { flex: 1; background: transparent; border: none; outline: none; color: white; font-size: 16px; font-family: inherit; }
+        .search-box input::placeholder { color: var(--gray-500); }
+        
+        section { padding: 4rem 0; }
+        .section-title { font-size: 2rem; font-weight: 700; text-align: center; margin-bottom: 1rem; }
+        
+        .glass { background: rgba(30, 41, 59, 0.5); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px; padding: 2rem; transition: all 0.3s ease; cursor: pointer; }
+        .glass:hover { transform: translateY(-3px); border-color: rgba(16, 185, 129, 0.3); }
+        
+        /* Contact Options */
+        .contact-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.5rem; max-width: 850px; margin: 2rem auto 0; }
+        @media (max-width: 600px) { .contact-grid { grid-template-columns: 1fr; } }
+        
+        .contact-card { text-align: center; }
+        .contact-icon { width: 44px; height: 44px; margin: 0 auto 1rem; transition: transform 0.3s ease; }
+        .glass:hover .contact-icon { transform: scale(1.15); }
+        .contact-card h3 { font-size: 1.125rem; font-weight: 600; margin-bottom: 0.5rem; }
+        .contact-card p { font-size: 13px; color: var(--gray-400); margin-bottom: 1.25rem; }
+        
+        /* Resource Categories */
+        .resources-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.5rem; margin-top: 2rem; }
+        .resource-card { text-align: left; }
+        .resource-icon { width: 48px; height: 48px; border-radius: 12px; background: rgba(255, 255, 255, 0.04); display: flex; align-items: center; justify-content: center; margin-bottom: 1rem; transition: all 0.3s ease; }
+        .glass:hover .resource-icon { background: rgba(16, 185, 129, 0.1); }
+        .resource-card h3 { font-size: 1rem; font-weight: 600; margin-bottom: 0.5rem; }
+        .resource-card p { font-size: 13px; color: var(--gray-400); margin-bottom: 1rem; line-height: 1.5; }
+        .resource-links { list-style: none; }
+        .resource-links li { margin-bottom: 10px; }
+        .resource-links a { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--gray-400); text-decoration: none; transition: all 0.2s ease; }
+        .resource-links a:hover { color: var(--primary); }
+        .resource-links i { width: 14px; height: 14px; opacity: 0; margin-left: -22px; transition: all 0.2s ease; }
+        .resource-links a:hover i { opacity: 1; margin-left: 0; }
+        
+        /* FAQ */
+        .faq-list { max-width: 750px; margin: 2rem auto 0; }
+        .faq-item { margin-bottom: 1rem; cursor: pointer; transition: all 0.3s ease; }
+        .faq-item.active { border-color: var(--primary); }
+        .faq-question { display: flex; justify-content: space-between; align-items: center; font-weight: 600; font-size: 15px; }
+        .faq-arrow { transition: transform 0.3s ease; }
+        .faq-item.active .faq-arrow { transform: rotate(90deg); }
+        .faq-answer { margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(255, 255, 255, 0.06); font-size: 14px; color: var(--gray-400); line-height: 1.7; display: none; }
+        .faq-item.active .faq-answer { display: block; }
+        
+        /* Developer Section */
+        .dev-section { background: rgba(30, 41, 59, 0.5); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px; padding: 3rem; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 2rem; }
+        .dev-content h3 { font-size: 1.5rem; font-weight: 700; margin-bottom: 0.75rem; }
+        .dev-content p { color: var(--gray-400); max-width: 450px; line-height: 1.6; }
+        .dev-badge { display: inline-block; padding: 6px 14px; border-radius: 8px; font-size: 12px; font-weight: 600; background: rgba(139, 92, 246, 0.15); color: var(--accent); margin-bottom: 1rem; }
+        .dev-actions { display: flex; gap: 1rem; flex-wrap: wrap; }
+        
+        .btn { display: inline-flex; align-items: center; gap: 8px; padding: 12px 24px; border-radius: 10px; font-size: 14px; font-weight: 600; border: none; cursor: pointer; transition: all 0.3s ease; text-decoration: none; }
+        .btn-primary { background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end)); color: white; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.35); }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 25px rgba(16, 185, 129, 0.5); }
+        .btn-outline { background: transparent; border: 1px solid rgba(255, 255, 255, 0.2); color: white; }
+        .btn-outline:hover { background: rgba(255, 255, 255, 0.1); }
+        .btn-sm { padding: 10px 18px; font-size: 13px; }
+        
+        footer { position: relative; z-index: 1; border-top: 1px solid rgba(255, 255, 255, 0.1); padding: 2rem; text-align: center; color: var(--gray-500); font-size: 0.875rem; margin-top: 4rem; }
+        footer a { color: var(--primary); text-decoration: none; }
+        
+        @media (max-width: 1024px) {
+            nav { display: none; position: absolute; top: 64px; left: 0; right: 0; background: rgba(15, 23, 42, 0.95); padding: 1rem; flex-direction: column; }
+            nav.open { display: flex; } .mobile-menu-btn { display: block; } nav a { padding: 12px 16px; }
+        }
+        @media (max-width: 640px) { main { padding: 1rem; } .header-content { padding: 0 1rem; } h1 { font-size: 2rem; } .resources-grid { grid-template-columns: 1fr 1fr; } }
+
+        /* Light mode toggle styling */
+
+        /* Mobile adjustment */
+        @media (max-width: 768px) {
+        }
+            /* Elegant Theme Toggle (CC-consistent) */
+        .cc-theme-toggle {
+            width: 36px; height: 36px;
+            padding: 0; border-radius: 8px;
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.1);
+            color: var(--gray-400);
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+        }
+        .cc-theme-toggle:hover {
+            background: rgba(255,255,255,0.08);
+            color: var(--primary);
+            border-color: rgba(16,185,129,0.3);
+        }
+        .cc-theme-toggle svg { width: 16px; height: 16px; }
+
+        /* Light Theme */
+        [data-theme="light"] body {
+            background: linear-gradient(135deg, #F8FAFC 0%, #F1F5F9 50%, #F8FAFC 100%);
+            color: #1E293B;
+        }
+        [data-theme="light"] header {
+            background: rgba(248,250,252,0.9);
+            border-bottom-color: rgba(0,0,0,0.08);
+        }
+        [data-theme="light"] nav a { color: #64748B; }
+        [data-theme="light"] nav a:hover { background: rgba(0,0,0,0.05); color: #1E293B; }
+        [data-theme="light"] nav a.active { color: white; }
+        [data-theme="light"] .glass {
+            background: rgba(255,255,255,0.7);
+            border-color: rgba(0,0,0,0.08);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+        }
+        [data-theme="light"] .glass:hover {
+            border-color: rgba(16,185,129,0.3);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+        [data-theme="light"] .section-title,
+        [data-theme="light"] h1,
+        [data-theme="light"] h2,
+        [data-theme="light"] h3 { color: #0F172A; }
+        [data-theme="light"] .section-subtitle,
+        [data-theme="light"] .hero p,
+        [data-theme="light"] .team-card .bio,
+        [data-theme="light"] .value-card p,
+        [data-theme="light"] .contact-info li,
+        [data-theme="light"] .stat-label,
+        [data-theme="light"] .timeline-item p,
+        [data-theme="light"] .job-item { color: #475569; }
+        [data-theme="light"] .logo-text h1 {
+            background: linear-gradient(90deg, #059669, #0891B2);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        [data-theme="light"] .logo-text p { color: #94A3B8; }
+        [data-theme="light"] .badge {
+            color: #059669; border-color: rgba(0,0,0,0.12);
+            background: rgba(16,185,129,0.06);
+        }
+        [data-theme="light"] .gradient-text {
+            background: linear-gradient(90deg, #059669, #0891B2, #7C3AED);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        [data-theme="light"] .value-icon { background: rgba(16,185,129,0.08); }
+        [data-theme="light"] .job-item { background: rgba(0,0,0,0.02); }
+        [data-theme="light"] .btn-outline { border-color: rgba(0,0,0,0.15); color: #1E293B; }
+        [data-theme="light"] .btn-outline:hover { background: rgba(0,0,0,0.05); }
+        [data-theme="light"] .cc-theme-toggle {
+            color: #94A3B8;
+            border-color: rgba(0,0,0,0.1);
+        }
+        [data-theme="light"] .cc-theme-toggle:hover {
+            background: rgba(16,185,129,0.08);
+            color: #059669;
+            border-color: rgba(16,185,129,0.3);
+        }
+        [data-theme="light"] .bg-orb { opacity: 0.06; }
+        [data-theme="light"] footer { border-top-color: rgba(0,0,0,0.08); color: #94A3B8; }
+        [data-theme="light"] .social-link { border-color: rgba(0,0,0,0.12); color: #94A3B8; }
+        [data-theme="light"] .social-link:hover { background: rgba(16,185,129,0.1); border-color: #10B981; color: #10B981; }
+        [data-theme="light"] .team-card .role { color: #059669; }
+        [data-theme="light"] .timeline-year { background: rgba(16,185,129,0.08); color: #059669; }
+        [data-theme="light"] .job-badge { background: rgba(139,92,246,0.08); color: #7C3AED; }
+        [data-theme="light"] .stat-value {
+            background: linear-gradient(90deg, #059669, #0891B2);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        [data-theme="light"] .timeline-line { background: rgba(0,0,0,0.08); }
+        [data-theme="light"] .mobile-menu-btn { color: #334155; }
+        [data-theme="light"] nav.open { background: rgba(248,250,252,0.98); border-bottom: 1px solid rgba(0,0,0,0.08); }
+    </style>
+</head>
+<body>
+    <div class="bg-animation"><div class="bg-orb bg-orb-1"></div><div class="bg-orb bg-orb-2"></div><div class="bg-orb bg-orb-3"></div></div>
+
+    <header>
+        <div class="header-content">
+            <a href="./index.html" class="logo-section">
+                <div class="logo-icon"><i data-lucide="brain" style="width:24px;height:24px;color:white;"></i></div>
+                <div class="logo-text"><h1>AI Supply Chain</h1><p>Advanced Platform</p></div>
+            </a>
+            <button class="mobile-menu-btn" onclick="document.querySelector('nav').classList.toggle('open')"><i data-lucide="menu" style="width:24px;height:24px;"></i></button>
+            <nav>
+                <a href="./index.html">Home</a>
+                <a href="./about.html">About</a>
+                <a href="./cc-app/">Command Center ⭐</a>
+                <a href="./dashboard.html">Dashboard</a>
+                <a href="./intelligence.html">Intelligence</a>
+                <a href="./platform.html">Platform</a>
+                <a href="./product.html">Product</a>
+                <a href="./customers.html">Customers</a>
+                <a href="./industries.html">Industries</a>
+                <a href="./events.html">Events</a>
+                <a href="./support.html" class="active">Support</a>
+            </nav>
+            <div class="header-actions" style="display:flex;align-items:center;gap:12px;">
+                            <button class="cc-theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path></svg></button>
+            <a href="./cc-app/" class="btn btn-primary" style="padding:8px 16px;font-size:13px;">Launch App</a>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <!-- Navigation Buttons -->
+        <div class="page-nav-buttons" style="max-width:1200px;margin:2rem auto;padding:0 2rem;">
+            <button onclick="window.history.back()" class="btn btn-secondary btn-sm" data-tooltip="Go Back">
+                <i data-lucide="arrow-left" style="width:16px;"></i> Back
+            </button>
+            <a href="./index.html" class="btn btn-primary btn-sm" data-tooltip="Home">
+                <i data-lucide="home" style="width:16px;"></i> Home
+            </a>
+        </div>
+
+        <!-- Hero -->
+        <section class="hero">
+            <div class="badge"><i data-lucide="life-buoy" style="width:16px;height:16px;"></i> Help & Support</div>
+            <h1>How Can We <span class="gradient-text">Help?</span></h1>
+            <p>Find answers, connect with experts, and get the most out of your AI Supply Chain platform.</p>
+            
+            <div class="search-container">
+                <div class="search-box">
+                    <i data-lucide="search" style="width:20px;height:20px;color:var(--gray-400);"></i>
+                    <input type="text" placeholder="Search documentation, FAQs, resources...">
+                </div>
+            </div>
+        </section>
+
+        <!-- Contact Options -->
+        <section id="contact" style="border-bottom:1px solid rgba(255,255,255,0.08);padding:3rem 0;">
+            <div class="contact-grid">
+                <div class="glass contact-card">
+                    <div class="contact-icon" style="color:var(--primary);"><i data-lucide="message-square" style="width:44px;height:44px;"></i></div>
+                    <h3>Live Chat</h3>
+                    <p>Available 24/7 for Enterprise plans</p>
+                    <a href="#" class="btn btn-outline btn-sm">Start Chat <i data-lucide="arrow-right" style="width:14px;height:14px;"></i></a>
+                </div>
+                
+                <div class="glass contact-card">
+                    <div class="contact-icon" style="color:var(--success);"><i data-lucide="phone" style="width:44px;height:44px;"></i></div>
+                    <h3>Phone Support</h3>
+                    <p>Mon-Fri, 8am-8pm EST</p>
+                    <a href="tel:+188855578759" class="btn btn-outline btn-sm">+1 (888) 555-SUPPLY</a>
+                </div>
+                
+                <div class="glass contact-card">
+                    <div class="contact-icon" style="color:var(--accent);"><i data-lucide="mail" style="width:44px;height:44px;"></i></div>
+                    <h3>Email Us</h3>
+                    <p>Response within 4 hours</p>
+                    <a href="mailto:support@aisupplychain.ai" class="btn btn-outline btn-sm">support@aisupplychain.ai</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Resources -->
+        <section id="resources">
+            <h2 class="section-title">Resources & Documentation</h2>
+            
+            <div class="resources-grid">
+                <div class="glass resource-card">
+                    <div class="resource-icon" style="color:#3b82f6;"><i data-lucide="book-open" style="width:22px;height:22px;"></i></div>
+                    <h3>Documentation</h3>
+                    <p>Comprehensive guides and API references for developers.</p>
+                    <ul class="resource-links">
+                        <li><a href="#"><i data-lucide="chevron-right"></i> Getting Started</a></li>
+                        <li><a href="#"><i data-lucide="chevron-right"></i> API Reference</a></li>
+                        <li><a href="#"><i data-lucide="chevron-right"></i> Integration Guides</a></li>
+                        <li><a href="#"><i data-lucide="chevron-right"></i> Best Practices</a></li>
+                    </ul>
+                </div>
+                
+                <div class="glass resource-card">
+                    <div class="resource-icon" style="color:var(--accent);"><i data-lucide="video" style="width:22px;height:22px;"></i></div>
+                    <h3>Video Tutorials</h3>
+                    <p>Step-by-step video walkthroughs of key features.</p>
+                    <ul class="resource-links">
+                        <li><a href="#"><i data-lucide="chevron-right"></i> Platform Overview</a></li>
+                        <li><a href="#"><i data-lucide="chevron-right"></i> Dashboard Tour</a></li>
+                        <li><a href="#"><i data-lucide="chevron-right"></i> Setting Up Alerts</a></li>
+                        <li><a href="#"><i data-lucide="chevron-right"></i> SHAP Explained</a></li>
+                    </ul>
+                </div>
+                
+                <div class="glass resource-card">
+                    <div class="resource-icon" style="color:var(--success);"><i data-lucide="file-text" style="width:22px;height:22px;"></i></div>
+                    <h3>Resources</h3>
+                    <p>Templates, whitepapers, and case studies.</p>
+                    <ul class="resource-links">
+                        <li><a href="#"><i data-lucide="chevron-right"></i> Implementation Guide</a></li>
+                        <li><a href="#"><i data-lucide="chevron-right"></i> ROI Calculator</a></li>
+                        <li><a href="#"><i data-lucide="chevron-right"></i> Security Whitepaper</a></li>
+                        <li><a href="#"><i data-lucide="chevron-right"></i> Compliance Checklist</a></li>
+                    </ul>
+                </div>
+                
+                <div class="glass resource-card">
+                    <div class="resource-icon" style="color:var(--primary);"><i data-lucide="message-square" style="width:22px;height:22px;"></i></div>
+                    <h3>Community</h3>
+                    <p>Connect with other supply chain professionals.</p>
+                    <ul class="resource-links">
+                        <li><a href="#"><i data-lucide="chevron-right"></i> Forums</a></li>
+                        <li><a href="#"><i data-lucide="chevron-right"></i> User Groups</a></li>
+                        <li><a href="#"><i data-lucide="chevron-right"></i> Webinars</a></li>
+                        <li><a href="#"><i data-lucide="chevron-right"></i> Events</a></li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- FAQ -->
+        <section id="faq" style="background:rgba(255,255,255,0.02);border-radius:24px;padding:4rem 2rem;margin:4rem 0;">
+            <h2 class="section-title">Frequently Asked Questions</h2>
+            
+            <div class="faq-list">
+                <div class="glass faq-item" onclick="this.classList.toggle('active')">
+                    <div class="faq-question">
+                        How do I get started with the platform?
+                        <i data-lucide="chevron-right" class="faq-arrow" style="width:20px;height:20px;color:var(--gray-400);"></i>
+                    </div>
+                    <div class="faq-answer">You can start with a free 14-day trial that includes full access to all features. Our onboarding team will help you set up your supplier data and configure initial risk models. No credit card required to start.</div>
+                </div>
+                
+                <div class="glass faq-item" onclick="this.classList.toggle('active')">
+                    <div class="faq-question">
+                        What integrations are available?
+                        <i data-lucide="chevron-right" class="faq-arrow" style="width:20px;height:20px;color:var(--gray-400);"></i>
+                    </div>
+                    <div class="faq-answer">We offer pre-built connectors for SAP, Oracle, Salesforce, ServiceNow, Workday, Kinaxis, Blue Yonder, Coupa, and 50+ other enterprise platforms. Our REST API also enables custom integrations with any system.</div>
+                </div>
+                
+                <div class="glass faq-item" onclick="this.classList.toggle('active')">
+                    <div class="faq-question">
+                        How does the AI explain its predictions?
+                        <i data-lucide="chevron-right" class="faq-arrow" style="width:20px;height:20px;color:var(--gray-400);"></i>
+                    </div>
+                    <div class="faq-answer">Every prediction includes SHAP (SHapley Additive exPlanations) values showing exactly which factors contributed to the risk score and by how much. This full transparency builds trust and enables better decision-making.</div>
+                </div>
+                
+                <div class="glass faq-item" onclick="this.classList.toggle('active')">
+                    <div class="faq-question">
+                        What compliance frameworks do you support?
+                        <i data-lucide="chevron-right" class="faq-arrow" style="width:20px;height:20px;color:var(--gray-400);"></i>
+                    </div>
+                    <div class="faq-answer">We provide dedicated tracking for UFLPA (Uyghur Forced Labor Prevention Act), EUDR (European Deforestation Regulation), CSDDD (Corporate Sustainability Due Diligence Directive), GDPR, SOX, REACH, and can customize for additional frameworks upon request.</div>
+                </div>
+                
+                <div class="glass faq-item" onclick="this.classList.toggle('active')">
+                    <div class="faq-question">
+                        How is my data protected?
+                        <i data-lucide="chevron-right" class="faq-arrow" style="width:20px;height:20px;color:var(--gray-400);"></i>
+                    </div>
+                    <div class="faq-answer">We're SOC 2 Type II certified, GDPR compliant, and use AES-256 encryption at rest and in transit. Data is hosted in your choice of AWS, Azure, or GCP regions. We also offer on-premise deployment options for enterprise customers.</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Developer Resources -->
+        <section id="developers">
+            <div class="dev-section">
+                <div class="dev-content">
+                    <span class="dev-badge">Developers</span>
+                    <h3>API & Developer Resources</h3>
+                    <p>Access our comprehensive API documentation, SDK downloads, and developer guides to build custom integrations.</p>
+                </div>
+                <div class="dev-actions">
+                    <a href="#" class="btn btn-outline"><i data-lucide="download" style="width:16px;height:16px;"></i> Download SDK</a>
+                    <a href="#" class="btn btn-primary"><i data-lucide="external-link" style="width:16px;height:16px;"></i> View API Docs</a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer><p>&copy; 2026 AI Supply Chain Advanced. All rights reserved. | <a href="#">Privacy Policy</a> | <a href="#">Terms of Service</a></p></footer>
+
+    <script>    lucide.createIcons();
+
+    function toggleTheme() {
+        var current = document.documentElement.getAttribute('data-theme');
+        var next = current === 'light' ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-theme', next);
+        localStorage.setItem('theme', next);
+        document.querySelectorAll('.cc-theme-toggle').forEach(function(btn) {
+            btn.innerHTML = next === 'dark' ? '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path></svg>' : '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path></svg>';
+        });
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+    document.addEventListener('DOMContentLoaded', function() {
+        var saved = localStorage.getItem('theme') || 'dark';
+        document.documentElement.setAttribute('data-theme', saved);
+        document.querySelectorAll('.cc-theme-toggle').forEach(function(btn) {
+            btn.innerHTML = saved === 'dark' ? '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path></svg>' : '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path></svg>';
+        });
+    });</script>
+</body>
+</html>
