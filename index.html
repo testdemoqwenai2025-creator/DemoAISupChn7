@@ -430,6 +430,7 @@
         document.documentElement.setAttribute('data-theme', saved);
         updateToggleIcons(saved);
     });
+    document.addEventListener('keydown',function(e){if(e.key==='Escape'){closeModal('login');closeModal('getstarted')}});
     </script>
 </body>
 </html>

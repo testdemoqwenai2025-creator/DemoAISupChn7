@@ -511,7 +511,7 @@
             <nav>
                 <a href="./index.html">Home</a>
                 <a href="./about.html">About</a>
-                <a href="./command-center.html">Command Center ⭐</a>
+                <a href="./cc-app/">Command Center ⭐</a>
                 <a href="./dashboard.html">Dashboard</a>
                 <a href="./intelligence.html">Intelligence</a>
                 <a href="./platform.html" class="active">Platform</a>
@@ -524,7 +524,7 @@
                     <div class="toggle-thumb"><i data-lucide="moon" style="width:16px;height:16px;color:#6366f1"></i></div>
                     <span class="theme-toggle-label">☀️ LIGHT</span>
                 </button>
-                <a href="./command-center.html" class="btn btn-primary btn-sm">Launch App</a>
+                <a href="./cc-app/" class="btn btn-primary btn-sm">Launch App</a>
             </div>
         </div>
     </header>
@@ -1121,6 +1121,8 @@ What would you like to explore?`
         }, { threshold: 0.1 });
 
         document.querySelectorAll('.animate-in').forEach(el => observer.observe(el));
+
+        document.addEventListener('keydown',function(e){if(e.key==='Escape'){closeModal('login');closeModal('getstarted')}});
     </script>
 </body>
 </html>

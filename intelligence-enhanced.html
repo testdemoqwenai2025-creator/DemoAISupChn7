@@ -470,6 +470,7 @@
         .modal-success h3 { font-size:1.25rem; font-weight:700; margin-bottom:0.5rem; }
         .modal-success p { margin-bottom:1.5rem; }
         [data-theme="light"] .modal-success h3 { color:#0F172A; }
+        .chart-wrap{position:relative;width:100%}
     </style>
 </head>
 <body>
@@ -489,7 +490,7 @@
             <nav>
                 <a href="./index.html">Home</a>
                 <a href="./about.html">About</a>
-                <a href="./command-center.html">Command Center ⭐</a>
+                <a href="./cc-app/">Command Center ⭐</a>
                 <a href="./dashboard.html">Dashboard</a>
                 <a href="./intelligence.html" class="active">Intelligence</a>
                 <a href="./platform.html">Platform</a>
@@ -502,7 +503,7 @@
                     <div class="toggle-thumb"><i data-lucide="moon" style="width:16px;height:16px;color:#6366f1"></i></div>
                     <span class="theme-toggle-label">☀️ LIGHT</span>
                 </button>
-                <a href="./command-center.html" class="btn btn-primary btn-sm">Launch App</a>
+                <a href="./cc-app/" class="btn btn-primary btn-sm">Launch App</a>
             </div>
         </div>
     </header>
@@ -610,14 +611,14 @@
                         <div class="chart-title"><i data-lucide="line-chart" style="color:var(--accent-6)"></i> Model Accuracy Over Time</div>
                         <div class="chart-badge">Last 6 Months</div>
                     </div>
-                    <div class="chart-container"><canvas id="modelChart"></canvas></div>
+                    <div class="chart-container"><div class="chart-wrap" style="height:220px"><canvas id="modelChart"></canvas></div></div>
                 </div>
                 
                 <div class="chart-card animate-in">
                     <div class="chart-header">
                         <div class="chart-title"><i data-lucide="radar" style="color:var(--accent-2)"></i> Multi-Dimensional Performance</div>
                     </div>
-                    <div class="chart-container"><canvas id="radarChart"></canvas></div>
+                    <div class="chart-container"><div class="chart-wrap" style="height:220px"><canvas id="radarChart"></canvas></div></div>
                 </div>
             </div>
 
@@ -1154,6 +1155,8 @@ What interests you most?`
         }, { threshold: 0.1 });
 
         document.querySelectorAll('.animate-in').forEach(el => observer.observe(el));
+
+        document.addEventListener('keydown',function(e){if(e.key==='Escape'){closeModal('login');closeModal('getstarted')}});
     </script>
 </body>
 </html>
