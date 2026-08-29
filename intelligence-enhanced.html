@@ -499,6 +499,8 @@
                 <a href="./support.html">Support</a>
             </nav>
             <div class="header-actions">
+                <button class="btn-login" onclick="openModal('login')"><i data-lucide="log-in" style="width:14px;height:14px;"></i> Login</button>
+                <button class="btn-get-started" onclick="openModal('getstarted')"><i data-lucide="rocket" style="width:14px;height:14px;"></i> Get Started</button>
                 <button class="theme-toggle" data-tooltip="🌙 Toggle Dark/Light Mode ☀️" onclick="toggleTheme()" aria-label="Toggle dark and light mode">
                     <div class="toggle-thumb"><i data-lucide="moon" style="width:16px;height:16px;color:#6366f1"></i></div>
                     <span class="theme-toggle-label">☀️ LIGHT</span>
@@ -1156,6 +1158,11 @@ What interests you most?`
 
         document.querySelectorAll('.animate-in').forEach(el => observer.observe(el));
 
+        // ===== MODALS =====
+        function openModal(t){document.getElementById('modal-'+t).classList.add('open');document.body.style.overflow='hidden';var f=document.getElementById(t+'-form-view'),s=document.getElementById(t+'-success');if(f)f.style.display='block';if(s)s.style.display='none';lucide.createIcons()}
+        function closeModal(t){document.getElementById('modal-'+t).classList.remove('open');document.body.style.overflow=''}
+        function handleLogin(e){e.preventDefault();var b=e.target.querySelector('.form-submit');b.disabled=true;b.textContent='Signing in...';setTimeout(function(){document.getElementById('login-form-view').style.display='none';document.getElementById('login-success').style.display='block';lucide.createIcons()},1200)}
+        function handleGetStarted(e){e.preventDefault();var b=e.target.querySelector('.form-submit');b.disabled=true;b.textContent='Creating account...';setTimeout(function(){document.getElementById('getstarted-form-view').style.display='none';document.getElementById('getstarted-success').style.display='block';lucide.createIcons()},1500)}
         document.addEventListener('keydown',function(e){if(e.key==='Escape'){closeModal('login');closeModal('getstarted')}});
     </script>
 </body>
