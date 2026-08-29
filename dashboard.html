@@ -116,7 +116,8 @@
         .demo-panel{display:none}
         .demo-panel.active{display:block}
         .demo-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem}
-        .demo-card{background:rgba(15,23,42,.6);border:1px solid rgba(255,255,255,.06);border-radius:var(--radius);padding:1.5rem}
+        .demo-card{background:rgba(15,23,42,.6);border:1px solid rgba(255,255,255,.06);border-radius:var(--radius);padding:1.5rem;overflow:hidden}
+        .chart-wrap{position:relative;width:100%}
         .demo-card-title{font-size:13px;font-weight:600;color:var(--gray-300);margin-bottom:1rem;display:flex;align-items:center;gap:8px}
         .demo-card-title i{color:var(--primary);width:16px;height:16px}
         /* Mini charts */
@@ -206,7 +207,7 @@
         [data-theme="light"] nav a{color:#64748B}
         [data-theme="light"] nav a:hover{background:rgba(0,0,0,.04);color:#1E293B}
         [data-theme="light"] nav a.active{color:#fff}
-        [data-theme="light"] .eco-card,.data-theme="light"] .demo-card,[data-theme="light"] .ai-visual,[data-theme="light"] .ind-card,[data-theme="light"] .comp-card,[data-theme="light"] .cta-card{background:#fff;border-color:rgba(0,0,0,.06);box-shadow:0 1px 3px rgba(0,0,0,.04)}
+        [data-theme="light"] .eco-card,[data-theme="light"] .demo-card,[data-theme="light"] .ai-visual,[data-theme="light"] .ind-card,[data-theme="light"] .comp-card,[data-theme="light"] .cta-card{background:#fff;border-color:rgba(0,0,0,.06);box-shadow:0 1px 3px rgba(0,0,0,.04)}
         [data-theme="light"] .section-title,[data-theme="light"] .hero h1,[data-theme="light"] .cta-card h2,[data-theme="light"] .eco-card h3,[data-theme="light"] .ai-feature h4,[data-theme="light"] .ind-card h4,[data-theme="light"] .comp-name{color:#0F172A}
         [data-theme="light"] .section-desc,[data-theme="light"] .hero p,[data-theme="light"] .eco-card p,[data-theme="light"] .ai-feature p,[data-theme="light"] .ind-card p,[data-theme="light"] .cta-card>p,[data-theme="light"] .demo-card-title,[data-theme="light"] .risk-table td,[data-theme="light"] .confidence-label,[data-theme="light"] .comp-details{color:#475569}
         [data-theme="light"] .stat-label,[data-theme="light"] .trust-label,[data-theme="light"] .ticker-label{color:#94A3B8}
@@ -384,7 +385,7 @@
                     </div>
                     <div class="demo-card">
                         <div class="demo-card-title"><i data-lucide="globe"></i> Regional Risk Distribution</div>
-                        <canvas id="chart-risk-donut" height="220"></canvas>
+                        <div class="chart-wrap" style="height:200px"><canvas id="chart-risk-donut"></canvas></div>
                         <div style="display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-top:1rem">
                             <div class="mini-stat"><div class="mini-stat-value" style="color:var(--danger)">62</div><div class="mini-stat-label">APAC Risk Score</div><div class="mini-stat-bar"><div class="mini-stat-fill" style="width:62%;background:linear-gradient(90deg,#f59e0b,#ef4444)"></div></div></div>
                             <div class="mini-stat"><div class="mini-stat-value" style="color:var(--success)">38</div><div class="mini-stat-label">Europe Risk Score</div><div class="mini-stat-bar"><div class="mini-stat-fill" style="width:38%;background:var(--success)"></div></div></div>
@@ -404,7 +405,7 @@
                     </div>
                     <div class="demo-card">
                         <div class="demo-card-title"><i data-lucide="trending-up"></i> Compliance Trend (12 months)</div>
-                        <canvas id="chart-compliance-trend" height="260"></canvas>
+                        <div class="chart-wrap" style="height:220px"><canvas id="chart-compliance-trend"></canvas></div>
                     </div>
                 </div>
             </div>
@@ -429,7 +430,7 @@
                             <div class="mini-stat"><div class="mini-stat-value" style="color:var(--accent)">1.2s</div><div class="mini-stat-label">Inference Time</div></div>
                             <div class="mini-stat"><div class="mini-stat-value" style="color:var(--warning)">96.1%</div><div class="mini-stat-label">Forecast Accuracy</div></div>
                         </div>
-                        <canvas id="chart-ai-accuracy" height="160"></canvas>
+                        <div class="chart-wrap" style="height:140px"><canvas id="chart-ai-accuracy"></canvas></div>
                     </div>
                 </div>
             </div>
@@ -441,7 +442,7 @@
             <p class="section-desc">Every prediction comes with a reason. SHAP values, confidence intervals, and feature attribution so your team can trust and act on every insight.</p>
             <div class="ai-grid">
                 <div class="ai-visual">
-                    <canvas id="chart-shap" height="300"></canvas>
+                    <div class="chart-wrap" style="height:280px"><canvas id="chart-shap"></canvas></div>
                 </div>
                 <div class="ai-features">
                     <div class="ai-feature"><div class="ai-feature-icon" style="background:rgba(16,185,129,.1);color:var(--primary)"><i data-lucide="eye" style="width:20px;height:20px"></i></div><div><h4>SHAP Explainability</h4><p>Every risk score decomposed into contributing factors. Auditors, regulators, and stakeholders see exactly why the AI made each decision.</p></div></div>
