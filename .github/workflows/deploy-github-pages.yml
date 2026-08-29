@@ -1,0 +1,80 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  # Job 1: Sync to public demo repo
+  sync-public:
+    runs-on: ubuntu-latest
+    if: github.repository == 'testdemoqwenai2025-creator/AISupChn6-Advanced'
+    steps:
+      - name: Checkout private repo
+        uses: actions/checkout@v4
+
+      - name: Checkout public repo
+        uses: actions/checkout@v4
+        with:
+          repository: testdemoqwenai2025-creator/demo6AISupChn-Advanced
+          token: ${{ secrets.PAT_SYNC }}
+          path: public-repo
+
+      - name: Sync files to public repo
+        run: |
+          # Copy all HTML files and cc-app directory
+          rsync -av --delete \
+            --exclude='.git' \
+            --exclude='.github' \
+            --exclude='evolution.txt' \
+            --exclude='README.md' \
+            --exclude='*.md' \
+            ./ public-repo/
+          
+          cd public-repo
+          git config user.name "CI Bot"
+          git config user.email "testdemoqwenai2025-creator@users.noreply.github.com"
+          git add -A
+          CHANGES=$(git diff --cached --stat)
+          if [ -n "$CHANGES" ]; then
+            git commit -m "auto: sync from private repo $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            git push
+          else
+            echo "No changes to sync."
+          fi
+
+  # Job 2: Deploy public repo to GitHub Pages
+  deploy-pages:
+    needs: sync-public
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Checkout public repo
+        uses: actions/checkout@v4
+        with:
+          repository: testdemoqwenai2025-creator/demo6AISupChn-Advanced
+          token: ${{ secrets.PAT_SYNC }}
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: '.'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
