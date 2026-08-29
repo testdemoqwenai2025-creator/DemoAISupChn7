@@ -3,569 +3,520 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard | AI Supply Chain Advanced - Analytics & Insights</title>
-    <meta name="description" content="AI-powered supply chain dashboard with KPIs, live data feeds, risk trends, and demand forecasting.">
-    
+    <title>Dashboard | AI Supply Chain Advanced - Enterprise Intelligence Platform</title>
+    <meta name="description" content="AI-powered supply chain intelligence dashboard. Real-time risk monitoring, SHAP-explainable AI, compliance automation, predictive analytics, and procurement optimisation for global enterprises.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-    
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        :root {
-            --primary: #10B981; --secondary: #06B6D4; --accent: #8B5CF6;
-            --warning: #F59E0B; --danger: #EF4444; --success: #22C55E;
-            --dark: #0F172A; --dark-lighter: #1E293B;
-            --gray-100: #F1F5F9; --gray-200: #E2E8F0; --gray-300: #CBD5E1;
-            --gray-400: #94A3B8; --gray-500: #64748B; --gray-600: #475569;
-            --gradient-start: #059669; --gradient-end: #0891B2;
+        *{margin:0;padding:0;box-sizing:border-box}
+        :root{
+            --primary:#10B981;--secondary:#06B6D4;--accent:#8B5CF6;
+            --warning:#F59E0B;--danger:#EF4444;--success:#22C55E;
+            --dark:#0F172A;--dark-lighter:#1E293B;--dark-card:#162032;
+            --gray-100:#F1F5F9;--gray-200:#E2E8F0;--gray-300:#CBD5E1;
+            --gray-400:#94A3B8;--gray-500:#64748B;--gray-600:#475569;
+            --gradient-start:#059669;--gradient-end:#0891B2;
+            --radius:16px;--radius-sm:10px;
         }
-        
-        body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: linear-gradient(135deg, var(--dark) 0%, var(--dark-lighter) 50%, var(--dark) 100%); color: white; min-height: 100vh; overflow-x: hidden; }
-        .bg-animation { position: fixed; inset: 0; overflow: hidden; pointer-events: none; z-index: 0; }
-        .bg-orb { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.15; animation: pulse 8s ease-in-out infinite; }
-        .bg-orb-1 { width: 500px; height: 500px; top: -100px; right: -100px; background: var(--primary); }
-        .bg-orb-2 { width: 400px; height: 400px; top: 50%; left: -100px; background: var(--secondary); animation-delay: 2s; }
-        .bg-orb-3 { width: 350px; height: 350px; bottom: -50px; right: 30%; background: var(--accent); animation-delay: 4s; }
-        @keyframes pulse { 0%, 100% { transform: scale(1); opacity: 0.15; } 50% { transform: scale(1.1); opacity: 0.25; } }
-        
-        header { position: sticky; top: 0; z-index: 100; backdrop-filter: blur(20px); background: rgba(15, 23, 42, 0.85); border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
-        .header-content { max-width: 1920px; margin: 0 auto; padding: 0 2rem; height: 64px; display: flex; align-items: center; justify-content: space-between; }
-        .logo-section { display: flex; align-items: center; gap: 12px; text-decoration: none; color: inherit; }
-        .logo-icon { width: 40px; height: 40px; border-radius: 12px; background: linear-gradient(135deg, var(--primary), var(--secondary)); display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 20px rgba(16, 185, 129, 0.35); }
-        .logo-text h1 { font-size: 18px; font-weight: 700; background: linear-gradient(90deg, var(--primary), var(--secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .logo-text p { font-size: 11px; color: var(--gray-400); }
-        
-        nav { display: flex; gap: 4px; flex-wrap: wrap; }
-        nav a { padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 500; text-decoration: none; transition: all 0.3s ease; color: var(--gray-300); white-space: nowrap; }
-        nav a:hover { background: rgba(255, 255, 255, 0.1); color: white; }
-        nav a.active { background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end)); color: white; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.35); }
-        .mobile-menu-btn { display: none; background: none; border: none; color: white; cursor: pointer; padding: 8px; }
-        
-        main { position: relative; z-index: 1; max-width: 1400px; margin: 0 auto; padding: 1.5rem; }
-        
-        .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem; }
-        
-        /* Page Navigation Buttons */
-
-        /* Light mode toggle styling */
-        .page-title h1 { font-size: 1.75rem; font-weight: 700; display: flex; align-items: center; gap: 10px; }
-        .live-badge { display: flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 9999px; background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.3); font-size: 12px; font-weight: 600; color: var(--primary); }
-        .live-dot { width: 8px; height: 8px; background: var(--primary); border-radius: 50%; animation: livePulse 2s ease-in-out infinite; }
-        @keyframes livePulse { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.3); opacity: 0.7; } }
-        
-        /* KPI Cards */
-        .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
-        .kpi-card { background: rgba(30, 41, 59, 0.5); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px; padding: 1.5rem; transition: all 0.3s ease; cursor: pointer; }
-        .kpi-card:hover { transform: translateY(-3px) scale(1.02); border-color: rgba(16, 185, 129, 0.3); }
-        .kpi-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem; }
-        .kpi-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; }
-        .kpi-trend { display: flex; align-items: center; gap: 4px; font-size: 13px; font-weight: 600; padding: 4px 10px; border-radius: 8px; }
-        .trend-up { background: rgba(34, 197, 94, 0.15); color: var(--success); }
-        .trend-down { background: rgba(239, 68, 68, 0.15); color: var(--danger); }
-        .trend-neutral { background: rgba(139, 92, 246, 0.15); color: var(--accent); }
-        .kpi-value { font-size: 32px; font-weight: 700; margin-bottom: 4px; }
-        .kpi-label { font-size: 14px; color: var(--gray-400); }
-        
-        /* Charts */
-        .charts-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem; }
-        @media (max-width: 1024px) { .charts-grid { grid-template-columns: 1fr; } }
-        
-        .chart-card { background: rgba(30, 41, 59, 0.5); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px; padding: 1.5rem; }
-        .chart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
-        .chart-title { display: flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 600; }
-        .chart-badge { padding: 4px 12px; border-radius: 6px; font-size: 11px; font-weight: 500; background: rgba(139, 92, 246, 0.15); color: var(--accent); }
-        .chart-container { height: 280px; position: relative; }
-        
-        .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem; }
-        @media (max-width: 768px) { .two-col { grid-template-columns: 1fr; } }
-        
-        /* Alerts */
-        .alerts-section { background: rgba(30, 41, 59, 0.5); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px; padding: 1.5rem; }
-        .alerts-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
-        .alert-count { display: flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 8px; background: rgba(239, 68, 68, 0.15); color: var(--danger); font-size: 13px; font-weight: 600; animation: alertPulse 2s ease-in-out infinite; }
-        @keyframes alertPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
-        
-        .alert-item { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 10px; margin-bottom: 8px; background: rgba(255, 255, 255, 0.02); transition: all 0.2s ease; }
-        .alert-item:hover { background: rgba(255, 255, 255, 0.05); }
-        .alert-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
-        .alert-dot.critical { background: var(--danger); box-shadow: 0 0 10px rgba(239, 68, 68, 0.5); }
-        .alert-dot.warning { background: var(--warning); }
-        .alert-dot.info { background: var(--secondary); }
-        .alert-content { flex: 1; min-width: 0; }
-        .alert-supplier { font-weight: 600; font-size: 13px; }
-        .alert-desc { font-size: 12px; color: var(--gray-400); }
-        .alert-time { font-size: 11px; color: var(--gray-500); white-space: nowrap; }
-        
-        /* Regional */
-        .region-item { padding: 12px; border-radius: 10px; background: rgba(255, 255, 255, 0.02); margin-bottom: 8px; }
-        .region-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-        .region-name { font-weight: 600; font-size: 13px; }
-        .region-score { font-size: 18px; font-weight: 700; color: var(--primary); }
-        .progress-bar { height: 6px; background: rgba(255, 255, 255, 0.1); border-radius: 3px; overflow: hidden; }
-        .progress-fill { height: 100%; border-radius: 3px; transition: width 0.5s ease; }
-        
-        footer { position: relative; z-index: 1; border-top: 1px solid rgba(255, 255, 255, 0.1); padding: 1.5rem; text-align: center; color: var(--gray-500); font-size: 12px; margin-top: 2rem; }
-        footer a { color: var(--primary); text-decoration: none; }
-        
-        @media (max-width: 1024px) {
-            nav { display: none; position: absolute; top: 64px; left: 0; right: 0; background: rgba(15, 23, 42, 0.95); padding: 1rem; flex-direction: column; }
-            nav.open { display: flex; } .mobile-menu-btn { display: block; } nav a { padding: 12px 16px; }
-        }
-        @media (max-width: 640px) { main { padding: 1rem; } .header-content { padding: 0 1rem; } .kpi-grid { grid-template-columns: 1fr 1fr; } }
-
-        /* Mobile adjustment */
-        @media (max-width: 768px) {
-        }
-            /* Elegant Theme Toggle (CC-consistent) */
-        .cc-theme-toggle {
-            width: 36px; height: 36px;
-            padding: 0; border-radius: 8px;
-            background: transparent;
-            border: 1px solid rgba(255,255,255,0.1);
-            color: var(--gray-400);
-            cursor: pointer;
-            display: flex; align-items: center; justify-content: center;
-            transition: all 0.2s ease;
-            flex-shrink: 0;
-        }
-        .cc-theme-toggle:hover {
-            background: rgba(255,255,255,0.08);
-            color: var(--primary);
-            border-color: rgba(16,185,129,0.3);
-        }
-        .cc-theme-toggle svg { width: 16px; height: 16px; }
-
-        /* Light Theme */
-        [data-theme="light"] body {
-            background: linear-gradient(135deg, #F8FAFC 0%, #F1F5F9 50%, #F8FAFC 100%);
-            color: #1E293B;
-        }
-        [data-theme="light"] header {
-            background: rgba(248,250,252,0.9);
-            border-bottom-color: rgba(0,0,0,0.08);
-        }
-        [data-theme="light"] nav a { color: #64748B; }
-        [data-theme="light"] nav a:hover { background: rgba(0,0,0,0.05); color: #1E293B; }
-        [data-theme="light"] nav a.active { color: white; }
-        [data-theme="light"] .glass {
-            background: rgba(255,255,255,0.7);
-            border-color: rgba(0,0,0,0.08);
-            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
-        }
-        [data-theme="light"] .glass:hover {
-            border-color: rgba(16,185,129,0.3);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-        }
-        [data-theme="light"] .section-title,
-        [data-theme="light"] h1,
-        [data-theme="light"] h2,
-        [data-theme="light"] h3 { color: #0F172A; }
-        [data-theme="light"] .section-subtitle,
-        [data-theme="light"] .hero p,
-        [data-theme="light"] .team-card .bio,
-        [data-theme="light"] .value-card p,
-        [data-theme="light"] .contact-info li,
-        [data-theme="light"] .stat-label,
-        [data-theme="light"] .timeline-item p,
-        [data-theme="light"] .job-item { color: #475569; }
-        [data-theme="light"] .logo-text h1 {
-            background: linear-gradient(90deg, #059669, #0891B2);
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-        }
-        [data-theme="light"] .logo-text p { color: #94A3B8; }
-        [data-theme="light"] .badge {
-            color: #059669; border-color: rgba(0,0,0,0.12);
-            background: rgba(16,185,129,0.06);
-        }
-        [data-theme="light"] .gradient-text {
-            background: linear-gradient(90deg, #059669, #0891B2, #7C3AED);
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-        }
-        [data-theme="light"] .value-icon { background: rgba(16,185,129,0.08); }
-        [data-theme="light"] .job-item { background: rgba(0,0,0,0.02); }
-        [data-theme="light"] .btn-outline { border-color: rgba(0,0,0,0.15); color: #1E293B; }
-        [data-theme="light"] .btn-outline:hover { background: rgba(0,0,0,0.05); }
-        [data-theme="light"] .cc-theme-toggle {
-            color: #94A3B8;
-            border-color: rgba(0,0,0,0.1);
-        }
-        [data-theme="light"] .cc-theme-toggle:hover {
-            background: rgba(16,185,129,0.08);
-            color: #059669;
-            border-color: rgba(16,185,129,0.3);
-        }
-        [data-theme="light"] .bg-orb { opacity: 0.06; }
-        [data-theme="light"] footer { border-top-color: rgba(0,0,0,0.08); color: #94A3B8; }
-        [data-theme="light"] .social-link { border-color: rgba(0,0,0,0.12); color: #94A3B8; }
-        [data-theme="light"] .social-link:hover { background: rgba(16,185,129,0.1); border-color: #10B981; color: #10B981; }
-        [data-theme="light"] .team-card .role { color: #059669; }
-        [data-theme="light"] .timeline-year { background: rgba(16,185,129,0.08); color: #059669; }
-        [data-theme="light"] .job-badge { background: rgba(139,92,246,0.08); color: #7C3AED; }
-        [data-theme="light"] .stat-value {
-            background: linear-gradient(90deg, #059669, #0891B2);
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-        }
-        [data-theme="light"] .timeline-line { background: rgba(0,0,0,0.08); }
-        [data-theme="light"] .mobile-menu-btn { color: #334155; }
-        [data-theme="light"] nav.open { background: rgba(248,250,252,0.98); border-bottom: 1px solid rgba(0,0,0,0.08); }
-
-        /* Login & Get Started Buttons */
-        .btn-login { display:inline-flex; align-items:center; gap:6px; padding:8px 18px; border-radius:8px; font-size:13px; font-weight:600; border:1px solid rgba(255,255,255,0.2); background:transparent; color:white; cursor:pointer; transition:all 0.2s ease; text-decoration:none; white-space:nowrap; }
-        .btn-login:hover { background:rgba(255,255,255,0.08); border-color:rgba(255,255,255,0.3); }
-        .btn-get-started { display:inline-flex; align-items:center; gap:6px; padding:8px 18px; border-radius:8px; font-size:13px; font-weight:600; border:none; background:linear-gradient(135deg, var(--gradient-start), var(--gradient-end)); color:white; cursor:pointer; transition:all 0.2s ease; text-decoration:none; white-space:nowrap; box-shadow:0 4px 15px rgba(16,185,129,0.3); }
-        .btn-get-started:hover { transform:translateY(-1px); box-shadow:0 6px 20px rgba(16,185,129,0.45); }
-        [data-theme="light"] .btn-login { color:#1E293B; border-color:rgba(0,0,0,0.15); }
-        [data-theme="light"] .btn-login:hover { background:rgba(0,0,0,0.04); }
-
-        /* Modal overlay */
-        .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); backdrop-filter:blur(6px); z-index:1000; align-items:center; justify-content:center; }
-        .modal-overlay.open { display:flex; }
-        .modal { background:var(--dark-lighter); border:1px solid rgba(255,255,255,0.1); border-radius:20px; padding:2.5rem; width:100%; max-width:420px; margin:1rem; position:relative; animation:modalIn 0.25s ease-out; }
-        @keyframes modalIn { from { opacity:0; transform:translateY(20px) scale(0.97); } to { opacity:1; transform:translateY(0) scale(1); } }
-        [data-theme="light"] .modal { background:#ffffff; border-color:rgba(0,0,0,0.08); box-shadow:0 20px 60px rgba(0,0,0,0.15); }
-        .modal-close { position:absolute; top:16px; right:16px; width:32px; height:32px; border-radius:8px; border:1px solid rgba(255,255,255,0.1); background:transparent; color:var(--gray-400); cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all 0.2s; }
-        .modal-close:hover { background:rgba(255,255,255,0.08); color:white; }
-        [data-theme="light"] .modal-close { border-color:rgba(0,0,0,0.1); color:#94A3B8; }
-        [data-theme="light"] .modal-close:hover { background:rgba(0,0,0,0.04); color:#1E293B; }
-        .modal h2 { font-size:1.5rem; font-weight:700; margin-bottom:0.5rem; }
-        .modal p { color:var(--gray-400); font-size:14px; margin-bottom:1.5rem; line-height:1.6; }
-        [data-theme="light"] .modal h2 { color:#0F172A; }
-        [data-theme="light"] .modal p { color:#64748B; }
-        .form-group { margin-bottom:1rem; }
-        .form-group label { display:block; font-size:13px; font-weight:500; margin-bottom:6px; color:var(--gray-300); }
-        [data-theme="light"] .form-group label { color:#475569; }
-        .form-group input { width:100%; padding:10px 14px; border-radius:10px; border:1px solid rgba(255,255,255,0.1); background:rgba(255,255,255,0.05); color:white; font-size:14px; font-family:inherit; outline:none; transition:border-color 0.2s; }
-        .form-group input:focus { border-color:var(--primary); }
-        .form-group input::placeholder { color:var(--gray-500); }
-        [data-theme="light"] .form-group input { background:#F8FAFC; border-color:rgba(0,0,0,0.12); color:#1E293B; }
-        [data-theme="light"] .form-group input:focus { border-color:#059669; }
-        [data-theme="light"] .form-group input::placeholder { color:#94A3B8; }
-        .form-submit { width:100%; padding:12px; border-radius:10px; border:none; background:linear-gradient(135deg, var(--gradient-start), var(--gradient-end)); color:white; font-size:14px; font-weight:600; cursor:pointer; transition:all 0.2s; margin-top:0.5rem; }
-        .form-submit:hover { box-shadow:0 4px 20px rgba(16,185,129,0.4); }
-        .form-submit:disabled { opacity:0.6; cursor:not-allowed; }
-        .form-footer { text-align:center; margin-top:1.25rem; font-size:13px; color:var(--gray-400); }
-        .form-footer a { color:var(--primary); text-decoration:none; font-weight:500; cursor:pointer; }
-        .form-footer a:hover { text-decoration:underline; }
-        [data-theme="light"] .form-footer { color:#94A3B8; }
-        .modal-success { display:none; text-align:center; padding:1rem 0; }
-        .modal-success .check-circle { width:56px; height:56px; border-radius:50%; background:rgba(16,185,129,0.12); color:var(--primary); display:flex; align-items:center; justify-content:center; margin:0 auto 1rem; }
-        .modal-success h3 { font-size:1.25rem; font-weight:700; margin-bottom:0.5rem; }
-        .modal-success p { margin-bottom:1.5rem; }
-        [data-theme="light"] .modal-success h3 { color:#0F172A; }
+        html{scroll-behavior:smooth}
+        body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background:var(--dark);color:white;min-height:100vh;overflow-x:hidden}
+        .bg-mesh{position:fixed;inset:0;pointer-events:none;z-index:0}
+        .bg-mesh::before,.bg-mesh::after{content:'';position:absolute;border-radius:50%;filter:blur(120px);opacity:.12}
+        .bg-mesh::before{width:600px;height:600px;top:-150px;right:-100px;background:var(--primary)}
+        .bg-mesh::after{width:500px;height:500px;bottom:-100px;left:-100px;background:var(--accent)}
+        .bg-grid{position:fixed;inset:0;pointer-events:none;z-index:0;background-image:linear-gradient(rgba(255,255,255,.02) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.02) 1px,transparent 1px);background-size:60px 60px}
+        /* Header */
+        header{position:sticky;top:0;z-index:100;backdrop-filter:blur(20px);background:rgba(15,23,42,.88);border-bottom:1px solid rgba(255,255,255,.06)}
+        .header-content{max-width:1400px;margin:0 auto;padding:0 1.5rem;height:60px;display:flex;align-items:center;justify-content:space-between}
+        .logo-section{display:flex;align-items:center;gap:10px;text-decoration:none;color:inherit}
+        .logo-icon{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--primary),var(--secondary));display:flex;align-items:center;justify-content:center;box-shadow:0 3px 15px rgba(16,185,129,.3)}
+        .logo-text h1{font-size:16px;font-weight:700;background:linear-gradient(90deg,var(--primary),var(--secondary));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+        .logo-text p{font-size:10px;color:var(--gray-500)}
+        nav{display:flex;gap:2px}
+        nav a{padding:6px 12px;border-radius:7px;font-size:12px;font-weight:500;text-decoration:none;transition:all .2s;color:var(--gray-400);white-space:nowrap}
+        nav a:hover{background:rgba(255,255,255,.06);color:white}
+        nav a.active{background:linear-gradient(135deg,var(--gradient-start),var(--gradient-end));color:white}
+        .mobile-menu-btn{display:none;background:0 0;border:none;color:white;cursor:pointer;padding:6px}
+        .header-right{display:flex;align-items:center;gap:8px}
+        .btn-login{display:inline-flex;align-items:center;gap:5px;padding:7px 16px;border-radius:7px;font-size:12px;font-weight:600;border:1px solid rgba(255,255,255,.15);background:0 0;color:rgba(255,255,255,.8);cursor:pointer;transition:all .2s}
+        .btn-login:hover{background:rgba(255,255,255,.06);color:#fff}
+        .btn-get-started{display:inline-flex;align-items:center;gap:5px;padding:7px 16px;border-radius:7px;font-size:12px;font-weight:600;border:none;background:linear-gradient(135deg,var(--gradient-start),var(--gradient-end));color:#fff;cursor:pointer;transition:all .2s;box-shadow:0 3px 12px rgba(16,185,129,.25)}
+        .btn-get-started:hover{transform:translateY(-1px);box-shadow:0 5px 18px rgba(16,185,129,.4)}
+        .cc-theme-toggle{width:34px;height:34px;padding:0;border-radius:7px;background:0 0;border:1px solid rgba(255,255,255,.1);color:var(--gray-400);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0}
+        .cc-theme-toggle:hover{background:rgba(255,255,255,.06);color:var(--primary);border-color:rgba(16,185,129,.3)}
+        .cc-theme-toggle svg{width:15px;height:15px}
+        main{position:relative;z-index:1}
+        /* Section defaults */
+        .container{max-width:1200px;margin:0 auto;padding:0 1.5rem}
+        section{padding:5rem 0}
+        .section-badge{display:inline-flex;align-items:center;gap:6px;padding:5px 14px;border-radius:999px;border:1px solid rgba(255,255,255,.1);font-size:12px;font-weight:500;color:var(--secondary);margin-bottom:1rem}
+        .section-title{font-size:clamp(1.75rem,4vw,2.5rem);font-weight:800;line-height:1.15;margin-bottom:.75rem;letter-spacing:-.02em}
+        .section-desc{font-size:1.05rem;color:var(--gray-400);max-width:580px;line-height:1.7}
+        .gradient-text{background:linear-gradient(90deg,var(--primary),var(--secondary),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+        /* ===== HERO ===== */
+        .hero{text-align:center;padding:5rem 1.5rem 3rem;position:relative;overflow:hidden}
+        .hero-badge{display:inline-flex;align-items:center;gap:8px;padding:6px 18px;border-radius:999px;border:1px solid rgba(16,185,129,.25);background:rgba(16,185,129,.06);font-size:12px;font-weight:500;color:var(--primary);margin-bottom:1.5rem}
+        .pulse-dot{width:7px;height:7px;border-radius:50%;background:var(--primary);animation:dotPulse 2s ease-in-out infinite}
+        @keyframes dotPulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.3)}}
+        .hero h1{font-size:clamp(2.25rem,5.5vw,3.75rem);font-weight:900;line-height:1.08;margin-bottom:1.25rem;letter-spacing:-.03em}
+        .hero p{font-size:1.15rem;color:var(--gray-400);max-width:620px;margin:0 auto 2rem;line-height:1.7}
+        .hero-actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-bottom:3.5rem}
+        .btn{display:inline-flex;align-items:center;gap:7px;padding:11px 24px;border-radius:var(--radius-sm);font-size:14px;font-weight:600;border:none;cursor:pointer;transition:all .25s;text-decoration:none}
+        .btn-primary{background:linear-gradient(135deg,var(--gradient-start),var(--gradient-end));color:#fff;box-shadow:0 4px 18px rgba(16,185,129,.3)}
+        .btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(16,185,129,.45)}
+        .btn-outline{background:0 0;border:1px solid rgba(255,255,255,.15);color:#fff}
+        .btn-outline:hover{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.25)}
+        .btn-lg{padding:13px 30px;font-size:15px;border-radius:12px}
+        /* Trust bar */
+        .trust-bar{max-width:900px;margin:0 auto;padding:2rem 1.5rem;border-top:1px solid rgba(255,255,255,.06);border-bottom:1px solid rgba(255,255,255,.06)}
+        .trust-label{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--gray-500);margin-bottom:1rem;text-align:center}
+        .trust-logos{display:flex;align-items:center;justify-content:center;gap:2.5rem;flex-wrap:wrap;opacity:.4}
+        .trust-logo{font-size:14px;font-weight:700;color:white;letter-spacing:.02em}
+        /* ===== LIVE TICKER ===== */
+        .ticker{background:rgba(16,185,129,.04);border-top:1px solid rgba(16,185,129,.1);border-bottom:1px solid rgba(16,185,129,.1);overflow:hidden;height:40px;display:flex;align-items:center}
+        .ticker-label{padding:0 1rem;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--primary);white-space:nowrap;border-right:1px solid rgba(16,185,129,.15);height:100%;display:flex;align-items:center;gap:6px;flex-shrink:0}
+        .ticker-track{display:flex;animation:tickerScroll 40s linear infinite;white-space:nowrap}
+        .ticker-item{display:inline-flex;align-items:center;gap:6px;padding:0 1.5rem;font-size:12px;color:var(--gray-300)}
+        .ticker-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0}
+        @keyframes tickerScroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+        /* ===== STATS ===== */
+        .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:rgba(255,255,255,.04);border-radius:var(--radius);overflow:hidden;margin-top:2.5rem}
+        .stat-item{padding:2rem 1.5rem;background:rgba(22,32,50,.6);backdrop-filter:blur(10px);text-align:center}
+        .stat-value{font-size:2rem;font-weight:900;background:linear-gradient(90deg,var(--primary),var(--secondary));-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1.2}
+        .stat-label{font-size:11px;color:var(--gray-500);margin-top:6px;text-transform:uppercase;letter-spacing:.06em}
+        .stat-change{font-size:11px;margin-top:4px;font-weight:600}
+        .stat-change.up{color:var(--success)}
+        .stat-change.down{color:var(--danger)}
+        /* ===== PLATFORM ECOSYSTEM ===== */
+        .eco-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.25rem;margin-top:3rem}
+        .eco-card{background:var(--dark-card);border:1px solid rgba(255,255,255,.06);border-radius:var(--radius);padding:2rem;transition:all .3s;cursor:pointer;position:relative;overflow:hidden}
+        .eco-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;opacity:0;transition:opacity .3s}
+        .eco-card:hover{transform:translateY(-4px);border-color:rgba(16,185,129,.2);box-shadow:0 12px 40px rgba(0,0,0,.3)}
+        .eco-card:hover::before{opacity:1}
+        .eco-card:nth-child(1)::before{background:linear-gradient(90deg,var(--primary),var(--secondary))}
+        .eco-card:nth-child(2)::before{background:linear-gradient(90deg,var(--secondary),var(--accent))}
+        .eco-card:nth-child(3)::before{background:linear-gradient(90deg,var(--accent),#EC4899)}
+        .eco-card:nth-child(4)::before{background:linear-gradient(90deg,var(--warning),#F97316)}
+        .eco-card:nth-child(5)::before{background:linear-gradient(90deg,var(--danger),#F97316)}
+        .eco-card:nth-child(6)::before{background:linear-gradient(90deg,#3B82F6,var(--secondary))}
+        .eco-icon{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:1.25rem}
+        .eco-card h3{font-size:1.1rem;font-weight:700;margin-bottom:.5rem}
+        .eco-card p{font-size:13px;color:var(--gray-400);line-height:1.65;margin-bottom:1rem}
+        .eco-features{list-style:none;display:flex;flex-wrap:wrap;gap:6px}
+        .eco-features li{font-size:11px;padding:4px 10px;border-radius:6px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);color:var(--gray-300)}
+        /* ===== INTERACTIVE DASHBOARD DEMO ===== */
+        .demo-section{background:var(--dark-card);border-top:1px solid rgba(255,255,255,.04);border-bottom:1px solid rgba(255,255,255,.04)}
+        .demo-tabs{display:flex;gap:4px;margin-bottom:2rem;flex-wrap:wrap}
+        .demo-tab{padding:8px 18px;border-radius:8px;font-size:13px;font-weight:600;border:1px solid rgba(255,255,255,.08);background:0 0;color:var(--gray-400);cursor:pointer;transition:all .2s}
+        .demo-tab.active{background:rgba(16,185,129,.1);border-color:rgba(16,185,129,.3);color:var(--primary)}
+        .demo-tab:hover:not(.active){background:rgba(255,255,255,.04);color:white}
+        .demo-panel{display:none}
+        .demo-panel.active{display:block}
+        .demo-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem}
+        .demo-card{background:rgba(15,23,42,.6);border:1px solid rgba(255,255,255,.06);border-radius:var(--radius);padding:1.5rem}
+        .demo-card-title{font-size:13px;font-weight:600;color:var(--gray-300);margin-bottom:1rem;display:flex;align-items:center;gap:8px}
+        .demo-card-title i{color:var(--primary);width:16px;height:16px}
+        /* Mini charts */
+        .mini-stats{display:grid;grid-template-columns:repeat(2,1fr);gap:1rem}
+        .mini-stat{padding:1rem;border-radius:var(--radius-sm);background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.04)}
+        .mini-stat-value{font-size:1.5rem;font-weight:800}
+        .mini-stat-label{font-size:11px;color:var(--gray-500);margin-top:2px}
+        .mini-stat-bar{height:4px;border-radius:2px;background:rgba(255,255,255,.06);margin-top:8px;overflow:hidden}
+        .mini-stat-fill{height:100%;border-radius:2px;transition:width 1.5s ease}
+        /* Risk table */
+        .risk-table{width:100%;font-size:12px}
+        .risk-table th{text-align:left;padding:8px 10px;color:var(--gray-500);font-weight:500;border-bottom:1px solid rgba(255,255,255,.06);font-size:11px;text-transform:uppercase;letter-spacing:.04em}
+        .risk-table td{padding:10px;border-bottom:1px solid rgba(255,255,255,.03);color:var(--gray-300)}
+        .risk-badge{display:inline-block;padding:3px 10px;border-radius:6px;font-size:11px;font-weight:600}
+        .risk-high{background:rgba(239,68,68,.12);color:var(--danger)}
+        .risk-medium{background:rgba(245,158,11,.12);color:var(--warning)}
+        .risk-low{background:rgba(16,185,129,.12);color:var(--success)}
+        /* AI Confidence */
+        .confidence-bar{display:flex;align-items:center;gap:8px;margin:6px 0}
+        .confidence-label{font-size:12px;color:var(--gray-400);width:90px;flex-shrink:0}
+        .confidence-track{flex:1;height:6px;background:rgba(255,255,255,.06);border-radius:3px;overflow:hidden}
+        .confidence-fill{height:100%;border-radius:3px;transition:width 2s ease}
+        .confidence-pct{font-size:12px;font-weight:700;width:40px;text-align:right}
+        /* ===== AI ENGINE ===== */
+        .ai-grid{display:grid;grid-template-columns:1fr 1fr;gap:2rem;margin-top:3rem;align-items:start}
+        .ai-visual{background:var(--dark-card);border:1px solid rgba(255,255,255,.06);border-radius:var(--radius);padding:2rem;position:relative}
+        .ai-features{display:flex;flex-direction:column;gap:1.25rem}
+        .ai-feature{display:flex;gap:1rem;padding:1.25rem;border-radius:var(--radius-sm);background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.04);transition:all .2s}
+        .ai-feature:hover{border-color:rgba(16,185,129,.2);background:rgba(16,185,129,.03)}
+        .ai-feature-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+        .ai-feature h4{font-size:14px;font-weight:600;margin-bottom:4px}
+        .ai-feature p{font-size:12px;color:var(--gray-400);line-height:1.6}
+        /* ===== INDUSTRIES ===== */
+        .ind-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-top:3rem}
+        .ind-card{background:var(--dark-card);border:1px solid rgba(255,255,255,.06);border-radius:var(--radius);padding:1.75rem;text-align:center;transition:all .3s;cursor:pointer}
+        .ind-card:hover{transform:translateY(-3px);border-color:rgba(16,185,129,.2)}
+        .ind-icon{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem}
+        .ind-card h4{font-size:14px;font-weight:600;margin-bottom:.4rem}
+        .ind-card p{font-size:12px;color:var(--gray-500);line-height:1.5}
+        /* ===== COMPLIANCE ===== */
+        .comp-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.25rem;margin-top:3rem}
+        .comp-card{background:var(--dark-card);border:1px solid rgba(255,255,255,.06);border-radius:var(--radius);padding:1.5rem}
+        .comp-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem}
+        .comp-name{font-size:14px;font-weight:600}
+        .comp-score{font-size:22px;font-weight:800}
+        .comp-bar{height:6px;background:rgba(255,255,255,.06);border-radius:3px;overflow:hidden;margin-bottom:.75rem}
+        .comp-fill{height:100%;border-radius:3px}
+        .comp-details{display:flex;justify-content:space-between;font-size:11px;color:var(--gray-500)}
+        /* ===== INTEGRATION LOGOS ===== */
+        .int-logos{display:flex;align-items:center;justify-content:center;gap:3rem;flex-wrap:wrap;margin-top:3rem;opacity:.35}
+        .int-logo{font-size:15px;font-weight:700;color:white}
+        /* ===== CTA ===== */
+        .cta-section{text-align:center;padding:5rem 1.5rem}
+        .cta-card{max-width:650px;margin:0 auto;padding:3.5rem;background:var(--dark-card);border:1px solid rgba(255,255,255,.06);border-radius:24px;position:relative;overflow:hidden}
+        .cta-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--primary),var(--secondary),var(--accent))}
+        .cta-card h2{font-size:2rem;font-weight:800;margin-bottom:1rem}
+        .cta-card>p{color:var(--gray-400);margin-bottom:2rem;line-height:1.7;max-width:480px;margin-left:auto;margin-right:auto}
+        .cta-actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+        /* ===== FOOTER ===== */
+        footer{position:relative;z-index:1;border-top:1px solid rgba(255,255,255,.06);padding:2rem;text-align:center;color:var(--gray-500);font-size:13px}
+        footer a{color:var(--primary);text-decoration:none}
+        /* ===== MODALS ===== */
+        .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(6px);z-index:1000;align-items:center;justify-content:center}
+        .modal-overlay.open{display:flex}
+        .modal{background:var(--dark-lighter);border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:2.5rem;width:100%;max-width:420px;margin:1rem;position:relative;animation:modalIn .25s ease-out}
+        @keyframes modalIn{from{opacity:0;transform:translateY(20px) scale(.97)}to{opacity:1;transform:none}}
+        .modal-close{position:absolute;top:16px;right:16px;width:32px;height:32px;border-radius:8px;border:1px solid rgba(255,255,255,.1);background:0 0;color:var(--gray-400);cursor:pointer;display:flex;align-items:center;justify-content:center}
+        .modal h2{font-size:1.5rem;font-weight:700;margin-bottom:.5rem}
+        .modal>p{color:var(--gray-400);font-size:14px;margin-bottom:1.5rem;line-height:1.6}
+        .form-group{margin-bottom:1rem}
+        .form-group label{display:block;font-size:13px;font-weight:500;margin-bottom:6px;color:var(--gray-300)}
+        .form-group input{width:100%;padding:10px 14px;border-radius:var(--radius-sm);border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:white;font-size:14px;font-family:inherit;outline:none;transition:border-color .2s}
+        .form-group input:focus{border-color:var(--primary)}
+        .form-group input::placeholder{color:var(--gray-500)}
+        .form-submit{width:100%;padding:12px;border-radius:var(--radius-sm);border:none;background:linear-gradient(135deg,var(--gradient-start),var(--gradient-end));color:white;font-size:14px;font-weight:600;cursor:pointer;margin-top:.5rem}
+        .form-submit:hover{box-shadow:0 4px 20px rgba(16,185,129,.4)}
+        .form-submit:disabled{opacity:.6;cursor:not-allowed}
+        .form-footer{text-align:center;margin-top:1.25rem;font-size:13px;color:var(--gray-400)}
+        .form-footer a{color:var(--primary);text-decoration:none;font-weight:500;cursor:pointer}
+        .modal-success{display:none;text-align:center;padding:1rem 0}
+        .modal-success .check-circle{width:56px;height:56px;border-radius:50%;background:rgba(16,185,129,.12);color:var(--primary);display:flex;align-items:center;justify-content:center;margin:0 auto 1rem}
+        .modal-success h3{font-size:1.25rem;font-weight:700;margin-bottom:.5rem}
+        .modal-success p{margin-bottom:1.5rem}
+        /* ===== LIGHT THEME ===== */
+        [data-theme="light"] body{background:#F8FAFC;color:#1E293B}
+        [data-theme="light"] header{background:rgba(248,250,252,.92);border-bottom-color:rgba(0,0,0,.06)}
+        [data-theme="light"] nav a{color:#64748B}
+        [data-theme="light"] nav a:hover{background:rgba(0,0,0,.04);color:#1E293B}
+        [data-theme="light"] nav a.active{color:#fff}
+        [data-theme="light"] .eco-card,.data-theme="light"] .demo-card,[data-theme="light"] .ai-visual,[data-theme="light"] .ind-card,[data-theme="light"] .comp-card,[data-theme="light"] .cta-card{background:#fff;border-color:rgba(0,0,0,.06);box-shadow:0 1px 3px rgba(0,0,0,.04)}
+        [data-theme="light"] .section-title,[data-theme="light"] .hero h1,[data-theme="light"] .cta-card h2,[data-theme="light"] .eco-card h3,[data-theme="light"] .ai-feature h4,[data-theme="light"] .ind-card h4,[data-theme="light"] .comp-name{color:#0F172A}
+        [data-theme="light"] .section-desc,[data-theme="light"] .hero p,[data-theme="light"] .eco-card p,[data-theme="light"] .ai-feature p,[data-theme="light"] .ind-card p,[data-theme="light"] .cta-card>p,[data-theme="light"] .demo-card-title,[data-theme="light"] .risk-table td,[data-theme="light"] .confidence-label,[data-theme="light"] .comp-details{color:#475569}
+        [data-theme="light"] .stat-label,[data-theme="light"] .trust-label,[data-theme="light"] .ticker-label{color:#94A3B8}
+        [data-theme="light"] .stats-grid{background:rgba(0,0,0,.03)}
+        [data-theme="light"] .stat-item{background:#fff}
+        [data-theme="light"] .mini-stat{background:#F8FAFC;border-color:rgba(0,0,0,.06)}
+        [data-theme="light"] .risk-table th{color:#94A3B8;border-bottom-color:rgba(0,0,0,.06)}
+        [data-theme="light"] .risk-table td{border-bottom-color:rgba(0,0,0,.04)}
+        [data-theme="light"] .ticker{background:rgba(16,185,129,.03);border-color:rgba(16,185,129,.08)}
+        [data-theme="light"] .ticker-item{color:#475569}
+        [data-theme="light"] .demo-tab{border-color:rgba(0,0,0,.08);color:#64748B}
+        [data-theme="light"] .demo-tab.active{background:rgba(16,185,129,.08);border-color:rgba(16,185,129,.25);color:#059669}
+        [data-theme="light"] .ai-feature{background:#F8FAFC;border-color:rgba(0,0,0,.04)}
+        [data-theme="light"] .btn-login{color:#1E293B;border-color:rgba(0,0,0,.1)}
+        [data-theme="light"] .btn-outline{border-color:rgba(0,0,0,.1);color:#1E293B}
+        [data-theme="light"] .cc-theme-toggle{color:#94A3B8;border-color:rgba(0,0,0,.08)}
+        [data-theme="light"] .cc-theme-toggle:hover{background:rgba(16,185,129,.06);color:#059669}
+        [data-theme="light"] .bg-mesh::before,[data-theme="light"] .bg-mesh::after{opacity:.05}
+        [data-theme="light"] .bg-grid{background-image:linear-gradient(rgba(0,0,0,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,0,0,.03) 1px,transparent 1px)}
+        [data-theme="light"] .modal{background:#fff;border-color:rgba(0,0,0,.06);box-shadow:0 20px 60px rgba(0,0,0,.1)}
+        [data-theme="light"] .modal h2{color:#0F172A}
+        [data-theme="light"] .modal>p{color:#64748B}
+        [data-theme="light"] .form-group label{color:#475569}
+        [data-theme="light"] .form-group input{background:#F8FAFC;border-color:rgba(0,0,0,.1);color:#1E293B}
+        [data-theme="light"] .form-group input::placeholder{color:#94A3B8}
+        [data-theme="light"] .form-footer{color:#94A3B8}
+        [data-theme="light"] .modal-success h3{color:#0F172A}
+        [data-theme="light"] footer{border-top-color:rgba(0,0,0,.06);color:#94A3B8}
+        [data-theme="light"] .mobile-menu-btn{color:#334155}
+        /* Responsive */
+        @media(max-width:1024px){nav{display:none;position:absolute;top:60px;left:0;right:0;background:rgba(15,23,42,.97);padding:1rem;flex-direction:column}nav.open{display:flex}.mobile-menu-btn{display:block}nav a{padding:10px 14px}.eco-grid{grid-template-columns:repeat(2,1fr)}.demo-grid,.ai-grid{grid-template-columns:1fr}.ind-grid{grid-template-columns:repeat(2,1fr)}.comp-grid{grid-template-columns:1fr 1fr}.trust-logos{gap:1.5rem}}
+        @media(max-width:768px){.stats-grid{grid-template-columns:repeat(2,1fr)}.eco-grid,.ind-grid,.comp-grid{grid-template-columns:1fr}.hero{padding:3.5rem 1rem 2rem}.hero-actions{flex-direction:column;align-items:center}}
+        @media(max-width:640px){section{padding:3rem 0}.mini-stats{grid-template-columns:1fr}.stats-grid{grid-template-columns:1fr 1fr}.header-content{padding:0 1rem}}
+        /* Animations */
+        @keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
+        .animate{animation:fadeUp .7s ease-out both}
+        .delay-1{animation-delay:.1s}.delay-2{animation-delay:.2s}.delay-3{animation-delay:.3s}.delay-4{animation-delay:.4s}
     </style>
 </head>
 <body>
-    <div class="bg-animation"><div class="bg-orb bg-orb-1"></div><div class="bg-orb bg-orb-2"></div><div class="bg-orb bg-orb-3"></div></div>
-
+    <div class="bg-mesh"></div><div class="bg-grid"></div>
     <header>
         <div class="header-content">
             <a href="./index.html" class="logo-section">
-                <div class="logo-icon"><i data-lucide="brain" style="width:24px;height:24px;color:white;"></i></div>
+                <div class="logo-icon"><i data-lucide="brain" style="width:20px;height:20px;color:white"></i></div>
                 <div class="logo-text"><h1>AI Supply Chain</h1><p>Advanced Platform</p></div>
             </a>
-            <button class="mobile-menu-btn" onclick="document.querySelector('nav').classList.toggle('open')"><i data-lucide="menu" style="width:24px;height:24px;"></i></button>
+            <button class="mobile-menu-btn" onclick="document.querySelector('nav').classList.toggle('open')"><i data-lucide="menu" style="width:20px;height:20px"></i></button>
             <nav>
-                <a href="./index.html">Home</a>
-                <a href="./about.html">About</a>
-                <a href="./cc-app/">Command Center ⭐</a>
-                <a href="./dashboard.html" class="active">Dashboard</a>
-                <a href="./intelligence.html">Intelligence</a>
-                <a href="./platform.html">Platform</a>
-                <a href="./product.html">Product</a>
-                <a href="./customers.html">Customers</a>
-                <a href="./industries.html">Industries</a>
-                <a href="./events.html">Events</a>
-                <a href="./support.html">Support</a>
+                <a href="./index.html">Home</a><a href="./about.html">About</a><a href="./cc-app/">Command Center</a><a href="./dashboard.html" class="active">Dashboard</a><a href="./intelligence.html">Intelligence</a><a href="./platform.html">Platform</a><a href="./product.html">Product</a><a href="./customers.html">Customers</a><a href="./industries.html">Industries</a><a href="./events.html">Events</a><a href="./support.html">Support</a>
             </nav>
-            <div class="header-actions" style="display:flex;align-items:center;gap:10px;">
-                <div class="live-badge"><span class="live-dot"></span> LIVE</div>
-                <button class="btn-login" onclick="openModal('login')"><i data-lucide="log-in" style="width:14px;height:14px;"></i> Login</button>
-                <button class="btn-get-started" onclick="openModal('getstarted')"><i data-lucide="rocket" style="width:14px;height:14px;"></i> Get Started</button>
-                <button class="cc-theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path></svg></button>
+            <div class="header-right">
+                <button class="btn-login" onclick="openModal('login')"><i data-lucide="log-in" style="width:13px;height:13px"></i> Login</button>
+                <button class="btn-get-started" onclick="openModal('getstarted')"><i data-lucide="rocket" style="width:13px;height:13px"></i> Get Started</button>
+                <button class="cc-theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path></svg></button>
             </div>
         </div>
     </header>
-
     <main>
-        <!-- Page Header -->
-        <div class="page-header">
-            <!-- Navigation Buttons -->
-            
-            <div class="page-title"><h1><i data-lucide="bar-chart-3" style="color:var(--primary);"></i> Analytics Dashboard</h1></div>
-            <div class="live-badge"><span class="live-dot"></span> Real-Time Data</div>
-        </div>
-
-        <!-- KPI Cards -->
-        <div class="kpi-grid">
-            <div class="kpi-card">
-                <div class="kpi-header">
-                    <div class="kpi-icon" style="background:rgba(244,63,94,0.15);color:#f43f5e;"><i data-lucide="alert-triangle" style="width:22px;height:22px;"></i></div>
-                    <div class="kpi-trend trend-up"><i data-lucide="arrow-up-right" style="width:14px;height:14px;"></i> +12%</div>
-                </div>
-                <div class="kpi-value" style="color:#f43f5e;">24</div>
-                <div class="kpi-label">Active Risks</div>
+        <!-- HERO -->
+        <section class="hero">
+            <div class="hero-badge animate"><span class="pulse-dot"></span> Enterprise Intelligence Platform v3.0</div>
+            <h1 class="animate delay-1">The AI-Native <span class="gradient-text">Supply Chain Brain</span></h1>
+            <p class="animate delay-2">Unify risk intelligence, compliance automation, and predictive analytics into a single platform. SHAP-explainable AI models that don't just predict — they show you why.</p>
+            <div class="hero-actions animate delay-3">
+                <a href="./cc-app/" class="btn btn-primary btn-lg">Launch Command Center <i data-lucide="arrow-right" style="width:18px;height:18px"></i></a>
+                <a href="#platform" class="btn btn-outline btn-lg">Explore Platform</a>
             </div>
-            <div class="kpi-card">
-                <div class="kpi-header">
-                    <div class="kpi-icon" style="background:rgba(16,185,129,0.15);color:#10b981;"><i data-lucide="shield" style="width:22px;height:22px;"></i></div>
-                    <div class="kpi-trend trend-down"><i data-lucide="arrow-down-right" style="width:14px;height:14px;"></i> +23</div>
-                </div>
-                <div class="kpi-value" style="color:#10b981;">847</div>
-                <div class="kpi-label">Suppliers Monitored</div>
+            <div class="stats-grid animate delay-4">
+                <div class="stat-item"><div class="stat-value" data-count="94.2">0</div><div class="stat-label">AI Model Accuracy</div><div class="stat-change up">+2.1% this quarter</div></div>
+                <div class="stat-item"><div class="stat-value" data-count="847">0</div><div class="stat-label">Suppliers Monitored</div><div class="stat-change up">+23 new</div></div>
+                <div class="stat-item"><div class="stat-value" data-count="1.8" data-suffix="s" data-decimal="1">0</div><div class="stat-label">Avg Response Time</div><div class="stat-change up">-0.3s improved</div></div>
+                <div class="stat-item"><div class="stat-value" data-count="99.97" data-suffix="%" data-decimal="2">0</div><div class="stat-label">Platform Uptime</div><div class="stat-change up">Enterprise SLA</div></div>
             </div>
-            <div class="kpi-card">
-                <div class="kpi-header">
-                    <div class="kpi-icon" style="background:rgba(139,92,246,0.15);color:#8b5cf6;"><i data-lucide="brain" style="width:22px;height:22px;"></i></div>
-                    <div class="kpi-trend trend-down"><i data-lucide="arrow-up-right" style="width:14px;height:14px;"></i> +2.1%</div>
-                </div>
-                <div class="kpi-value" style="color:#8b5cf6;">94.2%</div>
-                <div class="kpi-label">AI Model Accuracy</div>
-            </div>
-            <div class="kpi-card">
-                <div class="kpi-header">
-                    <div class="kpi-icon" style="background:rgba(6,182,212,0.15);color:#06b6d4;"><i data-lucide="zap" style="width:22px;height:22px;"></i></div>
-                    <div class="kpi-trend trend-down"><i data-lucide="arrow-down-right" style="width:14px;height:14px;"></i> -0.3s</div>
-                </div>
-                <div class="kpi-value" style="color:#06b6d4;">1.8s</div>
-                <div class="kpi-label">Avg Response Time</div>
+        </section>
+        <!-- TRUST BAR -->
+        <div class="trust-bar animate">
+            <div class="trust-label">Trusted by Industry Leaders</div>
+            <div class="trust-logos">
+                <span class="trust-logo">MAERSK</span><span class="trust-logo">SIEMENS</span><span class="trust-logo">UNILEVER</span><span class="trust-logo">BASF</span><span class="trust-logo">DHL</span><span class="trust-logo">NESTLE</span><span class="trust-logo">SHELL</span><span class="trust-logo">TOYOTA</span>
             </div>
         </div>
-
-        <!-- Main Charts Row -->
-        <div class="charts-grid">
-            <!-- Risk Trend Chart -->
-            <div class="chart-card">
-                <div class="chart-header">
-                    <div class="chart-title"><i data-lucide="activity" style="color:var(--primary);"></i> Risk Trend (Live)</div>
-                    <div class="chart-badge"><span class="live-dot" style="width:6px;height:6px;background:var(--primary);"></span> Live</div>
-                </div>
-                <div class="chart-container"><canvas id="riskTrendChart"></canvas></div>
-            </div>
-            
-            <!-- Risk Distribution Pie -->
-            <div class="chart-card">
-                <div class="chart-header">
-                    <div class="chart-title"><i data-lucide="shield" style="color:var(--primary);"></i> Risk Distribution</div>
-                </div>
-                <div class="chart-container"><canvas id="riskDistChart"></canvas></div>
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:1rem;">
-                    <div style="display:flex;align-items:center;gap:6px;font-size:12px;"><span style="width:10px;height:10px;border-radius:50%;background:#10b981;display:inline-block;"></span> Low <span style="margin-left:auto;font-weight:600;">35%</span></div>
-                    <div style="display:flex;align-items:center;gap:6px;font-size:12px;"><span style="width:10px;height:10px;border-radius:50%;background:#f59e0b;display:inline-block;"></span> Medium <span style="margin-left:auto;font-weight:600;">30%</span></div>
-                    <div style="display:flex;align-items:center;gap:6px;font-size:12px;"><span style="width:10px;height:10px;border-radius:50%;background:#f97316;display:inline-block;"></span> High <span style="margin-left:auto;font-weight:600;">22%</span></div>
-                    <div style="display:flex;align-items:center;gap:6px;font-size:12px;"><span style="width:10px;height:10px;border-radius:50%;background:#f43f5e;display:inline-block;"></span> Critical <span style="margin-left:auto;font-weight:600;">13%</span></div>
+        <!-- LIVE TICKER -->
+        <div class="ticker">
+            <div class="ticker-label"><i data-lucide="activity" style="width:14px;height:14px"></i> LIVE</div>
+            <div style="overflow:hidden;flex:1">
+                <div class="ticker-track">
+                    <span class="ticker-item"><span class="ticker-dot" style="background:var(--danger)"></span> HIGH RISK: APAC Supplier #2847 — Geopolitical tension detected in South China Sea</span>
+                    <span class="ticker-item"><span class="ticker-dot" style="background:var(--warning)"></span> EUDR ALERT: 3 suppliers flagged for deforestation risk in Brazil cocoa supply chain</span>
+                    <span class="ticker-item"><span class="ticker-dot" style="background:var(--success)"></span> COMPLIANCE: ESG Score improved to 87/100 for European manufacturing cluster</span>
+                    <span class="ticker-item"><span class="ticker-dot" style="background:var(--secondary)"></span> AI INSIGHT: Demand forecast model updated — 96.1% accuracy for Q4 projections</span>
+                    <span class="ticker-item"><span class="ticker-dot" style="background:var(--accent)"></span> TENDER: New public procurement opportunity detected — UK NHS Supply Chain Framework</span>
+                    <span class="ticker-item"><span class="ticker-dot" style="background:var(--danger)"></span> DISRUPTION: Port congestion alert — Rotterdam container dwell time +34%</span>
+                    <span class="ticker-item"><span class="ticker-dot" style="background:var(--success)"></span> ONBOARDING: 12 new suppliers passed automated compliance screening</span>
+                    <!-- Duplicate for seamless loop -->
+                    <span class="ticker-item"><span class="ticker-dot" style="background:var(--danger)"></span> HIGH RISK: APAC Supplier #2847 — Geopolitical tension detected in South China Sea</span>
+                    <span class="ticker-item"><span class="ticker-dot" style="background:var(--warning)"></span> EUDR ALERT: 3 suppliers flagged for deforestation risk in Brazil cocoa supply chain</span>
+                    <span class="ticker-item"><span class="ticker-dot" style="background:var(--success)"></span> COMPLIANCE: ESG Score improved to 87/100 for European manufacturing cluster</span>
+                    <span class="ticker-item"><span class="ticker-dot" style="background:var(--secondary)"></span> AI INSIGHT: Demand forecast model updated — 96.1% accuracy for Q4 projections</span>
+                    <span class="ticker-item"><span class="ticker-dot" style="background:var(--accent)"></span> TENDER: New public procurement opportunity detected — UK NHS Supply Chain Framework</span>
+                    <span class="ticker-item"><span class="ticker-dot" style="background:var(--danger)"></span> DISRUPTION: Port congestion alert — Rotterdam container dwell time +34%</span>
+                    <span class="ticker-item"><span class="ticker-dot" style="background:var(--success)"></span> ONBOARDING: 12 new suppliers passed automated compliance screening</span>
                 </div>
             </div>
         </div>
-
-        <!-- Second Row: Demand Forecast & Risk Radar -->
-        <div class="two-col">
-            <!-- Demand Forecasting -->
-            <div class="chart-card">
-                <div class="chart-header">
-                    <div class="chart-title"><i data-lucide="trending-up" style="color:var(--accent);"></i> Demand Forecast</div>
-                    <div class="chart-badge">Next 5 Weeks</div>
+        <!-- PLATFORM ECOSYSTEM -->
+        <section id="platform"><div class="container">
+            <div class="section-badge"><i data-lucide="layers" style="width:13px;height:13px"></i> Unified Platform</div>
+            <h2 class="section-title">Six Pillars of <span class="gradient-text">Intelligent Supply Chain</span></h2>
+            <p class="section-desc">A deeply integrated platform where every module feeds intelligence to the others — creating a compounding advantage no point solution can match.</p>
+            <div class="eco-grid">
+                <div class="eco-card">
+                    <div class="eco-icon" style="background:rgba(16,185,129,.1);color:var(--primary)"><i data-lucide="shield-alert" style="width:24px;height:24px"></i></div>
+                    <h3>Risk Intelligence</h3>
+                    <p>SHAP-explainable AI models that predict, explain, and prioritise supply chain risks across 40+ countries in real time.</p>
+                    <ul class="eco-features"><li>Geopolitical Risk Scoring</li><li>Financial Health Monitoring</li><li>Climate Risk Modelling</li><li>Supplier Dependency Mapping</li></ul>
                 </div>
-                <div class="chart-container"><canvas id="demandChart"></canvas></div>
+                <div class="eco-card">
+                    <div class="eco-icon" style="background:rgba(6,182,212,.1);color:var(--secondary)"><i data-lucide="scale" style="width:24px;height:24px"></i></div>
+                    <h3>Compliance Engine</h3>
+                    <p>Automated regulatory compliance for EUDR, CSDDD, UFLPA, and 50+ global frameworks with real-time audit trails.</p>
+                    <ul class="eco-features"><li>EUDR Due Diligence</li><li>CSDDD Supply Chain Tracing</li><li>Sanctions Screening</li><li>Auto-Document Generation</li></ul>
+                </div>
+                <div class="eco-card">
+                    <div class="eco-icon" style="background:rgba(139,92,246,.1);color:var(--accent)"><i data-lucide="brain-circuit" style="width:24px;height:24px"></i></div>
+                    <h3>Predictive Analytics</h3>
+                    <p>Machine learning models trained on 50M+ data points for demand forecasting, disruption prediction, and optimisation.</p>
+                    <ul class="eco-features"><li>Demand Forecasting</li><li>Disruption Prediction</li><li>Price Optimisation</li><li>Inventory Intelligence</li></ul>
+                </div>
+                <div class="eco-card">
+                    <div class="eco-icon" style="background:rgba(245,158,11,.1);color:var(--warning)"><i data-lucide="file-search" style="width:24px;height:24px"></i></div>
+                    <h3>Tender Management</h3>
+                    <p>AI-powered tender discovery, bid scoring, and contract intelligence across public and private procurement globally.</p>
+                    <ul class="eco-features"><li>Global Tender Discovery</li><li>AI Bid Scoring</li><li>Contract Risk Analysis</li><li>Supplier Matching</li></ul>
+                </div>
+                <div class="eco-card">
+                    <div class="eco-icon" style="background:rgba(239,68,68,.1);color:var(--danger)"><i data-lucide="network" style="width:24px;height:24px"></i></div>
+                    <h3>Supplier Intelligence</h3>
+                    <p>360-degree supplier profiles with ESG scores, financial health, capacity analysis, and relationship mapping.</p>
+                    <ul class="eco-features"><li>ESG Scoring</li><li>Financial Health Check</li><li>Capacity Monitoring</li><li>Diversity & Inclusion</li></ul>
+                </div>
+                <div class="eco-card">
+                    <div class="eco-icon" style="background:rgba(59,130,246,.1);color:#3B82F6"><i data-lucide="plug" style="width:24px;height:24px"></i></div>
+                    <h3>Integration Hub</h3>
+                    <p>200+ pre-built connectors for ERP, CRM, procurement, and logistics systems with real-time bi-directional sync.</p>
+                    <ul class="eco-features"><li>SAP / Oracle Connectors</li><li>REST & GraphQL APIs</li><li>Webhook Automation</li><li>EDI & AS2 Support</li></ul>
+                </div>
             </div>
-            
-            <!-- Risk Categories Radar -->
-            <div class="chart-card">
-                <div class="chart-header">
-                    <div class="chart-title"><i data-lucide="brain" style="color:var(--secondary);"></i> Risk Categories</div>
-                </div>
-                <div class="chart-container"><canvas id="radarChart"></canvas></div>
+        </div></section>
+        <!-- INTERACTIVE DASHBOARD DEMO -->
+        <section class="demo-section" style="padding:5rem 0"><div class="container">
+            <div class="section-badge"><i data-lucide="monitor" style="width:13px;height:13px"></i> Live Preview</div>
+            <h2 class="section-title">Intelligence at a <span class="gradient-text">Glance</span></h2>
+            <p class="section-desc" style="margin-bottom:2rem">Real-time dashboards that surface what matters. Every metric is clickable, every insight is explainable.</p>
+            <div class="demo-tabs">
+                <button class="demo-tab active" onclick="switchDemo('risk')">Risk Monitor</button>
+                <button class="demo-tab" onclick="switchDemo('compliance')">Compliance</button>
+                <button class="demo-tab" onclick="switchDemo('ai')">AI Engine</button>
             </div>
-        </div>
-
-        <!-- Bottom Section: Live Alerts & Regional Data -->
-        <div style="display:grid;grid-template-columns:2fr 1fr;gap:1.5rem;">
-            <!-- Live Alerts Feed -->
-            <div class="alerts-section">
-                <div class="alerts-header">
-                    <div class="chart-title"><i data-lucide="eye" style="color:#f43f5e;"></i> Live Alerts</div>
-                    <div class="alert-count"><span class="live-dot" style="width:6px;height:6px;background:white;"></span> 4 Active</div>
-                </div>
-                <div class="alert-list">
-                    <div class="alert-item">
-                        <div class="alert-dot critical"></div>
-                        <div class="alert-content">
-                            <div class="alert-supplier">TechComp Asia</div>
-                            <div class="alert-desc">Potential disruption detected - Financial stress indicators</div>
-                        </div>
-                        <div class="alert-time">2m ago</div>
+            <!-- RISK PANEL -->
+            <div class="demo-panel active" id="panel-risk">
+                <div class="demo-grid">
+                    <div class="demo-card">
+                        <div class="demo-card-title"><i data-lucide="alert-triangle"></i> Active Risk Alerts</div>
+                        <table class="risk-table">
+                            <thead><tr><th>Risk</th><th>Supplier</th><th>Region</th><th>Level</th></tr></thead>
+                            <tbody>
+                                <tr><td>Geopolitical Tension</td><td>ShenZhen Tech Co.</td><td>APAC</td><td><span class="risk-badge risk-high">HIGH</span></td></tr>
+                                <tr><td>Financial Distress</td><td>Nordic Logistics AB</td><td>Europe</td><td><span class="risk-badge risk-high">HIGH</span></td></tr>
+                                <tr><td>EUDR Non-Compliance</td><td>AgriBrasil Ltda</td><td>LATAM</td><td><span class="risk-badge risk-medium">MED</span></td></tr>
+                                <tr><td>Port Congestion</td><td>Rotterdam Shipping</td><td>Europe</td><td><span class="risk-badge risk-medium">MED</span></td></tr>
+                                <tr><td>Currency Volatility</td><td>Istanbul Metals</td><td>MEA</td><td><span class="risk-badge risk-low">LOW</span></td></tr>
+                            </tbody>
+                        </table>
                     </div>
-                    <div class="alert-item">
-                        <div class="alert-dot warning"></div>
-                        <div class="alert-content">
-                            <div class="alert-supplier">EuroManufacturing GmbH</div>
-                            <div class="alert-desc">Financial stress detected - Credit rating downgrade risk</div>
+                    <div class="demo-card">
+                        <div class="demo-card-title"><i data-lucide="globe"></i> Regional Risk Distribution</div>
+                        <canvas id="chart-risk-donut" height="220"></canvas>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-top:1rem">
+                            <div class="mini-stat"><div class="mini-stat-value" style="color:var(--danger)">62</div><div class="mini-stat-label">APAC Risk Score</div><div class="mini-stat-bar"><div class="mini-stat-fill" style="width:62%;background:linear-gradient(90deg,#f59e0b,#ef4444)"></div></div></div>
+                            <div class="mini-stat"><div class="mini-stat-value" style="color:var(--success)">38</div><div class="mini-stat-label">Europe Risk Score</div><div class="mini-stat-bar"><div class="mini-stat-fill" style="width:38%;background:var(--success)"></div></div></div>
+                            <div class="mini-stat"><div class="mini-stat-value" style="color:var(--success)">25</div><div class="mini-stat-label">N. America Score</div><div class="mini-stat-bar"><div class="mini-stat-fill" style="width:25%;background:var(--success)"></div></div></div>
+                            <div class="mini-stat"><div class="mini-stat-value" style="color:var(--warning)">71</div><div class="mini-stat-label">MEA Risk Score</div><div class="mini-stat-bar"><div class="mini-stat-fill" style="width:71%;background:linear-gradient(90deg,#eab308,#ef4444)"></div></div></div>
                         </div>
-                        <div class="alert-time">15m ago</div>
-                    </div>
-                    <div class="alert-item">
-                        <div class="alert-dot info"></div>
-                        <div class="alert-content">
-                            <div class="alert-supplier">GlobalLogistics Co</div>
-                            <div class="alert-desc">Route optimization recommended for APAC-EU corridor</div>
-                        </div>
-                        <div class="alert-time">32m ago</div>
-                    </div>
-                    <div class="alert-item">
-                        <div class="alert-dot critical"></div>
-                        <div class="alert-content">
-                            <div class="alert-supplier">SemiconTech Inc.</div>
-                            <div class="alert-desc">Supply constraint alert - Semiconductor shortage impact</div>
-                        </div>
-                        <div class="alert-time">1h ago</div>
                     </div>
                 </div>
             </div>
-            
-            <!-- Regional Overview -->
-            <div class="chart-card" style="padding:1.25rem;">
-                <div class="chart-header" style="margin-bottom:1rem;">
-                    <div class="chart-title"><i data-lucide="globe" style="color:var(--primary);font-size:16px;"></i> Regional View</div>
-                </div>
-                <div class="region-item">
-                    <div class="region-header"><span class="region-name">APAC</span><span class="region-score">342</span></div>
-                    <div class="progress-bar"><div class="progress-fill" style="width:62%;background:linear-gradient(90deg,#f59e0b,#f97316);"></div></div>
-                    <div style="font-size:11px;color:var(--gray-500);margin-top:4px;">Risk Score: 62</div>
-                </div>
-                <div class="region-item">
-                    <div class="region-header"><span class="region-name">Europe</span><span class="region-score">256</span></div>
-                    <div class="progress-bar"><div class="progress-fill" style="width:38%;background:var(--success);"></div></div>
-                    <div style="font-size:11px;color:var(--gray-500);margin-top:4px;">Risk Score: 38</div>
-                </div>
-                <div class="region-item">
-                    <div class="region-header"><span class="region-name">N. America</span><span class="region-score">189</span></div>
-                    <div class="progress-bar"><div class="progress-fill" style="width:25%;background:var(--success);"></div></div>
-                    <div style="font-size:11px;color:var(--gray-500);margin-top:4px;">Risk Score: 25</div>
-                </div>
-                <div class="region-item">
-                    <div class="region-header"><span class="region-name">LATAM</span><span class="region-score">42</span></div>
-                    <div class="progress-bar"><div class="progress-fill" style="width:48%;background:linear-gradient(90deg,#eab308,#f59e0b);"></div></div>
-                    <div style="font-size:11px;color:var(--gray-500);margin-top:4px;">Risk Score: 48</div>
-                </div>
-                <div class="region-item">
-                    <div class="region-header"><span class="region-name">MEA</span><span class="region-score">18</span></div>
-                    <div class="progress-bar"><div class="progress-fill" style="width:71%;background:linear-gradient(90deg,#ef4444,#dc2626);"></div></div>
-                    <div style="font-size:11px;color:var(--gray-500);margin-top:4px;">Risk Score: 71</div>
+            <!-- COMPLIANCE PANEL -->
+            <div class="demo-panel" id="panel-compliance">
+                <div class="demo-grid">
+                    <div style="display:flex;flex-direction:column;gap:1.25rem">
+                        <div class="demo-card"><div class="comp-header"><span class="comp-name">EUDR (EU Deforestation)</span><span class="comp-score" style="color:var(--warning)">72%</span></div><div class="comp-bar"><div class="comp-fill" style="width:72%;background:linear-gradient(90deg,var(--warning),#F97316)"></div></div><div class="comp-details"><span>847 suppliers assessed</span><span>12 gaps identified</span></div></div>
+                        <div class="demo-card"><div class="comp-header"><span class="comp-name">CSDDD (Corporate Sustainability)</span><span class="comp-score" style="color:var(--primary)">91%</span></div><div class="comp-bar"><div class="comp-fill" style="width:91%;background:var(--success)"></div></div><div class="comp-details"><span>Full value chain mapped</span><span>3 actions pending</span></div></div>
+                        <div class="demo-card"><div class="comp-header"><span class="comp-name">UFLPA (Forced Labour)</span><span class="comp-score" style="color:var(--success)">96%</span></div><div class="comp-bar"><div class="comp-fill" style="width:96%;background:var(--success)"></div></div><div class="comp-details"><span>632 entities screened</span><span>0 violations</span></div></div>
+                    </div>
+                    <div class="demo-card">
+                        <div class="demo-card-title"><i data-lucide="trending-up"></i> Compliance Trend (12 months)</div>
+                        <canvas id="chart-compliance-trend" height="260"></canvas>
+                    </div>
                 </div>
             </div>
-        </div>
+            <!-- AI PANEL -->
+            <div class="demo-panel" id="panel-ai">
+                <div class="demo-grid">
+                    <div class="demo-card">
+                        <div class="demo-card-title"><i data-lucide="brain"></i> SHAP Model Explainability</div>
+                        <p style="font-size:12px;color:var(--gray-400);margin-bottom:1.25rem;line-height:1.6">Top factors driving the current risk score for APAC Supplier #2847. Each bar shows the magnitude and direction of a feature's contribution.</p>
+                        <div class="confidence-bar"><span class="confidence-label">Geopolitical</span><div class="confidence-track"><div class="confidence-fill" style="width:92%;background:linear-gradient(90deg,var(--primary),var(--secondary))"></div></div><span class="confidence-pct" style="color:var(--danger)">+0.34</span></div>
+                        <div class="confidence-bar"><span class="confidence-label">Financial</span><div class="confidence-track"><div class="confidence-fill" style="width:68%;background:linear-gradient(90deg,var(--warning),#F97316)"></div></div><span class="confidence-pct" style="color:var(--warning)">+0.21</span></div>
+                        <div class="confidence-bar"><span class="confidence-label">ESG Score</span><div class="confidence-track"><div class="confidence-fill" style="width:45%;background:linear-gradient(90deg,var(--secondary),var(--accent))"></div></div><span class="confidence-pct">+0.12</span></div>
+                        <div class="confidence-bar"><span class="confidence-label">Lead Time</span><div class="confidence-track"><div class="confidence-fill" style="width:30%;background:var(--primary)"></div></div><span class="confidence-pct">+0.08</span></div>
+                        <div class="confidence-bar"><span class="confidence-label">Diversification</span><div class="confidence-track"><div class="confidence-fill" style="width:55%;background:var(--success)"></div></div><span class="confidence-pct" style="color:var(--success)">-0.15</span></div>
+                        <div class="confidence-bar"><span class="confidence-label">Certifications</span><div class="confidence-track"><div class="confidence-fill" style="width:40%;background:var(--success)"></div></div><span class="confidence-pct" style="color:var(--success)">-0.11</span></div>
+                    </div>
+                    <div class="demo-card">
+                        <div class="demo-card-title"><i data-lucide="cpu"></i> AI Performance Metrics</div>
+                        <div class="mini-stats" style="margin-bottom:1.25rem">
+                            <div class="mini-stat"><div class="mini-stat-value" style="color:var(--primary)">94.2%</div><div class="mini-stat-label">Model Accuracy</div></div>
+                            <div class="mini-stat"><div class="mini-stat-value" style="color:var(--secondary)">0.03</div><div class="mini-stat-label">RMSE Score</div></div>
+                            <div class="mini-stat"><div class="mini-stat-value" style="color:var(--accent)">1.2s</div><div class="mini-stat-label">Inference Time</div></div>
+                            <div class="mini-stat"><div class="mini-stat-value" style="color:var(--warning)">96.1%</div><div class="mini-stat-label">Forecast Accuracy</div></div>
+                        </div>
+                        <canvas id="chart-ai-accuracy" height="160"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div></section>
+        <!-- AI ENGINE DEEP DIVE -->
+        <section><div class="container">
+            <div class="section-badge"><i data-lucide="sparkles" style="width:13px;height:13px"></i> AI-Native Architecture</div>
+            <h2 class="section-title">Not Just AI. <span class="gradient-text">Explainable AI.</span></h2>
+            <p class="section-desc">Every prediction comes with a reason. SHAP values, confidence intervals, and feature attribution so your team can trust and act on every insight.</p>
+            <div class="ai-grid">
+                <div class="ai-visual">
+                    <canvas id="chart-shap" height="300"></canvas>
+                </div>
+                <div class="ai-features">
+                    <div class="ai-feature"><div class="ai-feature-icon" style="background:rgba(16,185,129,.1);color:var(--primary)"><i data-lucide="eye" style="width:20px;height:20px"></i></div><div><h4>SHAP Explainability</h4><p>Every risk score decomposed into contributing factors. Auditors, regulators, and stakeholders see exactly why the AI made each decision.</p></div></div>
+                    <div class="ai-feature"><div class="ai-feature-icon" style="background:rgba(6,182,212,.1);color:var(--secondary)"><i data-lucide="refresh-cw" style="width:20px;height:20px"></i></div><div><h4>Continuous Learning</h4><p>Models retrain automatically on new data. Feedback loops from your team improve accuracy without manual intervention — 94.2% and climbing.</p></div></div>
+                    <div class="ai-feature"><div class="ai-feature-icon" style="background:rgba(139,92,246,.1);color:var(--accent)"><i data-lucide="git-branch" style="width:20px;height:20px"></i></div><div><h4>Scenario Modelling</h4><p>Run "what-if" simulations: supplier loss, port closure, demand spike. See quantified impact in seconds with Monte Carlo confidence intervals.</p></div></div>
+                    <div class="ai-feature"><div class="ai-feature-icon" style="background:rgba(245,158,11,.1);color:var(--warning)"><i data-lucide="bell-ring" style="width:20px;height:20px"></i></div><div><h4>Anomaly Detection</h4><p>Unsupervised learning flags unusual patterns — order volume spikes, payment anomalies, shipping delays — before they become disruptions.</p></div></div>
+                </div>
+            </div>
+        </div></section>
+        <!-- INDUSTRIES -->
+        <section style="background:var(--dark-card);border-top:1px solid rgba(255,255,255,.04);border-bottom:1px solid rgba(255,255,255,.04)"><div class="container">
+            <div class="section-badge"><i data-lucide="building-2" style="width:13px;height:13px"></i> Industry Solutions</div>
+            <h2 class="section-title">Built for <span class="gradient-text">Your Industry</span></h2>
+            <p class="section-desc">Pre-configured compliance frameworks, risk models, and KPIs for every vertical — out of the box.</p>
+            <div class="ind-grid">
+                <div class="ind-card"><div class="ind-icon" style="background:rgba(16,185,129,.08);color:var(--primary)"><i data-lucide="factory" style="width:24px;height:24px"></i></div><h4>Manufacturing</h4><p>Supplier quality, production risk, and EUDR traceability</p></div>
+                <div class="ind-card"><div class="ind-icon" style="background:rgba(6,182,212,.08);color:var(--secondary)"><i data-lucide="pill" style="width:24px;height:24px"></i></div><h4>Pharmaceuticals</h4><p>Cold chain monitoring, GMP compliance, and drug traceability</p></div>
+                <div class="ind-card"><div class="ind-icon" style="background:rgba(139,92,246,.08);color:var(--accent)"><i data-lucide="shopping-cart" style="width:24px;height:24px"></i></div><h4>Retail & CPG</h4><p>Demand sensing, shelf availability, and supplier diversification</p></div>
+                <div class="ind-card"><div class="ind-icon" style="background:rgba(245,158,11,.08);color:var(--warning)"><i data-lucide="zap" style="width:24px;height:24px"></i></div><h4>Energy & Utilities</h4><p>Equipment procurement, sanctions compliance, and ESG reporting</p></div>
+                <div class="ind-card"><div class="ind-icon" style="background:rgba(239,68,68,.08);color:var(--danger)"><i data-lucide="truck" style="width:24px;height:24px"></i></div><h4>Logistics & Freight</h4><p>Carrier performance, route optimisation, and carbon tracking</p></div>
+                <div class="ind-card"><div class="ind-icon" style="background:rgba(59,130,246,.08);color:#3B82F6"><i data-lucide="landmark" style="width:24px;height:24px"></i></div><h4>Public Sector</h4><p>Tender intelligence, procurement transparency, and spend analytics</p></div>
+                <div class="ind-card"><div class="ind-icon" style="background:rgba(236,72,153,.08);color:#EC4899"><i data-lucide="wheat" style="width:24px;height:24px"></i></div><h4>Food & Agriculture</h4><p>EUDR compliance, farm-to-fork traceability, and sustainability</p></div>
+                <div class="ind-card"><div class="ind-icon" style="background:rgba(34,197,94,.08);color:var(--success)"><i data-lucide="hard-hat" style="width:24px;height:24px"></i></div><h4>Construction</h4><p>Materials procurement, supplier safety, and project risk</p></div>
+            </div>
+        </div></section>
+        <!-- INTEGRATIONS -->
+        <section><div class="container" style="text-align:center">
+            <div class="section-badge"><i data-lucide="plug" style="width:13px;height:13px"></i> 200+ Integrations</div>
+            <h2 class="section-title" style="margin:0 auto .75rem">Connects to <span class="gradient-text">Everything</span></h2>
+            <p class="section-desc" style="margin:0 auto">Pre-built connectors for every major ERP, procurement, and logistics platform. Zero-code setup with real-time bi-directional sync.</p>
+            <div class="int-logos">
+                <span class="int-logo">SAP</span><span class="int-logo">Oracle</span><span class="int-logo">Microsoft</span><span class="int-logo">Salesforce</span><span class="int-logo">Workday</span><span class="int-logo">Coupa</span><span class="int-logo">Jaggaer</span><span class="int-logo">Kinaxis</span><span class="int-logo">Blue Yonder</span><span class="int-logo">ServiceNow</span>
+            </div>
+        </div></section>
+        <!-- CTA -->
+        <section class="cta-section">
+            <div class="cta-card">
+                <h2>Ready to Build a <span class="gradient-text">Resilient Supply Chain</span>?</h2>
+                <p>Join 150+ enterprises using AI-native intelligence to predict risks, automate compliance, and optimise every link in the chain.</p>
+                <div class="cta-actions">
+                    <a href="./cc-app/" class="btn btn-primary btn-lg">Launch Command Center <i data-lucide="rocket" style="width:18px;height:18px"></i></a>
+                    <a href="./support.html" class="btn btn-outline btn-lg">Talk to Sales</a>
+                </div>
+            </div>
+        </section>
     </main>
-
-    <!-- Login Modal -->
-    <div class="modal-overlay" id="modal-login" onclick="if(event.target===this)closeModal('login')">
-        <div class="modal">
-            <button class="modal-close" onclick="closeModal('login')"><i data-lucide="x" style="width:16px;height:16px;"></i></button>
-            <div id="login-form-view">
-                <h2>Welcome Back</h2>
-                <p>Sign in to access your AI Supply Chain dashboard and intelligence tools.</p>
-                <form onsubmit="handleLogin(event)">
-                    <div class="form-group"><label>Email</label><input type="email" placeholder="you@company.com" required id="login-email"></div>
-                    <div class="form-group"><label>Password</label><input type="password" placeholder="Enter your password" required id="login-password" minlength="6"></div>
-                    <button type="submit" class="form-submit">Sign In</button>
-                </form>
-                <div class="form-footer">Don't have an account? <a onclick="closeModal('login');openModal('getstarted')">Get Started</a></div>
-            </div>
-            <div class="modal-success" id="login-success">
-                <div class="check-circle"><i data-lucide="check" style="width:28px;height:28px;"></i></div>
-                <h3>Login Successful</h3>
-                <p>Welcome back! Redirecting to your Command Center...</p>
-                <button class="form-submit" onclick="window.location.href='./cc-app/'">Go to Command Center</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Get Started Modal -->
-    <div class="modal-overlay" id="modal-getstarted" onclick="if(event.target===this)closeModal('getstarted')">
-        <div class="modal">
-            <button class="modal-close" onclick="closeModal('getstarted')"><i data-lucide="x" style="width:16px;height:16px;"></i></button>
-            <div id="getstarted-form-view">
-                <h2>Get Started Free</h2>
-                <p>Create your account and start exploring AI-powered supply chain intelligence in minutes.</p>
-                <form onsubmit="handleGetStarted(event)">
-                    <div class="form-group"><label>Full Name</label><input type="text" placeholder="John Smith" required id="gs-name"></div>
-                    <div class="form-group"><label>Work Email</label><input type="email" placeholder="you@company.com" required id="gs-email"></div>
-                    <div class="form-group"><label>Company</label><input type="text" placeholder="Company name" required id="gs-company"></div>
-                    <div class="form-group"><label>Password</label><input type="password" placeholder="Min. 8 characters" required id="gs-password" minlength="8"></div>
-                    <button type="submit" class="form-submit">Create Account</button>
-                </form>
-                <div class="form-footer">Already have an account? <a onclick="closeModal('getstarted');openModal('login')">Sign In</a></div>
-            </div>
-            <div class="modal-success" id="getstarted-success">
-                <div class="check-circle"><i data-lucide="check" style="width:28px;height:28px;"></i></div>
-                <h3>Account Created!</h3>
-                <p>Your free trial is ready. Launching the Command Center...</p>
-                <button class="form-submit" onclick="window.location.href='./cc-app/'">Launch Command Center</button>
-            </div>
-        </div>
-    </div>
-
+    <!-- MODALS -->
+    <div class="modal-overlay" id="modal-login" onclick="if(event.target===this)closeModal('login')"><div class="modal"><button class="modal-close" onclick="closeModal('login')"><i data-lucide="x" style="width:16px;height:16px"></i></button><div id="login-form-view"><h2>Welcome Back</h2><p>Sign in to access your AI Supply Chain dashboard and intelligence tools.</p><form onsubmit="handleLogin(event)"><div class="form-group"><label>Email</label><input type="email" placeholder="you@company.com" required></div><div class="form-group"><label>Password</label><input type="password" placeholder="Enter your password" required minlength="6"></div><button type="submit" class="form-submit">Sign In</button></form><div class="form-footer">Don't have an account? <a onclick="closeModal('login');openModal('getstarted')">Get Started</a></div></div><div class="modal-success" id="login-success"><div class="check-circle"><i data-lucide="check" style="width:28px;height:28px"></i></div><h3>Login Successful</h3><p>Welcome back! Redirecting to your Command Center...</p><button class="form-submit" onclick="window.location.href='./cc-app/'">Go to Command Center</button></div></div></div>
+    <div class="modal-overlay" id="modal-getstarted" onclick="if(event.target===this)closeModal('getstarted')"><div class="modal"><button class="modal-close" onclick="closeModal('getstarted')"><i data-lucide="x" style="width:16px;height:16px"></i></button><div id="getstarted-form-view"><h2>Get Started Free</h2><p>Create your account and start exploring AI-powered supply chain intelligence in minutes.</p><form onsubmit="handleGetStarted(event)"><div class="form-group"><label>Full Name</label><input type="text" placeholder="John Smith" required></div><div class="form-group"><label>Work Email</label><input type="email" placeholder="you@company.com" required></div><div class="form-group"><label>Company</label><input type="text" placeholder="Company name" required></div><div class="form-group"><label>Password</label><input type="password" placeholder="Min. 8 characters" required minlength="8"></div><button type="submit" class="form-submit">Create Account</button></form><div class="form-footer">Already have an account? <a onclick="closeModal('getstarted');openModal('login')">Sign In</a></div></div><div class="modal-success" id="getstarted-success"><div class="check-circle"><i data-lucide="check" style="width:28px;height:28px"></i></div><h3>Account Created!</h3><p>Your free trial is ready. Launching the Command Center...</p><button class="form-submit" onclick="window.location.href='./cc-app/'">Launch Command Center</button></div></div></div>
     <footer><p>&copy; 2026 AI Supply Chain Advanced. All rights reserved. | <a href="./support.html">Support</a></p></footer>
-
-    <script>    lucide.createIcons();
-
-    // Modal functions
-    function openModal(type) {
-        document.getElementById('modal-' + type).classList.add('open');
-        document.body.style.overflow = 'hidden';
-        // Reset to form view
-        var formView = document.getElementById(type + '-form-view');
-        var successView = document.getElementById(type + '-success');
-        if (formView) formView.style.display = 'block';
-        if (successView) successView.style.display = 'none';
-        if (typeof lucide !== 'undefined') lucide.createIcons();
-    }
-    function closeModal(type) {
-        document.getElementById('modal-' + type).classList.remove('open');
-        document.body.style.overflow = '';
-    }
-    function handleLogin(e) {
-        e.preventDefault();
-        var btn = e.target.querySelector('.form-submit');
-        btn.disabled = true; btn.textContent = 'Signing in...';
-        setTimeout(function() {
-            document.getElementById('login-form-view').style.display = 'none';
-            document.getElementById('login-success').style.display = 'block';
-            if (typeof lucide !== 'undefined') lucide.createIcons();
-        }, 1200);
-    }
-    function handleGetStarted(e) {
-        e.preventDefault();
-        var btn = e.target.querySelector('.form-submit');
-        btn.disabled = true; btn.textContent = 'Creating account...';
-        setTimeout(function() {
-            document.getElementById('getstarted-form-view').style.display = 'none';
-            document.getElementById('getstarted-success').style.display = 'block';
-            if (typeof lucide !== 'undefined') lucide.createIcons();
-        }, 1500);
-    }
-    // Close modals on Escape
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') { closeModal('login'); closeModal('getstarted'); }
-    });
-
-    function toggleTheme() {
-        var current = document.documentElement.getAttribute('data-theme');
-        var next = current === 'light' ? 'dark' : 'light';
-        document.documentElement.setAttribute('data-theme', next);
-        localStorage.setItem('theme', next);
-        document.querySelectorAll('.cc-theme-toggle').forEach(function(btn) {
-            btn.innerHTML = next === 'dark' ? '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path></svg>' : '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path></svg>';
-        });
-        if (typeof lucide !== 'undefined') lucide.createIcons();
-    }
-    document.addEventListener('DOMContentLoaded', function() {
-        var saved = localStorage.getItem('theme') || 'dark';
-        document.documentElement.setAttribute('data-theme', saved);
-        document.querySelectorAll('.cc-theme-toggle').forEach(function(btn) {
-            btn.innerHTML = saved === 'dark' ? '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path></svg>' : '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path></svg>';
-        });
-    });</script>
+    <script>
+    lucide.createIcons();
+    // ===== COUNTER ANIMATION =====
+    function animateCounters(){document.querySelectorAll('.stat-value[data-count]').forEach(function(el){var target=parseFloat(el.dataset.count);var suffix=el.dataset.suffix||'';var decimal=parseInt(el.dataset.decimal)||0;var duration=2000;var start=0;var startTime=null;function step(ts){if(!startTime)startTime=ts;var progress=Math.min((ts-startTime)/duration,1);var eased=1-Math.pow(1-progress,3);var current=start+(target-start)*eased;el.textContent=current.toFixed(decimal)+suffix;if(progress<1)requestAnimationFrame(step)};var observer=new IntersectionObserver(function(entries){entries.forEach(function(e){if(e.isIntersecting){requestAnimationFrame(step);observer.unobserve(el)}})},{threshold:.5});observer.observe(el)})}
+    // ===== DEMO TABS =====
+    function switchDemo(id){document.querySelectorAll('.demo-tab').forEach(function(t){t.classList.remove('active')});document.querySelectorAll('.demo-panel').forEach(function(p){p.classList.remove('active')});event.target.classList.add('active');document.getElementById('panel-'+id).classList.add('active');if(id==='risk'&&!window._chartRisk){initRiskChart()}if(id==='compliance'&&!window._chartComp){initCompChart()}if(id==='ai'&&!window._chartAI){initAIChart()}}
+    // ===== CHARTS =====
+    var chartDefaults={responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#94A3B8',font:{size:11,family:'Inter'}}}}};
+    function initRiskChart(){window._chartRisk=true;var ctx=document.getElementById('chart-risk-donut');if(!ctx)return;new Chart(ctx,{type:'doughnut',data:{labels:['APAC','Europe','N. America','LATAM','MEA'],datasets:[{data:[342,256,189,42,18],backgroundColor:['#F59E0B','#10B981','#10B981','#F59E0B','#EF4444'],borderWidth:0,borderRadius:4}]},options:{...chartDefaults,cutout:'72%',plugins:{...chartDefaults.plugins,legend:{position:'bottom',labels:{...chartDefaults.plugins.legend.labels,padding:12,usePointStyle:true,pointStyleWidth:8}}}}})}
+    function initCompChart(){window._chartComp=true;var ctx=document.getElementById('chart-compliance-trend');if(!ctx)return;new Chart(ctx,{type:'line',data:{labels:['Sep','Oct','Nov','Dec','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug'],datasets:[{label:'EUDR',data:[52,58,61,64,66,68,69,70,70,71,71,72],borderColor:'#F59E0B',backgroundColor:'rgba(245,158,11,.1)',fill:true,tension:.4,pointRadius:2},{label:'CSDDD',data:[72,75,78,81,83,85,86,88,89,90,90,91],borderColor:'#10B981',backgroundColor:'rgba(16,185,129,.1)',fill:true,tension:.4,pointRadius:2},{label:'UFLPA',data:[88,89,90,91,92,93,94,94,95,95,96,96],borderColor:'#06B6D4',backgroundColor:'rgba(6,182,212,.1)',fill:true,tension:.4,pointRadius:2}]},options:{...chartDefaults,scales:{x:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#64748B',font:{size:10}}},y:{min:40,max:100,grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#64748B',font:{size:10},callback:function(v){return v+'%'}}}},plugins:{...chartDefaults.plugins}}})}
+    function initAIChart(){window._chartAI=true;var ctx=document.getElementById('chart-ai-accuracy');if(!ctx)return;new Chart(ctx,{type:'bar',data:{labels:['Risk Pred.','Demand','Anomaly','Compliance','Price Opt.'],datasets:[{label:'Accuracy %',data:[94.2,96.1,91.8,97.3,89.6],backgroundColor:['rgba(16,185,129,.7)','rgba(6,182,212,.7)','rgba(139,92,246,.7)','rgba(34,197,94,.7)','rgba(245,158,11,.7)'],borderRadius:6,borderSkipped:false}]},options:{...chartDefaults,indexAxis:'y',scales:{x:{min:80,max:100,grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#64748B',font:{size:10},callback:function(v){return v+'%'}}},y:{grid:{display:false},ticks:{color:'#CBD5E1',font:{size:11,family:'Inter'}}}},plugins:{...chartDefaults.plugins,legend:{display:false}}}})}
+    // SHAP chart (init on scroll)
+    function initSHAPChart(){if(window._chartSHAP)return;window._chartSHAP=true;var ctx=document.getElementById('chart-shap');if(!ctx)return;new Chart(ctx,{type:'bar',data:{labels:['Geopolitical Risk','Financial Health','ESG Score','Lead Time Var.','Supplier Age','Order Volume','Certification','Diversification'],datasets:[{label:'SHAP Value',data:[0.34,0.21,0.12,0.08,0.06,0.05,-0.11,-0.15],backgroundColor:function(ctx){return ctx.raw>=0?'rgba(239,68,68,.65)':'rgba(16,185,129,.65)'},borderRadius:4,borderSkipped:false}]},options:{...chartDefaults,indexAxis:'y',scales:{x:{title:{display:true,text:'Impact on Risk Score',color:'#64748B',font:{size:10}},grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#64748B',font:{size:9}}},y:{grid:{display:false},ticks:{color:'#CBD5E1',font:{size:10,family:'Inter'}}}},plugins:{...chartDefaults.plugins,legend:{display:false}}}})}
+    var shapObserver=new IntersectionObserver(function(entries){entries.forEach(function(e){if(e.isIntersecting)initSHAPChart()})},{threshold:.3});
+    var shapEl=document.getElementById('chart-shap');if(shapEl)shapObserver.observe(shapEl);
+    // ===== MODALS =====
+    function openModal(t){document.getElementById('modal-'+t).classList.add('open');document.body.style.overflow='hidden';var f=document.getElementById(t+'-form-view'),s=document.getElementById(t+'-success');if(f)f.style.display='block';if(s)s.style.display='none';lucide.createIcons()}
+    function closeModal(t){document.getElementById('modal-'+t).classList.remove('open');document.body.style.overflow=''}
+    function handleLogin(e){e.preventDefault();var b=e.target.querySelector('.form-submit');b.disabled=true;b.textContent='Signing in...';setTimeout(function(){document.getElementById('login-form-view').style.display='none';document.getElementById('login-success').style.display='block';lucide.createIcons()},1200)}
+    function handleGetStarted(e){e.preventDefault();var b=e.target.querySelector('.form-submit');b.disabled=true;b.textContent='Creating account...';setTimeout(function(){document.getElementById('getstarted-form-view').style.display='none';document.getElementById('getstarted-success').style.display='block';lucide.createIcons()},1500)}
+    document.addEventListener('keydown',function(e){if(e.key==='Escape'){closeModal('login');closeModal('getstarted')}});
+    // ===== THEME =====
+    function toggleTheme(){var c=document.documentElement.getAttribute('data-theme');var n=c==='light'?'dark':'light';document.documentElement.setAttribute('data-theme',n);localStorage.setItem('theme',n);updateIcons(n);if(typeof lucide!=='undefined')lucide.createIcons()}
+    function updateIcons(t){var sun='<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path></svg>';var moon='<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path></svg>';document.querySelectorAll('.cc-theme-toggle').forEach(function(b){b.innerHTML=t==='dark'?sun:moon})}
+    document.addEventListener('DOMContentLoaded',function(){var s=localStorage.getItem('theme')||'dark';document.documentElement.setAttribute('data-theme',s);updateIcons(s);animateCounters();initRiskChart()})
+    </script>
 </body>
 </html>
