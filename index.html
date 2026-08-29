@@ -3,862 +3,161 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Supply Chain Command Center v3.0 | Enterprise Risk Intelligence</title>
-    <meta name="description" content="Real-time AI-powered supply chain risk intelligence platform with interactive dashboards, live alerts, and predictive analytics.">
+    <title>AI Supply Chain Advanced | Enterprise Intelligence Platform</title>
+    <meta name="description" content="AI-powered supply chain intelligence platform. Real-time risk monitoring, compliance automation, and predictive analytics for global enterprises.">
     
-    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    
-    <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
     
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        
         :root {
-            --primary: #10B981;
-            --secondary: #06B6D4;
-            --accent: #8B5CF6;
-            --warning: #F59E0B;
-            --danger: #EF4444;
-            --success: #22C55E;
-            --dark: #0F172A;
-            --dark-lighter: #1E293B;
-            --light: #F8FAFC;
-            --gray-100: #F1F5F9;
-            --gray-200: #E2E8F0;
-            --gray-300: #CBD5E1;
-            --gray-400: #94A3B8;
-            --gray-500: #64748B;
-            --gray-600: #475569;
-            --gray-700: #334155;
-            --gray-800: #1E293B;
-            --gradient-start: #059669;
-            --gradient-end: #0891B2;
-        }
-        
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: linear-gradient(135deg, var(--dark) 0%, var(--dark-lighter) 50%, var(--dark) 100%);
-            color: white;
-            min-height: 100vh;
-            overflow-x: hidden;
-        }
-        
-        /* Animated Background */
-        .bg-animation {
-            position: fixed;
-            inset: 0;
-            overflow: hidden;
-            pointer-events: none;
-            z-index: 0;
-        }
-        
-        .bg-orb {
-            position: absolute;
-            border-radius: 50%;
-            filter: blur(80px);
-            opacity: 0.15;
-            animation: pulse 8s ease-in-out infinite;
-        }
-        
-        .bg-orb-1 {
-            width: 500px; height: 500px;
-            top: -100px; right: -100px;
-            background: var(--primary);
-        }
-        
-        .bg-orb-2 {
-            width: 400px; height: 400px;
-            top: 50%; left: -100px;
-            background: var(--secondary);
-            animation-delay: 2s;
-        }
-        
-        .bg-orb-3 {
-            width: 350px; height: 350px;
-            bottom: -50px; right: 30%;
-            background: var(--accent);
-            animation-delay: 4s;
-        }
-        
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); opacity: 0.15; }
-            50% { transform: scale(1.1); opacity: 0.25; }
-        }
-        
-        /* Header */
-        header {
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            backdrop-filter: blur(20px);
-            background: rgba(15, 23, 42, 0.85);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
-        }
-        
-        .header-content {
-            max-width: 1920px;
-            margin: 0 auto;
-            padding: 0 2rem;
-            height: 64px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-        
-        .logo-section {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-        
-        .logo-icon {
-            position: relative;
-            width: 40px; height: 40px;
-            border-radius: 12px;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 20px rgba(16, 185, 129, 0.35);
-        }
-        
-        .logo-pulse {
-            position: absolute;
-            top: -4px; right: -4px;
-            width: 12px; height: 12px;
-            background: var(--primary);
-            border-radius: 50%;
-            animation: pulse-dot 2s ease-in-out infinite;
-        }
-        
-        @keyframes pulse-dot {
-            0%, 100% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.3); opacity: 0.7; }
-        }
-        
-        .logo-text h1 {
-            font-size: 18px;
-            font-weight: 700;
-            background: linear-gradient(90deg, var(--primary), var(--secondary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        
-        .logo-text p {
-            font-size: 11px;
-            color: var(--gray-400);
-        }
-        
-        nav {
-            display: flex;
-            gap: 4px;
-        }
-        
-        nav button {
-            padding: 8px 16px;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            border: none;
-            background: transparent;
-            color: var(--gray-300);
-        }
-        
-        nav button:hover {
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
-        }
-        
-        nav button.active {
-            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
-            color: white;
-            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.35);
-        }
-        
-        .header-right {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-        
-        .live-badge {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            padding: 6px 12px;
-            border-radius: 9999px;
-            background: rgba(16, 185, 129, 0.15);
-            border: 1px solid rgba(16, 185, 129, 0.3);
-            font-size: 11px;
-            font-weight: 600;
-            color: var(--primary);
-        }
-        
-        .live-dot {
-            width: 6px; height: 6px;
-            background: var(--primary);
-            border-radius: 50%;
-            animation: pulse-dot 2s ease-in-out infinite;
-        }
-        
-        .clock {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            padding: 8px 12px;
-            border-radius: 8px;
-            background: rgba(255, 255, 255, 0.05);
-            font-size: 13px;
-            font-family: monospace;
-            color: var(--gray-300);
-        }
-        
-        .theme-toggle, .notifications {
-            padding: 8px;
-            border-radius: 8px;
-            background: transparent;
-            border: none;
-            color: var(--gray-300);
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        
-        .theme-toggle:hover, .notifications:hover {
-            background: rgba(255, 255, 255, 0.1);
-            color: var(--warning);
-        }
-        
-        .notification-btn {
-            position: relative;
-        }
-        
-        .notification-dot {
-            position: absolute;
-            top: 6px; right: 6px;
-            width: 6px; height: 6px;
-            background: var(--danger);
-            border-radius: 50%;
-        }
-        
-        .cta-button {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            padding: 10px 18px;
-            border-radius: 8px;
-            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
-            color: white;
-            font-size: 13px;
-            font-weight: 600;
-            border: none;
-            cursor: pointer;
-            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.35);
-            transition: all 0.3s ease;
-        }
-        
-        .cta-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 25px rgba(16, 185, 129, 0.5);
-        }
-        
-        /* Main Content */
-        main {
-            position: relative;
-            z-index: 1;
-            max-width: 1920px;
-            margin: 0 auto;
-            padding: 2rem;
-        }
-        
-        /* Metrics Grid */
-        .metrics-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
-        
-        .metric-card {
-            position: relative;
-            background: rgba(30, 41, 59, 0.5);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 16px;
-            padding: 1.5rem;
-            overflow: hidden;
-            transition: all 0.3s ease;
-        }
-        
-        .metric-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-        }
-        
-        .metric-card::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            height: 3px;
-            background: linear-gradient(90deg, var(--card-color), transparent);
-            transform: scaleX(0);
-            transform-origin: left;
-            transition: transform 0.3s ease;
-        }
-        
-        .metric-card:hover::after {
-            transform: scaleX(1);
-        }
-        
-        .metric-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 1rem;
-        }
-        
-        .metric-icon {
-            width: 48px; height: 48px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-        }
-        
-        .metric-change {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            padding: 4px 8px;
-            border-radius: 9999px;
-            font-size: 12px;
-            font-weight: 600;
-        }
-        
-        .change-up {
-            background: rgba(239, 68, 68, 0.15);
-            color: var(--danger);
-        }
-        
-        .change-down {
-            background: rgba(34, 197, 94, 0.15);
-            color: var(--success);
-        }
-        
-        .metric-value {
-            font-size: 36px;
-            font-weight: 700;
-            margin-bottom: 4px;
-        }
-        
-        .metric-label {
-            font-size: 14px;
-            color: var(--gray-400);
-        }
-        
-        /* Charts Grid */
-        .charts-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
-        
-        .chart-card {
-            background: rgba(30, 41, 59, 0.5);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 16px;
-            padding: 1.5rem;
-        }
-        
-        .chart-card.full-width {
-            grid-column: span 2;
-        }
-        
-        .chart-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 1.5rem;
-        }
-        
-        .chart-title {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 16px;
-            font-weight: 600;
-        }
-        
-        .chart-title-icon {
-            width: 20px; height: 20px;
-        }
-        
-        .chart-subtitle {
-            font-size: 13px;
-            color: var(--gray-400);
-            margin-top: 4px;
-        }
-        
-        .chart-badge {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            padding: 4px 10px;
-            border-radius: 6px;
-            background: rgba(139, 92, 246, 0.15);
-            border: 1px solid rgba(139, 92, 246, 0.3);
-            font-size: 11px;
-            font-weight: 600;
-            color: var(--accent);
-        }
-        
-        .chart-container {
-            position: relative;
-            height: 320px;
-        }
-        
-        /* Alerts Section */
-        .alerts-section {
-            background: rgba(30, 41, 59, 0.5);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 16px;
-            padding: 1.5rem;
-        }
-        
-        .alerts-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.5rem;
-        }
-        
-        .alerts-title {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 16px;
-            font-weight: 600;
-        }
-        
-        .live-indicator {
-            width: 8px; height: 8px;
-            background: var(--danger);
-            border-radius: 50%;
-            animation: pulse-dot 1s ease-in-out infinite;
-        }
-        
-        .alerts-controls {
-            display: flex;
-            gap: 8px;
-        }
-        
-        .control-btn {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            padding: 6px 12px;
-            border-radius: 6px;
-            font-size: 12px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            border: 1px solid var(--gray-600);
-            background: transparent;
-            color: var(--gray-300);
-        }
-        
-        .control-btn:hover {
-            background: rgba(255, 255, 255, 0.1);
-        }
-        
-        .control-btn.active {
-            border-color: var(--danger);
-            color: var(--danger);
-            background: rgba(239, 68, 68, 0.1);
-        }
-        
-        .alerts-list {
-            max-height: 450px;
-            overflow-y: auto;
-            padding-right: 8px;
-        }
-        
-        .alert-item {
-            padding: 1rem;
-            border-radius: 12px;
-            margin-bottom: 12px;
-            border: 1px solid transparent;
-            transition: all 0.3s ease;
-        }
-        
-        .alert-item:last-child {
-            margin-bottom: 0;
-        }
-        
-        .alert-critical {
-            background: rgba(239, 68, 68, 0.08);
-            border-color: rgba(239, 68, 68, 0.25);
-        }
-        
-        .alert-warning {
-            background: rgba(245, 158, 11, 0.08);
-            border-color: rgba(245, 158, 11, 0.25);
-        }
-        
-        .alert-info {
-            background: rgba(59, 130, 246, 0.08);
-            border-color: rgba(59, 130, 246, 0.25);
-        }
-        
-        .alert-header-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 8px;
-        }
-        
-        .alert-badges {
-            display: flex;
-            gap: 6px;
-        }
-        
-        .alert-badge {
-            padding: 2px 8px;
-            border-radius: 4px;
-            font-size: 10px;
-            font-weight: 700;
-            text-transform: uppercase;
-        }
-        
-        .badge-critical {
-            background: rgba(239, 68, 68, 0.2);
-            color: var(--danger);
-            border: 1px solid rgba(239, 68, 68, 0.3);
-        }
-        
-        .badge-warning {
-            background: rgba(245, 158, 11, 0.2);
-            color: var(--warning);
-            border: 1px solid rgba(245, 158, 11, 0.3);
-        }
-        
-        .badge-info {
-            background: rgba(59, 130, 246, 0.2);
-            color: #3B82F6;
-            border: 1px solid rgba(59, 130, 246, 0.3);
-        }
-        
-        .badge-category {
-            background: rgba(255, 255, 255, 0.1);
-            color: var(--gray-300);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-        
-        .alert-time {
-            font-size: 12px;
-            color: var(--gray-400);
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-        
-        .shap-btn {
-            padding: 4px 8px;
-            border-radius: 4px;
-            background: transparent;
-            border: none;
-            color: var(--secondary);
-            cursor: pointer;
-            font-size: 11px;
-        }
-        
-        .shap-btn:hover {
-            background: rgba(6, 182, 212, 0.15);
-        }
-        
-        .alert-title-text {
-            font-size: 15px;
-            font-weight: 600;
-            margin-bottom: 4px;
-        }
-        
-        .alert-description {
-            font-size: 13px;
-            color: var(--gray-300);
-            margin-bottom: 12px;
-            line-height: 1.5;
-        }
-        
-        .alert-meta {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 12px;
-            color: var(--gray-400);
-        }
-        
-        .alert-meta-left {
-            display: flex;
-            gap: 16px;
-        }
-        
-        .alert-meta-item {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-        
-        .impact-badge {
-            padding: 2px 8px;
-            border-radius: 4px;
-            font-size: 11px;
-            font-weight: 600;
-        }
-        
-        .impact-high {
-            background: rgba(239, 68, 68, 0.2);
-            color: var(--danger);
-        }
-        
-        .impact-medium {
-            background: rgba(245, 158, 11, 0.2);
-            color: var(--warning);
-        }
-        
-        .impact-low {
-            background: rgba(34, 197, 94, 0.2);
-            color: var(--success);
-        }
-        
-        .shap-details {
-            margin-top: 12px;
-            padding: 12px;
-            border-radius: 8px;
-            background: rgba(15, 23, 42, 0.5);
-            font-size: 12px;
-            display: none;
-        }
-        
-        .shap-details.show {
-            display: block;
-        }
-        
-        .shap-grid {
-            display: grid;
-            grid-template-columns: auto 1fr;
-            gap: 8px;
-        }
-        
-        .shap-label {
-            color: var(--gray-400);
-        }
-        
-        .shap-value {
-            color: var(--gray-200);
-            font-weight: 500;
-        }
-        
-        /* Footer */
-        footer {
-            position: relative;
-            z-index: 1;
-            margin-top: auto;
-            padding: 1.5rem 2rem;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-            background: rgba(15, 23, 42, 0.5);
-        }
-        
-        .footer-content {
-            max-width: 1920px;
-            margin: 0 auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 13px;
-            color: var(--gray-400);
-        }
-        
-        .footer-brand {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-weight: 600;
-            color: white;
-        }
-        
-        .footer-links {
-            display: flex;
-            gap: 16px;
-        }
-        
-        .footer-link {
-            color: var(--gray-400);
-            text-decoration: none;
-            transition: color 0.3s ease;
-        }
-        
-        .footer-link:hover {
-            color: var(--primary);
-        }
-        
-        /* Scrollbar */
-        .alerts-list::-webkit-scrollbar {
-            width: 6px;
-        }
-        
-        .alerts-list::-webkit-scrollbar-track {
-            background: transparent;
-        }
-        
-        .alerts-list::-webkit-scrollbar-thumb {
-            background: var(--gray-600);
-            border-radius: 3px;
-        }
-        
-        .alerts-list::-webkit-scrollbar-thumb:hover {
-            background: var(--gray-500);
-        }
-        
-        /* Responsive */
-        @media (max-width: 1024px) {
-            .charts-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .chart-card.full-width {
-                grid-column: span 1;
-            }
-            
-            nav {
-                display: none;
-            }
-        }
-        
-        @media (max-width: 640px) {
-            .header-content {
-                padding: 0 1rem;
-            }
-            
-            main {
-                padding: 1rem;
-            }
-            
-            .metrics-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .clock {
-                display: none;
-            }
-        }
-            /* Elegant Theme Toggle (CC-consistent) */
-        .cc-theme-toggle {
-            width: 36px; height: 36px;
-            padding: 0; border-radius: 8px;
-            background: transparent;
-            border: 1px solid rgba(255,255,255,0.1);
-            color: var(--gray-400);
-            cursor: pointer;
-            display: flex; align-items: center; justify-content: center;
-            transition: all 0.2s ease;
-            flex-shrink: 0;
-        }
-        .cc-theme-toggle:hover {
-            background: rgba(255,255,255,0.08);
-            color: var(--primary);
-            border-color: rgba(16,185,129,0.3);
-        }
+            --primary: #10B981; --secondary: #06B6D4; --accent: #8B5CF6;
+            --warning: #F59E0B; --danger: #EF4444; --success: #22C55E;
+            --dark: #0F172A; --dark-lighter: #1E293B;
+            --gray-100: #F1F5F9; --gray-200: #E2E8F0; --gray-300: #CBD5E1;
+            --gray-400: #94A3B8; --gray-500: #64748B; --gray-600: #475569;
+            --gradient-start: #059669; --gradient-end: #0891B2;
+        }
+        body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: linear-gradient(135deg, var(--dark) 0%, var(--dark-lighter) 50%, var(--dark) 100%); color: white; min-height: 100vh; overflow-x: hidden; }
+        .bg-animation { position: fixed; inset: 0; overflow: hidden; pointer-events: none; z-index: 0; }
+        .bg-orb { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.15; animation: pulse 8s ease-in-out infinite; }
+        .bg-orb-1 { width: 500px; height: 500px; top: -100px; right: -100px; background: var(--primary); }
+        .bg-orb-2 { width: 400px; height: 400px; top: 50%; left: -100px; background: var(--secondary); animation-delay: 2s; }
+        .bg-orb-3 { width: 350px; height: 350px; bottom: -50px; right: 30%; background: var(--accent); animation-delay: 4s; }
+        @keyframes pulse { 0%, 100% { transform: scale(1); opacity: 0.15; } 50% { transform: scale(1.1); opacity: 0.25; } }
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        .fade-in { animation: fadeInUp 0.8s ease-out forwards; }
+        .fade-in-d1 { animation-delay: 0.1s; opacity: 0; }
+        .fade-in-d2 { animation-delay: 0.2s; opacity: 0; }
+        .fade-in-d3 { animation-delay: 0.3s; opacity: 0; }
+        .fade-in-d4 { animation-delay: 0.4s; opacity: 0; }
+        .fade-in-d5 { animation-delay: 0.5s; opacity: 0; }
+
+        header { position: sticky; top: 0; z-index: 100; backdrop-filter: blur(20px); background: rgba(15, 23, 42, 0.85); border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
+        .header-content { max-width: 1920px; margin: 0 auto; padding: 0 2rem; height: 64px; display: flex; align-items: center; justify-content: space-between; }
+        .logo-section { display: flex; align-items: center; gap: 12px; text-decoration: none; color: inherit; }
+        .logo-icon { width: 40px; height: 40px; border-radius: 12px; background: linear-gradient(135deg, var(--primary), var(--secondary)); display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 20px rgba(16, 185, 129, 0.35); }
+        .logo-text h1 { font-size: 18px; font-weight: 700; background: linear-gradient(90deg, var(--primary), var(--secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .logo-text p { font-size: 11px; color: var(--gray-400); }
+        nav { display: flex; gap: 4px; flex-wrap: wrap; }
+        nav a { padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 500; text-decoration: none; transition: all 0.3s ease; color: var(--gray-300); white-space: nowrap; }
+        nav a:hover { background: rgba(255, 255, 255, 0.1); color: white; }
+        nav a.active { background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end)); color: white; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.35); }
+        .mobile-menu-btn { display: none; background: none; border: none; color: white; cursor: pointer; padding: 8px; }
+
+        main { position: relative; z-index: 1; }
+
+        /* Hero */
+        .hero { text-align: center; padding: 6rem 2rem 4rem; max-width: 900px; margin: 0 auto; }
+        .hero-badge { display: inline-flex; align-items: center; gap: 8px; padding: 8px 20px; border-radius: 9999px; border: 1px solid rgba(16, 185, 129, 0.3); background: rgba(16, 185, 129, 0.08); font-size: 13px; font-weight: 500; color: var(--primary); margin-bottom: 2rem; }
+        .hero-badge .pulse-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--primary); animation: pulse 2s ease-in-out infinite; }
+        .hero h1 { font-size: clamp(2.5rem, 6vw, 4rem); font-weight: 800; line-height: 1.1; margin-bottom: 1.5rem; letter-spacing: -0.02em; }
+        .gradient-text { background: linear-gradient(90deg, var(--primary), var(--secondary), var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .hero-sub { font-size: 1.25rem; color: var(--gray-300); max-width: 640px; margin: 0 auto 2.5rem; line-height: 1.7; }
+        .hero-actions { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+
+        .btn { display: inline-flex; align-items: center; gap: 8px; padding: 12px 24px; border-radius: 10px; font-size: 14px; font-weight: 600; border: none; cursor: pointer; transition: all 0.3s ease; text-decoration: none; }
+        .btn-primary { background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end)); color: white; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.35); }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 25px rgba(16, 185, 129, 0.5); }
+        .btn-outline { background: transparent; border: 1px solid rgba(255, 255, 255, 0.2); color: white; }
+        .btn-outline:hover { background: rgba(255, 255, 255, 0.1); }
+        .btn-lg { padding: 14px 32px; font-size: 15px; border-radius: 12px; }
+        .btn-sm { padding: 8px 16px; font-size: 13px; }
+
+        /* Stats bar */
+        .stats-bar { max-width: 800px; margin: 0 auto 4rem; padding: 0 2rem; }
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: rgba(255,255,255,0.06); border-radius: 16px; overflow: hidden; }
+        .stat-item { padding: 1.5rem; background: rgba(30, 41, 59, 0.4); backdrop-filter: blur(10px); text-align: center; }
+        .stat-value { font-size: 1.75rem; font-weight: 800; background: linear-gradient(90deg, var(--primary), var(--secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .stat-label { font-size: 12px; color: var(--gray-400); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.05em; }
+
+        /* Sections */
+        section { padding: 5rem 2rem; }
+        .container { max-width: 1100px; margin: 0 auto; }
+        .section-header { text-align: center; margin-bottom: 3.5rem; }
+        .section-badge { display: inline-flex; align-items: center; gap: 6px; padding: 6px 16px; border-radius: 9999px; border: 1px solid rgba(255,255,255,0.15); font-size: 13px; font-weight: 500; color: var(--secondary); margin-bottom: 1rem; }
+        .section-title { font-size: 2.25rem; font-weight: 700; margin-bottom: 1rem; }
+        .section-desc { font-size: 1.1rem; color: var(--gray-400); max-width: 600px; margin: 0 auto; line-height: 1.7; }
+
+        /* Features grid */
+        .features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
+        .feature-card { background: rgba(30, 41, 59, 0.5); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 2rem; transition: all 0.3s ease; cursor: pointer; text-decoration: none; color: inherit; display: block; }
+        .feature-card:hover { transform: translateY(-4px); border-color: rgba(16, 185, 129, 0.3); box-shadow: 0 8px 30px rgba(16, 185, 129, 0.1); }
+        .feature-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 1.25rem; }
+        .feature-icon.green { background: rgba(16, 185, 129, 0.12); color: var(--primary); }
+        .feature-icon.cyan { background: rgba(6, 182, 212, 0.12); color: var(--secondary); }
+        .feature-icon.purple { background: rgba(139, 92, 246, 0.12); color: var(--accent); }
+        .feature-icon.amber { background: rgba(245, 158, 11, 0.12); color: var(--warning); }
+        .feature-icon.red { background: rgba(239, 68, 68, 0.12); color: var(--danger); }
+        .feature-icon.blue { background: rgba(59, 130, 246, 0.12); color: #3B82F6; }
+        .feature-card h3 { font-size: 1.1rem; font-weight: 600; margin-bottom: 0.5rem; }
+        .feature-card p { font-size: 14px; color: var(--gray-400); line-height: 1.6; }
+        .feature-card .feature-link { display: inline-flex; align-items: center; gap: 4px; margin-top: 1rem; font-size: 13px; font-weight: 600; color: var(--primary); opacity: 0; transition: opacity 0.3s; }
+        .feature-card:hover .feature-link { opacity: 1; }
+
+        /* CTA section */
+        .cta-section { text-align: center; padding: 5rem 2rem; }
+        .cta-card { max-width: 600px; margin: 0 auto; padding: 3.5rem; background: rgba(30, 41, 59, 0.5); border: 1px solid rgba(255,255,255,0.1); border-radius: 24px; position: relative; overflow: hidden; }
+        .cta-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, var(--primary), var(--secondary), var(--accent)); }
+        .cta-card h2 { font-size: 2rem; font-weight: 700; margin-bottom: 1rem; }
+        .cta-card p { color: var(--gray-400); margin-bottom: 2rem; line-height: 1.7; max-width: 460px; margin-left: auto; margin-right: auto; }
+        .cta-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+
+        footer { position: relative; z-index: 1; border-top: 1px solid rgba(255,255,255,0.1); padding: 2rem; text-align: center; color: var(--gray-500); font-size: 0.875rem; }
+        footer a { color: var(--primary); text-decoration: none; }
+
+        /* Theme Toggle */
+        .cc-theme-toggle { width: 36px; height: 36px; padding: 0; border-radius: 8px; background: transparent; border: 1px solid rgba(255,255,255,0.1); color: var(--gray-400); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; flex-shrink: 0; }
+        .cc-theme-toggle:hover { background: rgba(255,255,255,0.08); color: var(--primary); border-color: rgba(16,185,129,0.3); }
         .cc-theme-toggle svg { width: 16px; height: 16px; }
 
         /* Light Theme */
-        [data-theme="light"] body {
-            background: linear-gradient(135deg, #F8FAFC 0%, #F1F5F9 50%, #F8FAFC 100%);
-            color: #1E293B;
-        }
-        [data-theme="light"] header {
-            background: rgba(248,250,252,0.9);
-            border-bottom-color: rgba(0,0,0,0.08);
-        }
+        [data-theme="light"] body { background: linear-gradient(135deg, #F8FAFC 0%, #F1F5F9 50%, #F8FAFC 100%); color: #1E293B; }
+        [data-theme="light"] header { background: rgba(248,250,252,0.9); border-bottom-color: rgba(0,0,0,0.08); }
         [data-theme="light"] nav a { color: #64748B; }
         [data-theme="light"] nav a:hover { background: rgba(0,0,0,0.05); color: #1E293B; }
         [data-theme="light"] nav a.active { color: white; }
-        [data-theme="light"] .glass {
-            background: rgba(255,255,255,0.7);
-            border-color: rgba(0,0,0,0.08);
-            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
-        }
-        [data-theme="light"] .glass:hover {
-            border-color: rgba(16,185,129,0.3);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-        }
-        [data-theme="light"] .section-title,
-        [data-theme="light"] h1,
-        [data-theme="light"] h2,
-        [data-theme="light"] h3 { color: #0F172A; }
-        [data-theme="light"] .section-subtitle,
-        [data-theme="light"] .hero p,
-        [data-theme="light"] .team-card .bio,
-        [data-theme="light"] .value-card p,
-        [data-theme="light"] .contact-info li,
-        [data-theme="light"] .stat-label,
-        [data-theme="light"] .timeline-item p,
-        [data-theme="light"] .job-item { color: #475569; }
-        [data-theme="light"] .logo-text h1 {
-            background: linear-gradient(90deg, #059669, #0891B2);
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-        }
+        [data-theme="light"] .feature-card { background: rgba(255,255,255,0.7); border-color: rgba(0,0,0,0.08); box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+        [data-theme="light"] .feature-card:hover { border-color: rgba(16,185,129,0.3); box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+        [data-theme="light"] .section-title, [data-theme="light"] .hero h1, [data-theme="light"] .cta-card h2, [data-theme="light"] .feature-card h3 { color: #0F172A; }
+        [data-theme="light"] .section-desc, [data-theme="light"] .hero-sub, [data-theme="light"] .feature-card p, [data-theme="light"] .cta-card p { color: #475569; }
+        [data-theme="light"] .stat-label { color: #94A3B8; }
+        [data-theme="light"] .logo-text h1 { background: linear-gradient(90deg, #059669, #0891B2); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         [data-theme="light"] .logo-text p { color: #94A3B8; }
-        [data-theme="light"] .badge {
-            color: #059669; border-color: rgba(0,0,0,0.12);
-            background: rgba(16,185,129,0.06);
-        }
-        [data-theme="light"] .gradient-text {
-            background: linear-gradient(90deg, #059669, #0891B2, #7C3AED);
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-        }
-        [data-theme="light"] .value-icon { background: rgba(16,185,129,0.08); }
-        [data-theme="light"] .job-item { background: rgba(0,0,0,0.02); }
+        [data-theme="light"] .hero-badge { color: #059669; border-color: rgba(16,185,129,0.3); background: rgba(16,185,129,0.06); }
+        [data-theme="light"] .gradient-text { background: linear-gradient(90deg, #059669, #0891B2, #7C3AED); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         [data-theme="light"] .btn-outline { border-color: rgba(0,0,0,0.15); color: #1E293B; }
         [data-theme="light"] .btn-outline:hover { background: rgba(0,0,0,0.05); }
-        [data-theme="light"] .cc-theme-toggle {
-            color: #94A3B8;
-            border-color: rgba(0,0,0,0.1);
-        }
-        [data-theme="light"] .cc-theme-toggle:hover {
-            background: rgba(16,185,129,0.08);
-            color: #059669;
-            border-color: rgba(16,185,129,0.3);
-        }
+        [data-theme="light"] .cc-theme-toggle { color: #94A3B8; border-color: rgba(0,0,0,0.1); }
+        [data-theme="light"] .cc-theme-toggle:hover { background: rgba(16,185,129,0.08); color: #059669; border-color: rgba(16,185,129,0.3); }
         [data-theme="light"] .bg-orb { opacity: 0.06; }
         [data-theme="light"] footer { border-top-color: rgba(0,0,0,0.08); color: #94A3B8; }
-        [data-theme="light"] .social-link { border-color: rgba(0,0,0,0.12); color: #94A3B8; }
-        [data-theme="light"] .social-link:hover { background: rgba(16,185,129,0.1); border-color: #10B981; color: #10B981; }
-        [data-theme="light"] .team-card .role { color: #059669; }
-        [data-theme="light"] .timeline-year { background: rgba(16,185,129,0.08); color: #059669; }
-        [data-theme="light"] .job-badge { background: rgba(139,92,246,0.08); color: #7C3AED; }
-        [data-theme="light"] .stat-value {
-            background: linear-gradient(90deg, #059669, #0891B2);
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-        }
-        [data-theme="light"] .timeline-line { background: rgba(0,0,0,0.08); }
+        [data-theme="light"] .stat-item { background: rgba(255,255,255,0.6); }
+        [data-theme="light"] .stats-grid { background: rgba(0,0,0,0.04); }
+        [data-theme="light"] .cta-card { background: rgba(255,255,255,0.7); border-color: rgba(0,0,0,0.08); }
         [data-theme="light"] .mobile-menu-btn { color: #334155; }
         [data-theme="light"] nav.open { background: rgba(248,250,252,0.98); border-bottom: 1px solid rgba(0,0,0,0.08); }
-    
-/* ===== UNIFIED SITE FOOTER ===== */
+
+        @media (max-width: 1024px) {
+            nav { display: none; position: absolute; top: 64px; left: 0; right: 0; background: rgba(15, 23, 42, 0.95); padding: 1rem; flex-direction: column; }
+            nav.open { display: flex; } .mobile-menu-btn { display: block; } nav a { padding: 12px 16px; }
+            .features-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+        @media (max-width: 768px) {
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .features-grid { grid-template-columns: 1fr; }
+            .hero { padding: 4rem 1.5rem 3rem; }
+            .header-content { padding: 0 1rem; }
+        }
+        @media (max-width: 640px) {
+            section { padding: 3rem 1rem; }
+            .hero-actions { flex-direction: column; align-items: center; }
+        }
+    /* ===== UNIFIED SITE FOOTER ===== */
 .site-footer {
     background: linear-gradient(180deg, rgba(15, 23, 42, 0.95) 0%, rgba(15, 23, 42, 1) 100%);
     border-top: 1px solid rgba(255, 255, 255, 0.08);
@@ -1086,213 +385,161 @@
 </style>
 </head>
 <body>
-    <!-- Animated Background -->
-    <div class="bg-animation">
-        <div class="bg-orb bg-orb-1"></div>
-        <div class="bg-orb bg-orb-2"></div>
-        <div class="bg-orb bg-orb-3"></div>
-    </div>
+    <div class="bg-animation"><div class="bg-orb bg-orb-1"></div><div class="bg-orb bg-orb-2"></div><div class="bg-orb bg-orb-3"></div></div>
 
-    <!-- Header -->
     <header>
         <div class="header-content">
-            <div class="logo-section">
-                <div class="logo-icon">
-                    🛡️
-                    <div class="logo-pulse"></div>
-                </div>
-                <div class="logo-text">
-                    <h1>AI Supply Chain</h1>
-                    <p>Command Center v3.0</p>
-                </div>
-            </div>
-            
+            <a href="./index.html" class="logo-section">
+                <div class="logo-icon"><i data-lucide="brain" style="width:24px;height:24px;color:white;"></i></div>
+                <div class="logo-text"><h1>AI Supply Chain</h1><p>Advanced Platform</p></div>
+            </a>
+            <button class="mobile-menu-btn" onclick="document.querySelector('nav').classList.toggle('open')"><i data-lucide="menu" style="width:24px;height:24px;"></i></button>
             <nav>
-                <button class="active">Dashboard</button>
-                <button>Suppliers</button>
-                <button>Risk Intel</button>
-                <button>Forecasting</button>
-                <button>Compliance</button>
+                <a href="./index.html" class="active">Home</a>
+                <a href="./about.html">About</a>
+                <a href="./cc-app/">Command Center</a>
+                <a href="./dashboard.html">Dashboard</a>
+                <a href="./intelligence.html">Intelligence</a>
+                <a href="./platform.html">Platform</a>
+                <a href="./product.html">Product</a>
+                <a href="./customers.html">Customers</a>
+                <a href="./industries.html">Industries</a>
+                <a href="./events.html">Events</a>
+                <a href="./support.html">Support</a>
             </nav>
-            
-            <div class="header-right">
-                <div class="live-badge">
-                    <div class="live-dot"></div>
-                    LIVE
-                </div>
-                
-                <div class="clock">
-                    ⏰
-                    <span id="live-clock">--:--:--</span>
-                </div>
-                
-                <button class="notifications notification-btn">
-                    🔔
-                    <span class="notification-dot"></span>
-                </button>
-                
-                <button class="cta-button">
-                    ⚡ Run Analysis
-                </button>
-            </div>
+            <button class="cc-theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path></svg></button>
+            <a href="./cc-app/" class="btn btn-primary" style="padding:8px 16px;font-size:13px;">Launch App</a>
         </div>
     </header>
 
-    <!-- Main Content -->
     <main>
-        <!-- Metrics Row -->
-        <div class="metrics-grid">
-            <div class="metric-card" style="--card-color: #3B82F6;">
-                <div class="metric-header">
-                    <div class="metric-icon" style="background: linear-gradient(135deg, #3B82F6, #06B6D4);">
-                        👥
-                    </div>
-                    <div class="metric-change change-up">
-                        ↑ +3.2%
-                    </div>
-                </div>
-                <div class="metric-value" id="metric-suppliers">0</div>
-                <div class="metric-label">Total Suppliers Monitored</div>
+        <!-- Hero -->
+        <section class="hero">
+            <div class="hero-badge fade-in fade-in-d1"><span class="pulse-dot"></span> Enterprise Platform v3.0</div>
+            <h1 class="fade-in fade-in-d2">Intelligent Supply Chain<br><span class="gradient-text">Starts Here</span></h1>
+            <p class="hero-sub fade-in fade-in-d3">Real-time risk intelligence, compliance automation, and predictive analytics — built for global enterprises navigating complex supply chains.</p>
+            <div class="hero-actions fade-in fade-in-d4">
+                <a href="./cc-app/" class="btn btn-primary btn-lg">Launch Command Center <i data-lucide="arrow-right" style="width:18px;height:18px;"></i></a>
+                <a href="./about.html" class="btn btn-outline btn-lg">Learn More</a>
             </div>
-            
-            <div class="metric-card" style="--card-color: #F59E0B;">
-                <div class="metric-header">
-                    <div class="metric-icon" style="background: linear-gradient(135deg, #F59E0B, #F97316);">
-                        ⚠️
-                    </div>
-                    <div class="metric-change change-down">
-                        ↓ -2.1%
-                    </div>
-                </div>
-                <div class="metric-value" id="metric-risk">0</div>
-                <div class="metric-label">Avg Risk Score</div>
-            </div>
-            
-            <div class="metric-card" style="--card-color: #EF4444;">
-                <div class="metric-header">
-                    <div class="metric-icon" style="background: linear-gradient(135deg, #EF4444, #EC4899);">
-                        🚨
-                    </div>
-                    <div class="metric-change change-up">
-                        ↑ +5
-                    </div>
-                </div>
-                <div class="metric-value" id="metric-alerts">0</div>
-                <div class="metric-label">Active Alerts</div>
-            </div>
-            
-            <div class="metric-card" style="--card-color: #10B981;">
-                <div class="metric-header">
-                    <div class="metric-icon" style="background: linear-gradient(135deg, #10B981, #22C55E);">
-                        🧠
-                    </div>
-                    <div class="metric-change change-down">
-                        ↑ +1.2%
-                    </div>
-                </div>
-                <div class="metric-value" id="metric-accuracy">0%</div>
-                <div class="metric-label">AI Prediction Accuracy</div>
-            </div>
-        </div>
+        </section>
 
-        <!-- Charts Grid -->
-        <div class="charts-grid">
-            <!-- Risk Trend Analysis -->
-            <div class="chart-card full-width">
-                <div class="chart-header">
-                    <div>
-                        <div class="chart-title">
-                            <span class="chart-title-icon">📈</span>
-                            Risk Trend Analysis
-                        </div>
-                        <div class="chart-subtitle">6-month risk trajectory by category</div>
-                    </div>
-                    <div class="chart-badge">
-                        🤖 AI Powered
-                    </div>
+        <!-- Stats -->
+        <div class="stats-bar fade-in fade-in-d5">
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-value">150+</div>
+                    <div class="stat-label">Enterprise Clients</div>
                 </div>
-                <div class="chart-container">
-                    <canvas id="riskTrendChart"></canvas>
+                <div class="stat-item">
+                    <div class="stat-value">40+</div>
+                    <div class="stat-label">Countries</div>
                 </div>
-            </div>
-            
-            <!-- Supplier Risk Distribution -->
-            <div class="chart-card">
-                <div class="chart-header">
-                    <div>
-                        <div class="chart-title">
-                            <span class="chart-title-icon">🥧</span>
-                            Supplier Risk Distribution
-                        </div>
-                        <div class="chart-subtitle">Risk concentration analysis</div>
-                    </div>
+                <div class="stat-item">
+                    <div class="stat-value">99.9%</div>
+                    <div class="stat-label">Uptime</div>
                 </div>
-                <div class="chart-container">
-                    <canvas id="riskDistributionChart"></canvas>
-                </div>
-            </div>
-            
-            <!-- Regional Risk -->
-            <div class="chart-card">
-                <div class="chart-header">
-                    <div>
-                        <div class="chart-title">
-                            <span class="chart-title-icon">🌍</span>
-                            Regional Risk
-                        </div>
-                        <div class="chart-subtitle">Supplier concentration by geography</div>
-                    </div>
-                </div>
-                <div class="chart-container">
-                    <canvas id="regionalRiskChart"></canvas>
-                </div>
-            </div>
-            
-            <!-- Demand Forecast -->
-            <div class="chart-card full-width">
-                <div class="chart-header">
-                    <div>
-                        <div class="chart-title">
-                            <span class="chart-title-icon">📊</span>
-                            Demand Forecast vs Actual
-                        </div>
-                        <div class="chart-subtitle">AI-powered demand prediction accuracy</div>
-                    </div>
-                    <div class="chart-badge">
-                        ✨ ML Model v2.4
-                    </div>
-                </div>
-                <div class="chart-container">
-                    <canvas id="demandForecastChart"></canvas>
+                <div class="stat-item">
+                    <div class="stat-value">50M+</div>
+                    <div class="stat-label">Data Points</div>
                 </div>
             </div>
         </div>
 
-        <!-- Live Alerts Section -->
-        <section class="alerts-section">
-            <div class="alerts-header">
-                <div class="alerts-title">
-                    <div class="live-indicator"></div>
-                    Live Risk Alerts
-                    <span style="font-size: 13px; color: var(--gray-400); font-weight: 400;">Real-time threat intelligence stream</span>
+        <!-- Platform Features -->
+        <section>
+            <div class="container">
+                <div class="section-header">
+                    <div class="section-badge"><i data-lucide="layers" style="width:14px;height:14px;"></i> Platform</div>
+                    <h2 class="section-title">Everything You Need</h2>
+                    <p class="section-desc">A comprehensive suite of AI-powered tools designed to transform how you manage supply chain operations, risk, and compliance.</p>
                 </div>
-                <div class="alerts-controls">
-                    <button class="control-btn active" id="pauseBtn" onclick="toggleLiveFeed()">
-                        ⏸ Pause
-                    </button>
-                    <div class="control-btn">
-                        📻 Real-time
-                    </div>
+                <div class="features-grid">
+                    <a href="./cc-app/" class="feature-card">
+                        <div class="feature-icon green"><i data-lucide="monitor" style="width:24px;height:24px;"></i></div>
+                        <h3>Command Center</h3>
+                        <p>Real-time operational dashboard with live risk alerts, KPI tracking, and AI-driven insights across your entire supply chain.</p>
+                        <span class="feature-link">Open App <i data-lucide="arrow-right" style="width:14px;height:14px;"></i></span>
+                    </a>
+                    <a href="./intelligence.html" class="feature-card">
+                        <div class="feature-icon cyan"><i data-lucide="brain" style="width:24px;height:24px;"></i></div>
+                        <h3>AI Intelligence</h3>
+                        <p>SHAP-explainable risk models, predictive analytics, and machine learning pipelines tailored for supply chain decision-making.</p>
+                        <span class="feature-link">Explore <i data-lucide="arrow-right" style="width:14px;height:14px;"></i></span>
+                    </a>
+                    <a href="./dashboard.html" class="feature-card">
+                        <div class="feature-icon purple"><i data-lucide="bar-chart-3" style="width:24px;height:24px;"></i></div>
+                        <h3>Analytics Dashboard</h3>
+                        <p>Interactive charts, supplier scorecards, and performance metrics with drill-down capabilities for data-driven decisions.</p>
+                        <span class="feature-link">View Dashboard <i data-lucide="arrow-right" style="width:14px;height:14px;"></i></span>
+                    </a>
+                    <a href="./platform.html" class="feature-card">
+                        <div class="feature-icon amber"><i data-lucide="server" style="width:24px;height:24px;"></i></div>
+                        <h3>Platform Architecture</h3>
+                        <p>Scalable cloud-native infrastructure with real-time data processing, API integrations, and enterprise-grade security.</p>
+                        <span class="feature-link">View Platform <i data-lucide="arrow-right" style="width:14px;height:14px;"></i></span>
+                    </a>
+                    <a href="./product.html" class="feature-card">
+                        <div class="feature-icon red"><i data-lucide="package" style="width:24px;height:24px;"></i></div>
+                        <h3>Product Suite</h3>
+                        <p>End-to-end product offerings from procurement optimization to logistics management and supplier relationship intelligence.</p>
+                        <span class="feature-link">See Products <i data-lucide="arrow-right" style="width:14px;height:14px;"></i></span>
+                    </a>
+                    <a href="./industries.html" class="feature-card">
+                        <div class="feature-icon blue"><i data-lucide="globe" style="width:24px;height:24px;"></i></div>
+                        <h3>Industry Solutions</h3>
+                        <p>Tailored solutions for manufacturing, retail, pharmaceuticals, and logistics with industry-specific compliance frameworks.</p>
+                        <span class="feature-link">Explore Industries <i data-lucide="arrow-right" style="width:14px;height:14px;"></i></span>
+                    </a>
                 </div>
             </div>
-            
-            <div class="alerts-list" id="alertsList">
-                <!-- Alerts will be populated by JavaScript -->
+        </section>
+
+        <!-- Quick Links -->
+        <section>
+            <div class="container">
+                <div class="section-header">
+                    <div class="section-badge"><i data-lucide="compass" style="width:14px;height:14px;"></i> Explore</div>
+                    <h2 class="section-title">Discover More</h2>
+                </div>
+                <div class="features-grid" style="grid-template-columns: repeat(4, 1fr);">
+                    <a href="./about.html" class="feature-card" style="text-align:center;">
+                        <div class="feature-icon green" style="margin:0 auto 1rem;"><i data-lucide="users" style="width:24px;height:24px;"></i></div>
+                        <h3>About Us</h3>
+                        <p>Our mission, team, and values</p>
+                    </a>
+                    <a href="./customers.html" class="feature-card" style="text-align:center;">
+                        <div class="feature-icon cyan" style="margin:0 auto 1rem;"><i data-lucide="building-2" style="width:24px;height:24px;"></i></div>
+                        <h3>Customers</h3>
+                        <p>Success stories and case studies</p>
+                    </a>
+                    <a href="./events.html" class="feature-card" style="text-align:center;">
+                        <div class="feature-icon purple" style="margin:0 auto 1rem;"><i data-lucide="calendar" style="width:24px;height:24px;"></i></div>
+                        <h3>Events</h3>
+                        <p>Webinars, conferences, workshops</p>
+                    </a>
+                    <a href="./support.html" class="feature-card" style="text-align:center;">
+                        <div class="feature-icon amber" style="margin:0 auto 1rem;"><i data-lucide="headphones" style="width:24px;height:24px;"></i></div>
+                        <h3>Support</h3>
+                        <p>Help centre and contact us</p>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- CTA -->
+        <section class="cta-section">
+            <div class="cta-card">
+                <h2>Ready to Transform Your <span class="gradient-text">Supply Chain</span>?</h2>
+                <p>Get started with a personalised demo and see how AI-powered intelligence can drive results for your organisation.</p>
+                <div class="cta-actions">
+                    <a href="./cc-app/" class="btn btn-primary btn-lg">Launch Command Center <i data-lucide="rocket" style="width:18px;height:18px;"></i></a>
+                    <a href="./support.html" class="btn btn-outline btn-lg">Contact Sales</a>
+                </div>
             </div>
         </section>
     </main>
 
-    <!-- Footer -->
     <footer class="site-footer">
     <div class="sf-glow sf-glow-1"></div>
     <div class="sf-glow sf-glow-2"></div>
@@ -1399,24 +646,26 @@
     </div>
 </footer>
 
-    <script>    lucide.createIcons();
-
+    <script>
+    lucide.createIcons();
     function toggleTheme() {
         var current = document.documentElement.getAttribute('data-theme');
         var next = current === 'light' ? 'dark' : 'light';
         document.documentElement.setAttribute('data-theme', next);
         localStorage.setItem('theme', next);
-        document.querySelectorAll('.cc-theme-toggle').forEach(function(btn) {
-            btn.innerHTML = next === 'dark' ? '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path></svg>' : '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path></svg>';
-        });
+        updateToggleIcons(next);
         if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+    function updateToggleIcons(theme) {
+        var sunIcon = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path></svg>';
+        var moonIcon = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path></svg>';
+        document.querySelectorAll('.cc-theme-toggle').forEach(function(btn) { btn.innerHTML = theme === 'dark' ? sunIcon : moonIcon; });
     }
     document.addEventListener('DOMContentLoaded', function() {
         var saved = localStorage.getItem('theme') || 'dark';
         document.documentElement.setAttribute('data-theme', saved);
-        document.querySelectorAll('.cc-theme-toggle').forEach(function(btn) {
-            btn.innerHTML = saved === 'dark' ? '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path></svg>' : '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path></svg>';
-        });
-    });</script>
+        updateToggleIcons(saved);
+    });
+    </script>
 </body>
 </html>
