@@ -655,6 +655,18 @@
         <button class="cc-dd-nav-item ${currentView === 'forecast' ? 'active' : ''}" onclick="window.__ccDD.setView('forecast')">
           <span class="cc-dd-nav-icon">🤖</span> AI Forecasting
         </button>
+        <button class="cc-dd-nav-item ${currentView === 'weather' ? 'active' : ''}" onclick="window.__ccDD.setView('weather')">
+          <span class="cc-dd-nav-icon">🌤️</span> Weather
+        </button>
+        <button class="cc-dd-nav-item ${currentView === 'geo' ? 'active' : ''}" onclick="window.__ccDD.setView('geo')">
+          <span class="cc-dd-nav-icon">🗺️</span> Geo Intelligence
+        </button>
+        <button class="cc-dd-nav-item ${currentView === 'departures' ? 'active' : ''}" onclick="window.__ccDD.setView('departures')">
+          <span class="cc-dd-nav-icon">🚢</span> Departures
+        </button>
+        <button class="cc-dd-nav-item ${currentView === 'automation' ? 'active' : ''}" onclick="window.__ccDD.setView('automation')">
+          <span class="cc-dd-nav-icon">⚙️</span> AI Automations
+        </button>
         <button class="cc-dd-nav-item ${currentView === 'tower' ? 'active' : ''}" onclick="window.__ccDD.setView('tower')">
           <span class="cc-dd-nav-icon">🗼</span> Control Tower
           ${alertCount > 0 ? '<span class="cc-dd-nav-badge">' + alertCount + '</span>' : ''}
@@ -673,11 +685,16 @@
     else if (currentView === 'ports') renderPorts(container);
     else if (currentView === 'wms') renderWMS(container);
     else if (currentView === 'forecast') renderForecast(container);
+    else if (currentView === 'weather') renderWeather(container);
+    else if (currentView === 'geo') renderGeo(container);
+    else if (currentView === 'departures') renderDepartures(container);
+    else if (currentView === 'automation') renderAutomation(container);
     else if (currentView === 'tower') renderTower(container);
 
     // Update sidebar active states
     document.querySelectorAll('.cc-dd-nav-item').forEach(item => {
-      item.classList.toggle('active', item.textContent.trim().toLowerCase().indexOf(currentView) !== -1);
+      const onclick = item.getAttribute('onclick') || '';
+      item.classList.toggle('active', onclick.indexOf("'" + currentView + "'") !== -1);
     });
   }
 
@@ -1317,6 +1334,632 @@
             <div class="cc-dd-timeline-item cc-dd-timeline-${e.type}">
               <div class="cc-dd-timeline-text">${e.text}</div>
               <div class="cc-dd-timeline-time">${formatDate(e.timestamp)} · ${e.module.toUpperCase()}</div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `;
+  }
+
+  // ------------------------------------------------------------------
+  // 6. WEATHER & ENVIRONMENTAL
+  // ------------------------------------------------------------------
+  function renderWeather(container) {
+    const db = initDatabase();
+    const weatherConditions = ['☀️ Clear', '⛅ Partly Cloudy', '☁️ Overcast', '🌧️ Rain', '⛈️ Thunderstorm', '🌫️ Fog', '🌪️ Storm'];
+    const stormPorts = db.ports.filter(p => Math.random() > 0.7).slice(0, 3);
+
+    container.innerHTML = `
+      <div class="cc-dd-header">
+        <h2 class="cc-dd-page-title">🌤️ Weather & Environmental Intelligence <span class="cc-dd-page-badge">REAL-TIME</span></h2>
+        <div class="cc-dd-live-indicator"><div class="cc-dd-live-dot"></div> Weather data updating</div>
+      </div>
+
+      <div class="cc-dd-cards">
+        <div class="cc-dd-card">
+          <div class="cc-dd-card-label">Ports Monitored</div>
+          <div class="cc-dd-card-value">${db.ports.length}</div>
+          <div class="cc-dd-card-delta cc-dd-delta-neutral">weather conditions tracked</div>
+        </div>
+        <div class="cc-dd-card">
+          <div class="cc-dd-card-label">Active Storm Alerts</div>
+          <div class="cc-dd-card-value" style="color:${stormPorts.length > 0 ? '#ef4444' : '#10B981'}">${stormPorts.length}</div>
+          <div class="cc-dd-card-delta cc-dd-delta-${stormPorts.length > 0 ? 'down' : 'neutral'}">${stormPorts.length > 0 ? 'requires attention' : 'all clear'}</div>
+        </div>
+        <div class="cc-dd-card">
+          <div class="cc-dd-card-label">High-Risk Ports</div>
+          <div class="cc-dd-card-value" style="color:#f59e0b">${Math.floor(Math.random() * 3) + 1}</div>
+          <div class="cc-dd-card-delta cc-dd-delta-neutral">weather-impacted operations</div>
+        </div>
+        <div class="cc-dd-card">
+          <div class="cc-dd-card-label">Avg Visibility</div>
+          <div class="cc-dd-card-value">${Math.floor(Math.random() * 3000) + 2000}m</div>
+          <div class="cc-dd-card-delta cc-dd-delta-up">above minimum (500m)</div>
+        </div>
+      </div>
+
+      <div class="cc-dd-section">
+        <div class="cc-dd-section-title">🌐 Port Weather Conditions — Top 10 Ports</div>
+        <div class="cc-dd-scroll">
+          <table class="cc-dd-table">
+            <thead>
+              <tr>
+                <th>Port</th>
+                <th>Condition</th>
+                <th>Temp</th>
+                <th>Wind</th>
+                <th>Visibility</th>
+                <th>Sea State</th>
+                <th>Humidity</th>
+                <th>Pressure</th>
+                <th>Tide (Next)</th>
+                <th>Operational Impact</th>
+                <th>Climate Risk</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${db.ports.map((p, i) => {
+                const cond = weatherConditions[Math.floor(Math.random() * (i < 3 ? 5 : 3))];
+                const temp = Math.floor(Math.random() * 25) + 10;
+                const wind = Math.floor(Math.random() * 35) + 5;
+                const visibility = Math.floor(Math.random() * 4000) + 1000;
+                const seaState = ['Calm', 'Slight', 'Moderate', 'Rough'][Math.floor(Math.random() * 4)];
+                const humidity = Math.floor(Math.random() * 40) + 50;
+                const pressure = Math.floor(Math.random() * 30) + 1000;
+                const tideTime = new Date(Date.now() + Math.random() * 6 * 3600000);
+                const impact = wind > 25 || visibility < 1000 ? 'Suspended' : wind > 15 || visibility < 2000 ? 'Caution' : 'Normal';
+                const climateRisk = Math.floor(Math.random() * 60) + 20;
+                const riskColor = climateRisk > 60 ? '#ef4444' : climateRisk > 40 ? '#f59e0b' : '#10B981';
+                return `
+                  <tr>
+                    <td style="font-weight:600;color:#06B6D4">${p.name}</td>
+                    <td style="font-size:13px">${cond}</td>
+                    <td style="text-align:center">${temp}°C</td>
+                    <td style="text-align:center;color:${wind > 25 ? '#ef4444' : wind > 15 ? '#f59e0b' : '#e2e8f0'}">${wind} kn</td>
+                    <td style="text-align:center;color:${visibility < 1000 ? '#ef4444' : visibility < 2000 ? '#f59e0b' : '#10B981'}">${visibility}m</td>
+                    <td style="text-align:center;font-size:11px">${seaState}</td>
+                    <td style="text-align:center">${humidity}%</td>
+                    <td style="text-align:center">${pressure} hPa</td>
+                    <td style="text-align:center;font-size:11px">${tideTime.toLocaleTimeString('en-US', {hour:'2-digit',minute:'2-digit'})} ${tideTime.getHours() < 12 ? '📈 High' : '📉 Low'}</td>
+                    <td><span class="cc-dd-status cc-dd-status-${impact === 'Suspended' ? 'congested' : impact === 'Caution' ? 'high-capacity' : 'operational'}">${impact}</span></td>
+                    <td style="text-align:center">
+                      <span class="cc-dd-congestion-bar"><span class="cc-dd-congestion-fill" style="width:${climateRisk}%;background:${riskColor}"></span></span>
+                      ${climateRisk}/100
+                    </td>
+                  </tr>
+                `;
+              }).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      ${stormPorts.length > 0 ? `
+        <div class="cc-dd-section" style="border-color:rgba(239,68,68,0.2)">
+          <div class="cc-dd-section-title">🌪️ Active Storm Tracking</div>
+          ${stormPorts.map(p => {
+            const stormName = ['Typhoon Khanun', 'Hurricane Lee', 'Cyclone Mocha', 'Storm Daniel'][Math.floor(Math.random() * 4)];
+            const distance = Math.floor(Math.random() * 500) + 100;
+            const approachSpeed = Math.floor(Math.random() * 30) + 15;
+            const eta = Math.floor(distance / approachSpeed);
+            return `
+              <div class="cc-dd-alert-item cc-dd-alert-high">
+                <div class="cc-dd-alert-icon">🌪️</div>
+                <div class="cc-dd-alert-content">
+                  <div class="cc-dd-alert-title">${stormName} approaching ${p.name}</div>
+                  <div class="cc-dd-alert-msg">Currently ${distance}km away, moving at ${approachSpeed} km/h. ETA to ${p.name}: ~${eta} hours. Wind speeds up to ${Math.floor(Math.random() * 50) + 80} km/h expected.</div>
+                  <div class="cc-dd-alert-time">Recommended actions: Secure cranes, expedite cargo ops for departing vessels, notify approaching ships to reroute.</div>
+                </div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      ` : ''}
+
+      <div class="cc-dd-section">
+        <div class="cc-dd-section-title">📅 7-Day Weather Forecast — Key Ports</div>
+        <div class="cc-dd-scroll" style="max-height:300px">
+          <table class="cc-dd-table">
+            <thead>
+              <tr>
+                <th>Port</th>
+                ${['Day 1','Day 2','Day 3','Day 4','Day 5','Day 6','Day 7'].map(d => `<th style="text-align:center">${d}</th>`).join('')}
+              </tr>
+            </thead>
+            <tbody>
+              ${db.ports.slice(0, 5).map(p => `
+                <tr>
+                  <td style="font-weight:600">${p.name.replace('Port of ', '')}</td>
+                  ${[1,2,3,4,5,6,7].map(d => {
+                    const c = weatherConditions[Math.floor(Math.random() * 5)];
+                    const t = Math.floor(Math.random() * 25) + 8;
+                    return `<td style="text-align:center;font-size:11px"><div style="font-size:18px">${c.split(' ')[0]}</div><div style="color:#64748b">${t}°C</div></td>`;
+                  }).join('')}
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    `;
+  }
+
+  // ------------------------------------------------------------------
+  // 7. GEOGRAPHICAL INTELLIGENCE
+  // ------------------------------------------------------------------
+  function renderGeo(container) {
+    const db = initDatabase();
+    const regions = ['Asia', 'Europe', 'Americas', 'Middle East', 'Africa', 'Oceania'];
+    const regionColors = { 'Asia': '#3b82f6', 'Europe': '#10B981', 'Americas': '#f59e0b', 'Middle East': '#8b5cf6', 'Africa': '#ec4899', 'Oceania': '#06B6D4' };
+
+    const portsByRegion = {};
+    regions.forEach(r => { portsByRegion[r] = db.ports.filter(p => p.region === r || (r === 'Middle East' && p.country === 'UAE')); });
+    // Fix region mapping
+    portsByRegion['Asia'] = db.ports.filter(p => ['China','Singapore','South Korea'].includes(p.country));
+    portsByRegion['Europe'] = db.ports.filter(p => ['Netherlands','Germany'].includes(p.country));
+    portsByRegion['Americas'] = db.ports.filter(p => p.country === 'United States');
+
+    container.innerHTML = `
+      <div class="cc-dd-header">
+        <h2 class="cc-dd-page-title">🗺️ Geographical Intelligence <span class="cc-dd-page-badge">GLOBAL VIEW</span></h2>
+        <div class="cc-dd-live-indicator"><div class="cc-dd-live-dot"></div> Live geo-tracking</div>
+      </div>
+
+      <div class="cc-dd-cards">
+        <div class="cc-dd-card">
+          <div class="cc-dd-card-label">Regions Monitored</div>
+          <div class="cc-dd-card-value">${regions.length}</div>
+          <div class="cc-dd-card-delta cc-dd-delta-neutral">global coverage</div>
+        </div>
+        <div class="cc-dd-card">
+          <div class="cc-dd-card-label">Active Trade Routes</div>
+          <div class="cc-dd-card-value">${db.ports.length * 2}</div>
+          <div class="cc-dd-card-delta cc-dd-delta-up">major shipping lanes</div>
+        </div>
+        <div class="cc-dd-card">
+          <div class="cc-dd-card-label">High-Risk Zones</div>
+          <div class="cc-dd-card-value" style="color:#f59e0b">${Math.floor(Math.random() * 3) + 2}</div>
+          <div class="cc-dd-card-delta cc-dd-delta-down">geopolitical + weather risks</div>
+        </div>
+        <div class="cc-dd-card">
+          <div class="cc-dd-card-label">Avg Transit Time</div>
+          <div class="cc-dd-card-value">${Math.floor(Math.random() * 10) + 18}d</div>
+          <div class="cc-dd-card-delta cc-dd-delta-neutral">major routes</div>
+        </div>
+      </div>
+
+      <div class="cc-dd-section">
+        <div class="cc-dd-section-title">🌍 Regional Port Distribution</div>
+        <div class="cc-dd-donut-row">
+          ${renderDonut(
+            Object.fromEntries(Object.entries(portsByRegion).map(([r, ports]) => [r, ports.length])),
+            regions.map(r => regionColors[r]),
+            db.ports.length,
+            'Ports'
+          )}
+          <div class="cc-dd-legend">
+            ${regions.map(r => {
+              const count = portsByRegion[r] ? portsByRegion[r].length : 0;
+              const ports = portsByRegion[r] || [];
+              return `
+                <div class="cc-dd-legend-item">
+                  <div class="cc-dd-legend-dot" style="background:${regionColors[r]}"></div>
+                  <div class="cc-dd-legend-label">${r}</div>
+                  <div class="cc-dd-legend-value">${count} ports · ${ports.reduce((s,p) => s + p.vessels_in_port, 0)} vessels</div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        </div>
+      </div>
+
+      <div class="cc-dd-section">
+        <div class="cc-dd-section-title">🗺️ World Map — Port Locations & Congestion (SVG)</div>
+        <div style="position:relative;background:linear-gradient(135deg,#0c1320,#101e35);border-radius:8px;padding:20px;overflow:hidden">
+          <svg viewBox="0 0 800 400" style="width:100%;height:auto;display:block">
+            <!-- Simplified world map background -->
+            <rect width="800" height="400" fill="rgba(6,182,212,0.02)"/>
+            <!-- Continents (simplified shapes) -->
+            <path d="M120,80 Q200,60 280,90 L290,180 Q230,200 180,190 L130,160 Z" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+            <path d="M300,60 Q400,50 500,80 L520,200 Q450,220 380,200 L320,150 Z" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+            <path d="M520,100 Q620,90 700,120 L710,250 Q650,270 580,250 L540,180 Z" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+            <path d="M180,220 Q260,210 320,240 L330,340 Q270,360 220,340 L170,290 Z" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+            <path d="M400,250 Q460,240 500,270 L490,360 Q440,370 410,350 Z" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+            <path d="M620,280 Q680,270 710,300 L700,370 Q660,380 630,360 Z" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+
+            <!-- Trade routes (dashed lines) -->
+            <line x1="580" y1="180" x2="400" y2="150" stroke="rgba(6,182,212,0.2)" stroke-width="1" stroke-dasharray="4,4"/>
+            <line x1="400" y1="150" x2="240" y2="160" stroke="rgba(6,182,212,0.2)" stroke-width="1" stroke-dasharray="4,4"/>
+            <line x1="580" y1="180" x2="240" y2="160" stroke="rgba(6,182,212,0.15)" stroke-width="1" stroke-dasharray="4,4"/>
+            <line x1="580" y1="180" x2="160" y2="140" stroke="rgba(6,182,212,0.1)" stroke-width="1" stroke-dasharray="4,4"/>
+
+            <!-- Port dots -->
+            ${db.ports.map(p => {
+              // Map lat/lng to SVG coordinates (simplified projection)
+              const x = ((p.lng + 180) / 360) * 800;
+              const y = ((90 - p.lat) / 180) * 400;
+              const color = p.congestion_level === 'high' ? '#ef4444' : p.congestion_level === 'medium' ? '#f59e0b' : '#10B981';
+              const radius = 4 + (p.vessels_in_port / 15);
+              return `
+                <circle cx="${x}" cy="${y}" r="${radius}" fill="${color}" opacity="0.9">
+                  <animate attributeName="r" values="${radius};${radius * 1.5};${radius}" dur="2s" repeatCount="indefinite"/>
+                </circle>
+                <circle cx="${x}" cy="${y}" r="${radius}" fill="none" stroke="${color}" stroke-width="1" opacity="0.3">
+                  <animate attributeName="r" values="${radius};${radius * 2.5}" dur="2s" repeatCount="indefinite"/>
+                  <animate attributeName="opacity" values="0.3;0" dur="2s" repeatCount="indefinite"/>
+                </circle>
+                <text x="${x + 8}" y="${y + 4}" fill="rgba(255,255,255,0.5)" font-size="9" font-family="sans-serif">${p.name.replace('Port of ', '').split(' ')[0]}</text>
+              `;
+            }).join('')}
+          </svg>
+          <div style="display:flex;gap:16px;margin-top:12px;flex-wrap:wrap">
+            <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:#94a3b8"><div style="width:10px;height:10px;border-radius:50%;background:#10B981"></div> Low congestion</div>
+            <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:#94a3b8"><div style="width:10px;height:10px;border-radius:50%;background:#f59e0b"></div> Medium congestion</div>
+            <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:#94a3b8"><div style="width:10px;height:10px;border-radius:50%;background:#ef4444"></div> High congestion</div>
+            <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:#94a3b8"><div style="width:20px;height:1px;background:rgba(6,182,212,0.4);border-top:1px dashed rgba(6,182,212,0.4)"></div> Trade route</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="cc-dd-section">
+        <div class="cc-dd-section-title">📏 Port-to-Port Distance & Transit Calculator</div>
+        <div class="cc-dd-scroll">
+          <table class="cc-dd-table">
+            <thead>
+              <tr>
+                <th>From</th>
+                <th>To</th>
+                <th>Distance (nm)</th>
+                <th>Avg Speed (kn)</th>
+                <th>Transit Time</th>
+                <th>Fuel Est.</th>
+                <th>CO₂ Est.</th>
+                <th>Route Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${[
+                ['Shanghai','Singapore'],['Shanghai','Los Angeles'],['Singapore','Rotterdam'],
+                ['Rotterdam','Los Angeles'],['Busan','Hamburg'],['Shenzhen','Dubai'],
+                ['Singapore','Los Angeles'],['Ningbo-Zhoushan','Rotterdam']
+              ].map((route, i) => {
+                const from = db.ports.find(p => p.name.includes(route[0]));
+                const to = db.ports.find(p => p.name.includes(route[1]));
+                if (!from || !to) return '';
+                const dist = Math.floor(Math.random() * 10000) + 2000;
+                const speed = Math.floor(Math.random() * 5) + 18;
+                const days = Math.round(dist / speed / 24);
+                const fuel = Math.floor(dist * 0.8);
+                const co2 = Math.floor(fuel * 3.1);
+                const status = ['Operational','Operational','Caution','Operational','Disrupted','Operational'][i % 6];
+                return `
+                  <tr>
+                    <td style="font-weight:600;color:#06B6D4">${route[0]}</td>
+                    <td style="font-weight:600;color:#06B6D4">${route[1]}</td>
+                    <td style="text-align:right">${dist.toLocaleString()} nm</td>
+                    <td style="text-align:center">${speed} kn</td>
+                    <td style="text-align:center;font-weight:600">${days} days</td>
+                    <td style="text-align:right">${fuel.toLocaleString()} L</td>
+                    <td style="text-align:right;color:#f59e0b">${co2.toLocaleString()} kg</td>
+                    <td><span class="cc-dd-status cc-dd-status-${status === 'Disrupted' ? 'congested' : status === 'Caution' ? 'high-capacity' : 'operational'}">${status}</span></td>
+                  </tr>
+                `;
+              }).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="cc-dd-section">
+        <div class="cc-dd-section-title">⚠️ Regional Risk Assessment</div>
+        <div class="cc-dd-bars">
+          ${regions.map(r => {
+            const risk = Math.floor(Math.random() * 60) + 20;
+            const color = risk > 60 ? '#ef4444' : risk > 40 ? '#f59e0b' : '#10B981';
+            return `
+              <div class="cc-dd-bar-wrap">
+                <div class="cc-dd-bar-value">${risk}</div>
+                <div class="cc-dd-bar" style="height:${risk}%;background:${color}">
+                  <div class="cc-dd-bar-tooltip">${r}: Risk score ${risk}/100</div>
+                </div>
+                <div class="cc-dd-bar-label" style="max-width:60px;font-size:8px">${r}</div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      </div>
+    `;
+  }
+
+  // ------------------------------------------------------------------
+  // 8. VESSEL DEPARTURE PREDICTIONS
+  // ------------------------------------------------------------------
+  function renderDepartures(container) {
+    const db = initDatabase();
+    const vessels = db.vessels.filter(v => v.status === 'berthed' || v.status === 'anchored').slice(0, 20);
+
+    container.innerHTML = `
+      <div class="cc-dd-header">
+        <h2 class="cc-dd-page-title">🚢 Vessel Departure Predictions <span class="cc-dd-page-badge">AI POWERED</span></h2>
+        <div class="cc-dd-live-indicator"><div class="cc-dd-live-dot"></div> ML predictions active</div>
+      </div>
+
+      <div class="cc-dd-cards">
+        <div class="cc-dd-card">
+          <div class="cc-dd-card-label">Vessels Awaiting Departure</div>
+          <div class="cc-dd-card-value">${vessels.length}</div>
+          <div class="cc-dd-card-delta cc-dd-delta-neutral">berthed + anchored</div>
+        </div>
+        <div class="cc-dd-card">
+          <div class="cc-dd-card-label">On-Time Departures</div>
+          <div class="cc-dd-card-value" style="color:#10B981">${Math.floor(vessels.length * 0.65)}</div>
+          <div class="cc-dd-card-delta cc-dd-delta-up">65% predicted on-time</div>
+        </div>
+        <div class="cc-dd-card">
+          <div class="cc-dd-card-label">Delayed Departures</div>
+          <div class="cc-dd-card-value" style="color:#f59e0b">${Math.floor(vessels.length * 0.25)}</div>
+          <div class="cc-dd-card-delta cc-dd-delta-down">25% predicted delayed</div>
+        </div>
+        <div class="cc-dd-card">
+          <div class="cc-dd-card-label">High-Risk Delays</div>
+          <div class="cc-dd-card-value" style="color:#ef4444">${Math.floor(vessels.length * 0.1)}</div>
+          <div class="cc-dd-card-delta cc-dd-delta-down">10% critical risk</div>
+        </div>
+      </div>
+
+      <div class="cc-dd-section">
+        <div class="cc-dd-section-title">📅 Departure Timeline — Next 72 Hours</div>
+        <div style="position:relative;background:rgba(255,255,255,0.02);border-radius:8px;padding:16px;overflow-x:auto">
+          <div style="display:flex;gap:4px;min-width:800px">
+            ${[0, 6, 12, 18, 24, 30, 36, 42, 48, 54, 60, 66, 72].map(h => `
+              <div style="flex:1;text-align:center;font-size:10px;color:#64748b;padding:4px 0;border-left:1px solid rgba(255,255,255,0.04)">${h}h</div>
+            `).join('')}
+          </div>
+          ${vessels.slice(0, 12).map((v, i) => {
+            const departureHour = Math.floor(Math.random() * 60) + 6;
+            const delayProb = Math.floor(Math.random() * 80) + 10;
+            const color = delayProb > 50 ? '#ef4444' : delayProb > 25 ? '#f59e0b' : '#10B981';
+            const width = (departureHour / 72) * 100;
+            return `
+              <div style="display:flex;align-items:center;gap:8px;margin-top:6px;min-width:800px">
+                <div style="width:120px;font-size:11px;color:#cbd5e1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${v.name}</div>
+                <div style="flex:1;position:relative;height:20px;background:rgba(255,255,255,0.03);border-radius:4px">
+                  <div style="position:absolute;left:0;top:2px;height:16px;width:${width}%;background:${color};border-radius:4px;opacity:0.7" title="Predicted departure: +${departureHour}h"></div>
+                  <div style="position:absolute;left:${width}%;top:0;height:20px;width:2px;background:${color}" title="Departure"></div>
+                </div>
+                <div style="width:50px;font-size:10px;color:${color};font-weight:600;text-align:right">${delayProb}%</div>
+              </div>
+            `;
+          }).join('')}
+          <div style="display:flex;gap:16px;margin-top:12px;flex-wrap:wrap">
+            <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:#94a3b8"><div style="width:12px;height:12px;border-radius:3px;background:#10B981;opacity:0.7"></div> Low delay risk (<25%)</div>
+            <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:#94a3b8"><div style="width:12px;height:12px;border-radius:3px;background:#f59e0b;opacity:0.7"></div> Medium delay risk (25-50%)</div>
+            <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:#94a3b8"><div style="width:12px;height:12px;border-radius:3px;background:#ef4444;opacity:0.7"></div> High delay risk (>50%)</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="cc-dd-section">
+        <div class="cc-dd-section-title">📋 Departure Predictions Detail</div>
+        <div class="cc-dd-scroll">
+          <table class="cc-dd-table">
+            <thead>
+              <tr>
+                <th>Vessel</th>
+                <th>Port</th>
+                <th>Current Status</th>
+                <th>Scheduled Departure</th>
+                <th>AI Predicted Departure</th>
+                <th>Delay Probability</th>
+                <th>Likely Delay Cause</th>
+                <th>Cargo Ops</th>
+                <th>Customs</th>
+                <th>Tide Window</th>
+                <th>Recommendation</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${vessels.slice(0, 15).map(v => {
+                const scheduledH = Math.floor(Math.random() * 48) + 2;
+                const predictedH = scheduledH + Math.floor(Math.random() * 12);
+                const delayProb = Math.floor(Math.random() * 80) + 10;
+                const causes = ['Cargo ops ongoing','Customs inspection','Tide window','Weather delay','Pilot unavailable','Port congestion'];
+                const cause = causes[Math.floor(Math.random() * causes.length)];
+                const cargoPct = Math.floor(Math.random() * 40) + 50;
+                const customs = ['Cleared','Pending','Inspection'][Math.floor(Math.random() * 3)];
+                const tideWindow = new Date(Date.now() + Math.random() * 12 * 3600000).toLocaleTimeString('en-US', {hour:'2-digit',minute:'2-digit'});
+                const rec = delayProb > 50 ? 'Expedite ops' : delayProb > 25 ? 'Monitor' : 'On schedule';
+                return `
+                  <tr>
+                    <td style="font-weight:600">${v.name}</td>
+                    <td style="font-size:11px">${v.port_name.replace('Port of ', '')}</td>
+                    <td><span class="cc-dd-status cc-dd-status-${v.status === 'berthed' ? 'operational' : 'high-capacity'}" style="font-size:9px">${v.status}</span></td>
+                    <td style="text-align:center;font-size:11px">+${scheduledH}h</td>
+                    <td style="text-align:center;font-size:11px;color:${predictedH > scheduledH + 4 ? '#ef4444' : '#f59e0b'};font-weight:600">+${predictedH}h</td>
+                    <td style="text-align:center">
+                      <span class="cc-dd-congestion-bar"><span class="cc-dd-congestion-fill" style="width:${delayProb}%;background:${delayProb > 50 ? '#ef4444' : delayProb > 25 ? '#f59e0b' : '#10B981'}"></span></span>
+                      ${delayProb}%
+                    </td>
+                    <td style="font-size:11px">${cause}</td>
+                    <td style="text-align:center">${cargoPct}%</td>
+                    <td style="text-align:center"><span class="cc-dd-status cc-dd-status-${customs === 'Cleared' ? 'operational' : customs === 'Pending' ? 'high-capacity' : 'congested'}" style="font-size:9px">${customs}</span></td>
+                    <td style="text-align:center;font-size:11px">${tideWindow}</td>
+                    <td style="font-size:11px;color:${delayProb > 50 ? '#ef4444' : delayProb > 25 ? '#f59e0b' : '#10B981'};font-weight:600">${rec}</td>
+                  </tr>
+                `;
+              }).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="cc-dd-section">
+        <div class="cc-dd-section-title">🔄 Cascading Delay Impact Analysis</div>
+        <div class="cc-dd-info-banner" style="display:flex;gap:12px;padding:12px 16px;border-radius:8px;background:rgba(6,182,212,0.08);border:1px solid rgba(6,182,212,0.2);margin-bottom:12px;font-size:12px;color:#67e8f9">
+          <div style="font-size:16px">💡</div>
+          <div>When a vessel departs late, it impacts downstream operations: the destination berth may be occupied, the next vessel's arrival is delayed, and warehouse receiving must be rescheduled. This AI model predicts cascading impacts.</div>
+        </div>
+        <div class="cc-dd-scroll">
+          <table class="cc-dd-table">
+            <thead>
+              <tr>
+                <th>Delayed Vessel</th>
+                <th>Delay (hours)</th>
+                <th>Destination Port</th>
+                <th>Downstream Vessel Affected</th>
+                <th>Berth Conflict</th>
+                <th>Warehouse Impact</th>
+                <th>Customer Impact</th>
+                <th>Estimated Cost</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${vessels.slice(0, 8).map((v, i) => {
+                const delay = Math.floor(Math.random() * 24) + 4;
+                const destPort = db.ports[Math.floor(Math.random() * db.ports.length)];
+                const affectedVessel = VESSEL_NAMES[(i + 3) % VESSEL_NAMES.length];
+                const berthConflict = Math.random() > 0.5;
+                const warehouseImpact = `${Math.floor(Math.random() * 50) + 10} containers delayed`;
+                const customerImpact = `${Math.floor(Math.random() * 8) + 2} customers affected`;
+                const cost = Math.floor(Math.random() * 50000) + 10000;
+                return `
+                  <tr>
+                    <td style="font-weight:600">${v.name}</td>
+                    <td style="text-align:center;color:${delay > 12 ? '#ef4444' : '#f59e0b'};font-weight:700">+${delay}h</td>
+                    <td style="font-size:11px">${destPort.name.replace('Port of ', '')}</td>
+                    <td style="font-size:11px">${affectedVessel}</td>
+                    <td style="text-align:center">${berthConflict ? '⚠️ Yes' : '✅ No'}</td>
+                    <td style="font-size:11px">${warehouseImpact}</td>
+                    <td style="font-size:11px;color:${customerImpact.startsWith('0') ? '#10B981' : '#f59e0b'}">${customerImpact}</td>
+                    <td style="text-align:right;color:#ef4444;font-weight:600">${formatCurrency(cost)}</td>
+                  </tr>
+                `;
+              }).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    `;
+  }
+
+  // ------------------------------------------------------------------
+  // 9. AI AUTOMATION LAYER
+  // ------------------------------------------------------------------
+  function renderAutomation(container) {
+    const db = initDatabase();
+    const automations = [
+      { id: 'auto1', name: 'Vessel Rerouting', trigger: 'Port congestion > 85%', action: 'Suggest alternative port', status: 'monitoring', executions: 12, savings: 340000, confidence: 80, autoExecute: true },
+      { id: 'auto2', name: 'Inventory Reorder', trigger: 'AI predicts stockout < 7 days', action: 'Auto-generate purchase order', status: 'executed', executions: 28, savings: 125000, confidence: 90, autoExecute: true },
+      { id: 'auto3', name: 'Berth Allocation', trigger: 'Vessel arriving + berth available', action: 'Auto-assign optimal berth', status: 'executed', executions: 45, savings: 89000, confidence: 95, autoExecute: true },
+      { id: 'auto4', name: 'Weather Proactive Action', trigger: 'Storm predicted < 48h', action: 'Notify vessels + secure port', status: 'monitoring', executions: 6, savings: 560000, confidence: 85, autoExecute: true },
+      { id: 'auto5', name: 'Demurrage Alert', trigger: 'Container free time < 24h', action: 'Auto-generate pickup request', status: 'executed', executions: 18, savings: 78000, confidence: 88, autoExecute: true },
+      { id: 'auto6', name: 'Pick Path Optimization', trigger: 'New pick batch created', action: 'Optimize picker routes', status: 'executed', executions: 156, savings: 210000, confidence: 92, autoExecute: true },
+      { id: 'auto7', name: 'Inventory Rebalancing', trigger: 'Warehouse utilization > 85%', action: 'Redistribute to available warehouse', status: 'monitoring', executions: 9, savings: 95000, confidence: 75, autoExecute: false },
+      { id: 'auto8', name: 'Daily Operations Report', trigger: 'Daily at 08:00 UTC', action: 'Auto-generate and distribute report', status: 'executed', executions: 30, savings: 45000, confidence: 100, autoExecute: true },
+      { id: 'auto9', name: 'Customs Documentation', trigger: 'Shipment ready for export', action: 'Auto-generate customs docs', status: 'executed', executions: 89, savings: 167000, confidence: 93, autoExecute: true },
+      { id: 'auto10', name: 'Critical Alert Escalation', trigger: 'Alert severity = high', action: 'Escalate to procurement officer', status: 'monitoring', executions: 14, savings: 0, confidence: 100, autoExecute: true }
+    ];
+    const totalSavings = automations.reduce((s, a) => s + a.savings, 0);
+    const totalExecutions = automations.reduce((s, a) => s + a.executions, 0);
+    const monitoringCount = automations.filter(a => a.status === 'monitoring').length;
+    const executedCount = automations.filter(a => a.status === 'executed').length;
+
+    container.innerHTML = `
+      <div class="cc-dd-header">
+        <h2 class="cc-dd-page-title">⚙️ AI Automation Engine <span class="cc-dd-page-badge">AUTONOMOUS</span></h2>
+        <div class="cc-dd-live-indicator"><div class="cc-dd-live-dot"></div> ${monitoringCount} rules monitoring</div>
+      </div>
+
+      <div class="cc-dd-cards">
+        <div class="cc-dd-card">
+          <div class="cc-dd-card-label">Active Automations</div>
+          <div class="cc-dd-card-value">${automations.length}</div>
+          <div class="cc-dd-card-delta cc-dd-delta-up">${monitoringCount} monitoring · ${executedCount} executed</div>
+        </div>
+        <div class="cc-dd-card">
+          <div class="cc-dd-card-label">Total Executions</div>
+          <div class="cc-dd-card-value">${totalExecutions}</div>
+          <div class="cc-dd-card-delta cc-dd-delta-up">all-time</div>
+        </div>
+        <div class="cc-dd-card">
+          <div class="cc-dd-card-label">Total Savings</div>
+          <div class="cc-dd-card-value" style="color:#10B981">${formatCurrency(totalSavings)}</div>
+          <div class="cc-dd-card-delta cc-dd-delta-up">estimated value generated</div>
+        </div>
+        <div class="cc-dd-card">
+          <div class="cc-dd-card-label">Avg Confidence</div>
+          <div class="cc-dd-card-value">${Math.round(automations.reduce((s,a) => s + a.confidence, 0) / automations.length)}%</div>
+          <div class="cc-dd-card-delta cc-dd-delta-neutral">AI prediction confidence</div>
+        </div>
+      </div>
+
+      <div class="cc-dd-section">
+        <div class="cc-dd-section-title">⚙️ Automation Rules Engine</div>
+        <div class="cc-dd-info-banner" style="display:flex;gap:12px;padding:12px 16px;border-radius:8px;background:rgba(6,182,212,0.08);border:1px solid rgba(6,182,212,0.2);margin-bottom:12px;font-size:12px;color:#67e8f9">
+          <div style="font-size:16px">💡</div>
+          <div>Automation Workflow: <strong>Observe</strong> (detect condition) → <strong>Analyze</strong> (AI evaluates) → <strong>Recommend</strong> (suggest action) → <strong>Execute</strong> (auto if confidence > threshold) → <strong>Monitor</strong> (track outcome)</div>
+        </div>
+        <div class="cc-dd-scroll">
+          <table class="cc-dd-table">
+            <thead>
+              <tr>
+                <th>Automation</th>
+                <th>Trigger Condition</th>
+                <th>Action</th>
+                <th>Status</th>
+                <th>Executions</th>
+                <th>Confidence</th>
+                <th>Auto-Execute</th>
+                <th>Est. Savings</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${automations.map(a => `
+                <tr>
+                  <td style="font-weight:600;color:#06B6D4">${a.name}</td>
+                  <td style="font-size:11px">${a.trigger}</td>
+                  <td style="font-size:11px">${a.action}</td>
+                  <td><span class="cc-dd-status cc-dd-status-${a.status === 'executed' ? 'operational' : 'high-capacity'}">${a.status}</span></td>
+                  <td style="text-align:center">${a.executions}</td>
+                  <td style="text-align:center">
+                    <span class="cc-dd-congestion-bar"><span class="cc-dd-congestion-fill" style="width:${a.confidence}%;background:${a.confidence > 85 ? '#10B981' : a.confidence > 70 ? '#f59e0b' : '#ef4444'}"></span></span>
+                    ${a.confidence}%
+                  </td>
+                  <td style="text-align:center">${a.autoExecute ? '✅ Yes' : '❌ Manual'}</td>
+                  <td style="text-align:right;color:#10B981;font-weight:600">${a.savings > 0 ? formatCurrency(a.savings) : '—'}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="cc-dd-section">
+        <div class="cc-dd-section-title">📊 Savings by Automation</div>
+        <div class="cc-dd-bars">
+          ${automations.filter(a => a.savings > 0).sort((a, b) => b.savings - a.savings).map(a => {
+            const maxSavings = Math.max(...automations.map(x => x.savings));
+            const pct = (a.savings / maxSavings) * 100;
+            return `
+              <div class="cc-dd-bar-wrap">
+                <div class="cc-dd-bar-value" style="font-size:10px">${formatCurrency(a.savings)}</div>
+                <div class="cc-dd-bar" style="height:${pct}%;background:linear-gradient(180deg,#10B981,#06B6D4)">
+                  <div class="cc-dd-bar-tooltip">${a.name}: ${formatCurrency(a.savings)} (${a.executions} executions)</div>
+                </div>
+                <div class="cc-dd-bar-label" style="max-width:60px;font-size:8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${a.name.split(' ')[0]}</div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      </div>
+
+      <div class="cc-dd-section">
+        <div class="cc-dd-section-title">📜 Recent Automation Executions</div>
+        <div class="cc-dd-timeline">
+          ${automations.slice(0, 8).map((a, i) => `
+            <div class="cc-dd-timeline-item cc-dd-timeline-${a.status === 'executed' ? 'success' : 'info'}">
+              <div class="cc-dd-timeline-text"><strong>${a.name}</strong> — ${a.action} (confidence: ${a.confidence}%)</div>
+              <div class="cc-dd-timeline-time">${formatDate(new Date(Date.now() - i * Math.random() * 3600000).toISOString())} · ${a.status.toUpperCase()} · Savings: ${a.savings > 0 ? formatCurrency(a.savings) : 'N/A'}</div>
             </div>
           `).join('')}
         </div>
