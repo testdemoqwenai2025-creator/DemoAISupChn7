@@ -956,7 +956,8 @@
         iconsLabeled: labeled,
         timestampsAdded: stamped,
         loadingSkeleton: true,
-        themeToggle: true
+        themeToggle: true,
+        dispatchSidebarItem: injectDispatchSidebarItem()
       });
     }
 
@@ -965,6 +966,138 @@
     } else {
       runEnhancements();
     }
+  }
+
+  // ------------------------------------------------------------------
+  // #12. INJECT DISPATCH DASHBOARD INTO SPA SIDEBAR
+  // ------------------------------------------------------------------
+  // Inserts a "🚢 Dispatch" nav item between AI Documents and Compliance
+  // in the Command Center's sidebar. Clicking it opens the dispatch
+  // dashboard modal (same as the floating button).
+  function injectDispatchSidebarItem() {
+    var attempts = 0;
+
+    function tryInject() {
+      attempts++;
+      if (document.getElementById('cc-dispatch-sidebar-item')) return true;
+      if (attempts > 30) return false;
+
+      // Find all sidebar nav buttons/links
+      var navItems = document.querySelectorAll('nav button, nav a, [class*="sidebar"] button, [class*="sidebar"] a');
+
+      var aiDocsItem = null;
+      var complianceItem = null;
+
+      navItems.forEach(function(item) {
+        var text = (item.textContent || '').toLowerCase().trim();
+        if (text.indexOf('ai doc') !== -1 || text.indexOf('document') !== -1) {
+          aiDocsItem = item;
+        }
+        if (text.indexOf('compliance') !== -1 || text.indexOf('compli') !== -1) {
+          complianceItem = item;
+        }
+      });
+
+      // If we found either, insert between them (or after AI Docs, or before Compliance)
+      var insertBefore = complianceItem;
+      var insertAfter = aiDocsItem;
+
+      if (!insertBefore && !insertAfter) {
+        // Fallback: find the sidebar container and append
+        var sidebar = document.querySelector('nav, [class*="sidebar"], aside');
+        if (!sidebar) {
+          setTimeout(tryInject, 500);
+          return false;
+        }
+        appendToSidebar(sidebar);
+        return true;
+      }
+
+      // Create the new nav item by cloning an existing one (preserves styling)
+      var template = insertAfter || insertBefore;
+      if (!template) {
+        setTimeout(tryInject, 500);
+        return false;
+      }
+
+      var newItem = template.cloneNode(true);
+      newItem.id = 'cc-dispatch-sidebar-item';
+      newItem.removeAttribute('data-state');
+      newItem.removeAttribute('aria-current');
+
+      // Update the icon — find the first SVG and replace it
+      var svg = newItem.querySelector('svg');
+      if (svg) {
+        svg.innerHTML = '<path d="M3 15c0 2 1 4 3 4h12c2 0 3-2 3-4M3 15c0-2 1-4 3-4h12c2 0 3 2 3 4M3 15h18M12 3v8M9 7l3-4 3 4"/><circle cx="12" cy="15" r="1"/>';
+      }
+
+      // Update the text content — find the span/text element
+      var spans = newItem.querySelectorAll('span');
+      spans.forEach(function(span) {
+        var text = span.textContent.trim();
+        if (text.length > 0 && text.length < 30 && text.indexOf('badge') === -1) {
+          span.textContent = 'Dispatch';
+        }
+      });
+
+      // Also update any direct text nodes
+      var walker = document.createTreeWalker(newItem, NodeFilter.SHOW_TEXT, null, null);
+      while (walker.nextNode()) {
+        var node = walker.currentNode;
+        var text = node.textContent.trim();
+        if (text.length > 0 && text.length < 30) {
+          node.textContent = 'Dispatch';
+        }
+      }
+
+      // Remove any badge elements
+      var badges = newItem.querySelectorAll('[class*="badge"], [class*="count"], [data-slot]');
+      badges.forEach(function(b) { b.remove(); });
+
+      // Set the onclick handler — open the dispatch dashboard
+      newItem.onclick = function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        if (window.__ccDD && window.__ccDD.open) {
+          window.__ccDD.open();
+        } else {
+          // Fallback: try to find and click the floating dispatch button
+          var floatBtn = document.getElementById('cc-dd-trigger-btn');
+          if (floatBtn) floatBtn.click();
+        }
+      };
+
+      // Insert into the sidebar
+      if (insertBefore && insertBefore.parentNode) {
+        insertBefore.parentNode.insertBefore(newItem, insertBefore);
+      } else if (insertAfter && insertAfter.nextSibling) {
+        insertAfter.parentNode.insertBefore(newItem, insertAfter.nextSibling);
+      } else if (insertAfter && insertAfter.parentNode) {
+        insertAfter.parentNode.appendChild(newItem);
+      }
+
+      console.log('[cc-enhancements] Dispatch Dashboard injected into sidebar (between AI Documents and Compliance)');
+      return true;
+    }
+
+    function appendToSidebar(sidebar) {
+      var newItem = document.createElement('button');
+      newItem.id = 'cc-dispatch-sidebar-item';
+      newItem.className = sidebar.querySelector('button') ? sidebar.querySelector('button').className : '';
+      newItem.style.cssText = 'display:flex;align-items:center;gap:8px;padding:8px 16px;width:100%;font-size:13px;font-weight:600;color:#94a3b8;background:none;border:none;cursor:pointer;font-family:inherit;border-radius:6px;transition:all 0.2s';
+      newItem.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 15c0 2 1 4 3 4h12c2 0 3-2 3-4M3 15c0-2 1-4 3-4h12c2 0 3 2 3 4M3 15h18M12 3v8M9 7l3-4 3 4"/><circle cx="12" cy="15" r="1"/></svg> <span>Dispatch</span>';
+      newItem.onmouseover = function() { newItem.style.background = 'rgba(255,255,255,0.03)'; newItem.style.color = '#e2e8f0'; };
+      newItem.onmouseout = function() { newItem.style.background = 'none'; newItem.style.color = '#94a3b8'; };
+      newItem.onclick = function() {
+        if (window.__ccDD && window.__ccDD.open) window.__ccDD.open();
+        else { var fb = document.getElementById('cc-dd-trigger-btn'); if (fb) fb.click(); }
+      };
+      sidebar.appendChild(newItem);
+      console.log('[cc-enhancements] Dispatch Dashboard appended to sidebar');
+    }
+
+    setTimeout(tryInject, 2000);
+    return 'injected';
   }
 
   init();
