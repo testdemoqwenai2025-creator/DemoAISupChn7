@@ -667,6 +667,12 @@
         <button class="cc-dd-nav-item ${currentView === 'automation' ? 'active' : ''}" onclick="window.__ccDD.setView('automation')">
           <span class="cc-dd-nav-icon">⚙️</span> AI Automations
         </button>
+        <button class="cc-dd-nav-item ${currentView === 'financial' ? 'active' : ''}" onclick="window.__ccDD.setView('financial')">
+          <span class="cc-dd-nav-icon">💰</span> Financial Impact
+        </button>
+        <button class="cc-dd-nav-item ${currentView === 'twin' ? 'active' : ''}" onclick="window.__ccDD.setView('twin')">
+          <span class="cc-dd-nav-icon">🔮</span> Digital Twin
+        </button>
         <button class="cc-dd-nav-item ${currentView === 'tower' ? 'active' : ''}" onclick="window.__ccDD.setView('tower')">
           <span class="cc-dd-nav-icon">🗼</span> Control Tower
           ${alertCount > 0 ? '<span class="cc-dd-nav-badge">' + alertCount + '</span>' : ''}
@@ -689,6 +695,8 @@
     else if (currentView === 'geo') renderGeo(container);
     else if (currentView === 'departures') renderDepartures(container);
     else if (currentView === 'automation') renderAutomation(container);
+    else if (currentView === 'financial') renderFinancial(container);
+    else if (currentView === 'twin') renderTwin(container);
     else if (currentView === 'tower') renderTower(container);
 
     // Update sidebar active states
@@ -2346,6 +2354,490 @@
   }
 
   // ------------------------------------------------------------------
+  // 10. FINANCIAL IMPACT DASHBOARD
+  // ------------------------------------------------------------------
+  function renderFinancial(container) {
+    const db = initDatabase();
+    const totalDemurrage = db.ports.reduce((s, p) => s + Math.floor(Math.random() * 80000 + 20000), 0);
+    const totalDetention = Math.floor(totalDemurrage * 0.6);
+    const totalStorage = db.warehouses.reduce((s, w) => s + Math.floor(w.utilized * 0.85 * 30), 0);
+    const totalBunker = Math.floor(Math.random() * 500000 + 800000);
+    const totalCarrying = db.inventory.reduce((s, i) => s + Math.floor(i.quantity * i.unit_value * 0.02), 0);
+    const totalStockoutCost = db.forecasts.filter(f => f.stockout_risk === 'high').length * 25000;
+    const totalLanded = totalDemurrage + totalDetention + totalStorage + totalBunker + totalCarrying + totalStockoutCost;
+    const aiSavings = 1745000;
+    const roi = Math.round((aiSavings / (totalLanded * 0.1)) * 100);
+
+    container.innerHTML = `
+      <div class="cc-dd-header">
+        <h2 class="cc-dd-page-title">💰 Financial Impact Dashboard <span class="cc-dd-page-badge">REAL-TIME</span></h2>
+        <div class="cc-dd-live-indicator"><div class="cc-dd-live-dot"></div> Financial data syncing</div>
+      </div>
+
+      <!-- Top-level financial exposure -->
+      <div class="cc-dd-cards">
+        <div class="cc-dd-card" style="border-color:rgba(239,68,68,0.2)">
+          <div class="cc-dd-card-label">Total Cost Exposure (30d)</div>
+          <div class="cc-dd-card-value" style="color:#ef4444">${formatCurrency(totalLanded)}</div>
+          <div class="cc-dd-card-delta cc-dd-delta-down">across all operations</div>
+        </div>
+        <div class="cc-dd-card" style="border-color:rgba(16,185,129,0.2)">
+          <div class="cc-dd-card-label">AI Savings (Quarter)</div>
+          <div class="cc-dd-card-value" style="color:#10B981">${formatCurrency(aiSavings)}</div>
+          <div class="cc-dd-card-delta cc-dd-delta-up">ROI: ${roi}%</div>
+        </div>
+        <div class="cc-dd-card">
+          <div class="cc-dd-card-label">Cost per TEU</div>
+          <div class="cc-dd-card-value">$${Math.floor(totalLanded / (db.ports.reduce((s,p) => s + p.daily_throughput, 0) * 30) * 100) / 100}</div>
+          <div class="cc-dd-card-delta cc-dd-delta-neutral">avg across ports</div>
+        </div>
+        <div class="cc-dd-card">
+          <div class="cc-dd-card-label">Net Impact</div>
+          <div class="cc-dd-card-value" style="color:${aiSavings > totalLanded * 0.5 ? '#10B981' : '#f59e0b'}">${formatCurrency(aiSavings - Math.floor(totalLanded * 0.15))}</div>
+          <div class="cc-dd-card-delta cc-dd-delta-up">AI savings vs cost exposure</div>
+        </div>
+      </div>
+
+      <!-- Cost breakdown bar chart -->
+      <div class="cc-dd-section">
+        <div class="cc-dd-section-title">📊 Cost Breakdown — Last 30 Days</div>
+        <div class="cc-dd-bars">
+          ${[
+            { label: 'Demurrage', value: totalDemurrage, color: '#ef4444' },
+            { label: 'Detention', value: totalDetention, color: '#f59e0b' },
+            { label: 'Storage', value: totalStorage, color: '#8b5cf6' },
+            { label: 'Bunker Fuel', value: totalBunker, color: '#06B6D4' },
+            { label: 'Carrying', value: totalCarrying, color: '#3b82f6' },
+            { label: 'Stockout', value: totalStockoutCost, color: '#ec4899' }
+          ].map(c => {
+            const maxVal = Math.max(totalDemurrage, totalDetention, totalStorage, totalBunker, totalCarrying, totalStockoutCost, 1);
+            const pct = (c.value / maxVal) * 100;
+            return `
+              <div class="cc-dd-bar-wrap">
+                <div class="cc-dd-bar-value" style="font-size:10px">${formatCurrency(c.value)}</div>
+                <div class="cc-dd-bar" style="height:${pct}%;background:${c.color}">
+                  <div class="cc-dd-bar-tooltip">${c.label}: ${formatCurrency(c.value)} (${Math.round(c.value/totalLanded*100)}% of total)</div>
+                </div>
+                <div class="cc-dd-bar-label" style="max-width:60px;font-size:9px">${c.label}</div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      </div>
+
+      <!-- Cost by port -->
+      <div class="cc-dd-section">
+        <div class="cc-dd-section-title">⚓ Demurrage & Detention by Port</div>
+        <div class="cc-dd-scroll">
+          <table class="cc-dd-table">
+            <thead>
+              <tr><th>Port</th><th>Containers Held</th><th>Demurrage (30d)</th><th>Detention (30d)</th><th>Rate/Day</th><th>Avg Days Overdue</th><th>Total Exposure</th><th>Trend</th></tr>
+            </thead>
+            <tbody>
+              ${db.ports.map(p => {
+                const containers = Math.floor(Math.random() * 80) + 20;
+                const demurrage = Math.floor(Math.random() * 120000 + 30000);
+                const detention = Math.floor(demurrage * (0.5 + Math.random() * 0.2));
+                const avgOverdue = Math.floor(Math.random() * 8) + 2;
+                const trend = Math.random() > 0.5 ? 'up' : 'down';
+                return `
+                  <tr>
+                    <td style="font-weight:600;color:#06B6D4">${p.name}</td>
+                    <td style="text-align:center">${containers}</td>
+                    <td style="text-align:right;color:#ef4444;font-weight:600">${formatCurrency(demurrage)}</td>
+                    <td style="text-align:right;color:#f59e0b">${formatCurrency(detention)}</td>
+                    <td style="text-align:center">$${p.demurrage_rate}</td>
+                    <td style="text-align:center;color:${avgOverdue > 5 ? '#ef4444' : '#f59e0b'}">${avgOverdue}d</td>
+                    <td style="text-align:right;color:#ef4444;font-weight:800">${formatCurrency(demurrage + detention)}</td>
+                    <td style="text-align:center">${trend === 'up' ? '<span style="color:#ef4444">↑ 12%</span>' : '<span style="color:#10B981">↓ 8%</span>'}</td>
+                  </tr>
+                `;
+              }).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Storage costs per warehouse -->
+      <div class="cc-dd-section">
+        <div class="cc-dd-section-title">🏭 Storage Costs per Warehouse (Monthly)</div>
+        <div class="cc-dd-bars">
+          ${db.warehouses.map(w => {
+            const cost = Math.floor(w.utilized * 0.85 * 30);
+            const maxCost = Math.max(...db.warehouses.map(x => Math.floor(x.utilized * 0.85 * 30)));
+            const pct = (cost / maxCost) * 100;
+            return `
+              <div class="cc-dd-bar-wrap">
+                <div class="cc-dd-bar-value" style="font-size:10px">${formatCurrency(cost)}</div>
+                <div class="cc-dd-bar" style="height:${pct}%;background:linear-gradient(180deg,#8b5cf6,#3b82f6)">
+                  <div class="cc-dd-bar-tooltip">${w.name}: ${formatCurrency(cost)}/month · ${w.utilized}/${w.capacity} m² at $0.85/m²/day</div>
+                </div>
+                <div class="cc-dd-bar-label" style="max-width:70px;font-size:8px">${w.name.split(' ')[0]}</div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      </div>
+
+      <!-- Total Landed Cost Calculator -->
+      <div class="cc-dd-section">
+        <div class="cc-dd-section-title">🧮 Total Landed Cost Calculator</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin-bottom:16px">
+          ${[
+            { label: 'Demurrage Charges', value: totalDemurrage, color: '#ef4444', desc: 'Port delay fees' },
+            { label: 'Detention Charges', value: totalDetention, color: '#f59e0b', desc: 'Container usage fees' },
+            { label: 'Storage Costs', value: totalStorage, color: '#8b5cf6', desc: 'Warehouse space' },
+            { label: 'Bunker Fuel', value: totalBunker, color: '#06B6D4', desc: 'Vessel fuel projection' },
+            { label: 'Inventory Carrying', value: totalCarrying, color: '#3b82f6', desc: '2% of inventory value/mo' },
+            { label: 'Stockout Losses', value: totalStockoutCost, color: '#ec4899', desc: 'Lost revenue estimate' }
+          ].map(c => `
+            <div style="padding:14px;background:rgba(255,255,255,0.03);border:1px solid ${c.color}20;border-radius:8px">
+              <div style="font-size:10px;color:#64748b;text-transform:uppercase">${c.label}</div>
+              <div style="font-size:20px;font-weight:800;color:${c.color}">${formatCurrency(c.value)}</div>
+              <div style="font-size:10px;color:#64748b;margin-top:2px">${c.desc}</div>
+              <div style="font-size:11px;color:#64748b;margin-top:4px">${Math.round(c.value/totalLanded*100)}% of total</div>
+            </div>
+          `).join('')}
+        </div>
+        <div style="padding:16px;background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.2);border-radius:8px;display:flex;justify-content:space-between;align-items:center">
+          <div>
+            <div style="font-size:11px;color:#64748b;text-transform:uppercase">Total Landed Cost (30 days)</div>
+            <div style="font-size:28px;font-weight:900;color:#ef4444">${formatCurrency(totalLanded)}</div>
+          </div>
+          <div style="text-align:right">
+            <div style="font-size:11px;color:#64748b;text-transform:uppercase">Projected Annual</div>
+            <div style="font-size:20px;font-weight:700;color:#f59e0b">${formatCurrency(totalLanded * 12)}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ROI of AI -->
+      <div class="cc-dd-section" style="border-color:rgba(16,185,129,0.2);background:rgba(16,185,129,0.02)">
+        <div class="cc-dd-section-title">📈 ROI of AI Recommendations — Quarterly Summary</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;margin-bottom:16px">
+          <div style="padding:14px;background:rgba(16,185,129,0.06);border:1px solid rgba(16,185,129,0.15);border-radius:8px;text-align:center">
+            <div style="font-size:10px;color:#64748b;text-transform:uppercase">Vessel Rerouting</div>
+            <div style="font-size:20px;font-weight:800;color:#10B981">${formatCurrency(340000)}</div>
+            <div style="font-size:10px;color:#64748b">12 reroutes · avg $28k saved</div>
+          </div>
+          <div style="padding:14px;background:rgba(16,185,129,0.06);border:1px solid rgba(16,185,129,0.15);border-radius:8px;text-align:center">
+            <div style="font-size:10px;color:#64748b;text-transform:uppercase">Demurrage Avoided</div>
+            <div style="font-size:20px;font-weight:800;color:#10B981">${formatCurrency(425000)}</div>
+            <div style="font-size:10px;color:#64748b">18 early pickups</div>
+          </div>
+          <div style="padding:14px;background:rgba(16,185,129,0.06);border:1px solid rgba(16,185,129,0.15);border-radius:8px;text-align:center">
+            <div style="font-size:10px;color:#64748b;text-transform:uppercase">Pick Path Savings</div>
+            <div style="font-size:20px;font-weight:800;color:#10B981">${formatCurrency(210000)}</div>
+            <div style="font-size:10px;color:#64748b">156 optimized batches</div>
+          </div>
+          <div style="padding:14px;background:rgba(16,185,129,0.06);border:1px solid rgba(16,185,129,0.15);border-radius:8px;text-align:center">
+            <div style="font-size:10px;color:#64748b;text-transform:uppercase">Stockout Prevention</div>
+            <div style="font-size:20px;font-weight:800;color:#10B981">${formatCurrency(380000)}</div>
+            <div style="font-size:10px;color:#64748b">28 auto-reorders</div>
+          </div>
+          <div style="padding:14px;background:rgba(16,185,129,0.06);border:1px solid rgba(16,185,129,0.15);border-radius:8px;text-align:center">
+            <div style="font-size:10px;color:#64748b;text-transform:uppercase">Weather Proactive</div>
+            <div style="font-size:20px;font-weight:800;color:#10B981">${formatCurrency(560000)}</div>
+            <div style="font-size:10px;color:#64748b">6 storm pre-emptions</div>
+          </div>
+          <div style="padding:14px;background:rgba(16,185,129,0.06);border:1px solid rgba(16,185,129,0.15);border-radius:8px;text-align:center">
+            <div style="font-size:10px;color:#64748b;text-transform:uppercase">Customs Auto-Docs</div>
+            <div style="font-size:20px;font-weight:800;color:#10B981">${formatCurrency(167000)}</div>
+            <div style="font-size:10px;color:#64748b">89 automated filings</div>
+          </div>
+        </div>
+        <div style="padding:20px;background:linear-gradient(135deg,rgba(16,185,129,0.08),rgba(6,182,212,0.08));border:1px solid rgba(16,185,129,0.2);border-radius:12px;text-align:center">
+          <div style="font-size:11px;color:#64748b;text-transform:uppercase;letter-spacing:0.05em">Total AI Savings This Quarter</div>
+          <div style="font-size:36px;font-weight:900;color:#10B981;margin:8px 0">${formatCurrency(aiSavings)}</div>
+          <div style="font-size:14px;color:#67e8f9">ROI: <strong>${roi}%</strong> · Cost of AI platform: ${formatCurrency(Math.floor(totalLanded * 0.1))} · Net benefit: <strong style="color:#10B981">${formatCurrency(aiSavings - Math.floor(totalLanded * 0.1))}</strong></div>
+        </div>
+      </div>
+    `;
+  }
+
+  // ------------------------------------------------------------------
+  // 11. DIGITAL TWIN / SCENARIO SIMULATOR
+  // ------------------------------------------------------------------
+  function renderTwin(container) {
+    const db = initDatabase();
+    container.innerHTML = `
+      <div class="cc-dd-header">
+        <h2 class="cc-dd-page-title">🔮 Digital Twin — Scenario Simulator <span class="cc-dd-page-badge">WHAT-IF</span></h2>
+        <div class="cc-dd-live-indicator"><div class="cc-dd-live-dot"></div> Simulation engine ready</div>
+      </div>
+
+      <div class="cc-dd-section">
+        <div class="cc-dd-section-title">🎭 Select a Disruption Scenario</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px">
+          ${SCENARIOS.map((s, i) => `
+            <div onclick="window.__ccDD.runScenario(${i})" style="padding:16px;background:rgba(255,255,255,0.03);border:1px solid ${s.color}30;border-radius:10px;cursor:pointer;transition:all 0.2s" onmouseover="this.style.background='rgba(255,255,255,0.06)';this.style.borderColor='${s.color}'" onmouseout="this.style.background='rgba(255,255,255,0.03)';this.style.borderColor='${s.color}30'">
+              <div style="font-size:28px;margin-bottom:8px">${s.icon}</div>
+              <div style="font-size:14px;font-weight:700;color:${s.color}">${s.name}</div>
+              <div style="font-size:11px;color:#64748b;margin-top:4px">${s.description}</div>
+              <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">
+                ${s.tags.map(t => `<span style="font-size:9px;padding:2px 6px;border-radius:4px;background:rgba(255,255,255,0.05);color:#94a3b8">${t}</span>`).join('')}
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+
+      <div id="cc-dd-twin-result"></div>
+    `;
+  }
+
+  const SCENARIOS = [
+    {
+      id: 'shanghai_closure',
+      name: 'Port of Shanghai Closure (7 Days)',
+      icon: '🚢',
+      color: '#ef4444',
+      description: 'Simulates a 7-day closure of the world\'s largest port due to typhoon or geopolitical event.',
+      tags: ['Ports', 'Vessels', 'Warehouses', 'High Impact'],
+      // Impact data
+      vesselsDelayed: 45,
+      containersStuck: 12000,
+      reroutedTo: ['Ningbo-Zhoushan (+40% load)', 'Busan (+25% load)', 'Qingdao (+30% load)'],
+      warehouseImpact: 'Rotterdam +15% inbound surge, Singapore +22%, LA +18%',
+      costPerDay: 2400000,
+      totalCost: 16800000,
+      recoveryDays: 21,
+      customersAffected: 340,
+      aiActions: [
+        'Auto-reroute 28 vessels to Ningbo-Zhoushan (nearest port with capacity)',
+        'Notify 340 affected customers with revised ETAs',
+        'Pre-position empty containers at Busan for backlog recovery',
+        'Increase warehouse staffing at Rotterdam by 20% for surge',
+        'Activate alternative suppliers in Vietnam for 3 critical SKUs'
+      ],
+      aiSavings: 4200000,
+      withoutAI: 16800000,
+      withAI: 12600000
+    },
+    {
+      id: 'hurricane_rotterdam',
+      name: 'Hurricane Hits Rotterdam (48 Hours)',
+      icon: '🌪️',
+      color: '#f59e0b',
+      description: 'Simulates a major storm forcing Europe\'s largest port to suspend operations for 48 hours.',
+      tags: ['Weather', 'Ports', 'Departures'],
+      vesselsDelayed: 18,
+      containersStuck: 4500,
+      reroutedTo: ['Antwerp (+35% load)', 'Hamburg (+28% load)'],
+      warehouseImpact: 'Dubai +12% reroute, Singapore +8% for Asia-bound cargo',
+      costPerDay: 1800000,
+      totalCost: 3600000,
+      recoveryDays: 9,
+      customersAffected: 125,
+      aiActions: [
+        '48h advance warning → all berthed vessels expedite departure',
+        'Secure cranes and port equipment 12h before landfall',
+        'Reroute 12 approaching vessels to Antwerp',
+        'Pre-book warehouse slots at Hamburg for diverted cargo',
+        'Auto-generate force majeure notifications to customers'
+      ],
+      aiSavings: 2100000,
+      withoutAI: 3600000,
+      withAI: 1500000
+    },
+    {
+      id: 'supplier_bankruptcy',
+      name: 'Major Supplier Bankruptcy',
+      icon: '⚠️',
+      color: '#8b5cf6',
+      description: 'Simulates the sudden bankruptcy of a Tier-1 supplier providing 15% of critical components.',
+      tags: ['Suppliers', 'Inventory', 'AI Forecasting'],
+      vesselsDelayed: 0,
+      containersStuck: 0,
+      reroutedTo: ['Alternative supplier in Vietnam (identified by AI)'],
+      warehouseImpact: '3 critical SKUs projected to stockout in 5-7 days',
+      costPerDay: 350000,
+      totalCost: 2100000,
+      recoveryDays: 14,
+      customersAffected: 89,
+      aiActions: [
+        'AI detects supplier distress signals 30 days before bankruptcy filing',
+        'Auto-identify 3 alternative suppliers with matching certifications',
+        'Generate emergency purchase orders for 90-day buffer stock',
+        'Reroute existing orders to backup suppliers',
+        'Notify affected customers of potential 7-day delay'
+      ],
+      aiSavings: 1800000,
+      withoutAI: 2100000,
+      withAI: 300000
+    },
+    {
+      id: 'demand_spike',
+      name: 'Demand Spike 200% (Black Friday)',
+      icon: '📈',
+      color: '#10B981',
+      description: 'Simulates a 200% demand spike across all product categories during peak shopping season.',
+      tags: ['AI Forecasting', 'WMS', 'Labor'],
+      vesselsDelayed: 0,
+      containersStuck: 0,
+      reroutedTo: [],
+      warehouseImpact: 'All 4 warehouses at 98%+ capacity, pick volume 3x normal',
+      costPerDay: 280000,
+      totalCost: 1960000,
+      recoveryDays: 7,
+      customersAffected: 0,
+      aiActions: [
+        'AI forecast predicts spike 21 days in advance (92% accuracy)',
+        'Auto-increase inventory at all 4 warehouses (pre-positioned)',
+        'Auto-schedule 45 additional temporary staff across warehouses',
+        'Optimize pick paths for 3x volume (genetic algorithm)',
+        'Auto-negotiate expedited shipping with 3 carriers',
+        'Activate overflow warehouse in Dubai (pre-arranged contract)'
+      ],
+      aiSavings: 1400000,
+      withoutAI: 1960000,
+      withAI: 560000
+    },
+    {
+      id: 'suez_blockage',
+      name: 'Suez Canal Blockage (5 Days)',
+      icon: '🛑',
+      color: '#06B6D4',
+      description: 'Simulates a vessel blocking the Suez Canal for 5 days, disrupting Asia-Europe trade route.',
+      tags: ['Ports', 'Vessels', 'Geo Intelligence'],
+      vesselsDelayed: 62,
+      containersStuck: 18000,
+      reroutedTo: ['Cape of Good Hope route (+10 days transit)'],
+      warehouseImpact: 'Europe warehouses facing 5-day supply gap, Asia facing export backlog',
+      costPerDay: 3200000,
+      totalCost: 16000000,
+      recoveryDays: 30,
+      customersAffected: 520,
+      aiActions: [
+        'Immediately reroute 35 vessels around Cape of Good Hope',
+        'Prioritize 12 critical cargo vessels for Suez queue priority',
+        'Air-freight 8 critical SKUs (pharmaceuticals) to Europe',
+        'Activate European buffer stock (pre-positioned by AI 60 days ago)',
+        'Auto-notify 520 customers with 3 options: wait, reroute, or air-freight'
+      ],
+      aiSavings: 6800000,
+      withoutAI: 16000000,
+      withAI: 9200000
+    }
+  ];
+
+  function runScenario(idx) {
+    const s = SCENARIOS[idx];
+    const container = document.getElementById('cc-dd-twin-result');
+    if (!container) return;
+
+    const withoutAI = s.withoutAI;
+    const withAI = s.withAI;
+    const savings = s.aiSavings;
+    const savingsPct = Math.round(savings / withoutAI * 100);
+
+    container.innerHTML = `
+      <div class="cc-dd-section" style="border-color:${s.color}30">
+        <div class="cc-dd-section-title">${s.icon} ${s.name} — Simulation Results</div>
+
+        <!-- Impact summary cards -->
+        <div class="cc-dd-cards">
+          <div class="cc-dd-card" style="border-color:${s.color}20">
+            <div class="cc-dd-card-label">Vessels Delayed</div>
+            <div class="cc-dd-card-value" style="color:${s.color}">${s.vesselsDelayed}</div>
+          </div>
+          <div class="cc-dd-card">
+            <div class="cc-dd-card-label">Containers Stuck</div>
+            <div class="cc-dd-card-value">${s.containersStuck.toLocaleString()}</div>
+          </div>
+          <div class="cc-dd-card">
+            <div class="cc-dd-card-label">Customers Affected</div>
+            <div class="cc-dd-card-value">${s.customersAffected}</div>
+          </div>
+          <div class="cc-dd-card">
+            <div class="cc-dd-card-label">Recovery Time</div>
+            <div class="cc-dd-card-value">${s.recoveryDays} days</div>
+          </div>
+        </div>
+
+        <!-- Side-by-side: Without AI vs With AI -->
+        <div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:20px">
+          <div style="flex:1;min-width:280px;padding:20px;background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.2);border-radius:12px">
+            <div style="font-size:12px;color:#ef4444;font-weight:700;text-transform:uppercase;margin-bottom:8px">❌ Without AI Platform</div>
+            <div style="font-size:32px;font-weight:900;color:#ef4444;margin-bottom:8px">${formatCurrency(withoutAI)}</div>
+            <div style="font-size:12px;color:#94a3b8">Total estimated cost impact</div>
+            <div style="margin-top:12px;font-size:11px;color:#64748b">
+              <div style="margin-bottom:4px">📉 Reactive response only</div>
+              <div style="margin-bottom:4px">📉 Manual rerouting (days of delay)</div>
+              <div style="margin-bottom:4px">📉 No advance warning</div>
+              <div style="margin-bottom:4px">📉 Customer churn from delays</div>
+              <div>📉 ${s.recoveryDays} days to recover</div>
+            </div>
+          </div>
+          <div style="flex:1;min-width:280px;padding:20px;background:rgba(16,185,129,0.06);border:1px solid rgba(16,185,129,0.2);border-radius:12px">
+            <div style="font-size:12px;color:#10B981;font-weight:700;text-transform:uppercase;margin-bottom:8px">✅ With AI Platform</div>
+            <div style="font-size:32px;font-weight:900;color:#10B981;margin-bottom:8px">${formatCurrency(withAI)}</div>
+            <div style="font-size:12px;color:#94a3b8">Total estimated cost impact</div>
+            <div style="margin-top:12px;font-size:11px;color:#64748b">
+              <div style="margin-bottom:4px">📈 Proactive AI-driven response</div>
+              <div style="margin-bottom:4px">📈 Auto-rerouting within minutes</div>
+              <div style="margin-bottom:4px">📈 Predictive advance warning</div>
+              <div style="margin-bottom:4px">📈 Customer retention via transparency</div>
+              <div>📈 Recovery in ${Math.ceil(s.recoveryDays * 0.5)} days (50% faster)</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Savings highlight -->
+        <div style="padding:20px;background:linear-gradient(135deg,rgba(16,185,129,0.08),rgba(6,182,212,0.08));border:1px solid rgba(16,185,129,0.2);border-radius:12px;text-align:center;margin-bottom:20px">
+          <div style="font-size:11px;color:#64748b;text-transform:uppercase">AI Savings in This Scenario</div>
+          <div style="font-size:36px;font-weight:900;color:#10B981;margin:8px 0">${formatCurrency(savings)}</div>
+          <div style="font-size:14px;color:#67e8f9">Cost reduction: <strong>${savingsPct}%</strong> · Recovery 50% faster · ${s.customersAffected} customers proactively notified</div>
+        </div>
+
+        <!-- Cascading impact -->
+        <div style="font-size:13px;font-weight:700;color:#e2e8f0;margin-bottom:10px">🔄 Cascading Impact Analysis</div>
+        <div class="cc-dd-timeline">
+          <div class="cc-dd-timeline-item cc-dd-timeline-warning">
+            <div class="cc-dd-timeline-text"><strong>Hour 0:</strong> ${s.name} triggers. ${s.vesselsDelayed > 0 ? s.vesselsDelayed + ' vessels affected.' : 'Demand surge detected.'} ${s.containersStuck > 0 ? s.containersStuck.toLocaleString() + ' containers stuck.' : ''}</div>
+            <div class="cc-dd-timeline-time">Immediate</div>
+          </div>
+          <div class="cc-dd-timeline-item cc-dd-timeline-info">
+            <div class="cc-dd-timeline-text"><strong>Hour 1:</strong> AI analyzes impact across ${db.ports.length} ports and ${db.warehouses.length} warehouses. ${s.reroutedTo.length > 0 ? 'Rerouting options: ' + s.reroutedTo.join(', ') : 'Demand redistribution calculated.'}</div>
+            <div class="cc-dd-timeline-time">+1 hour</div>
+          </div>
+          <div class="cc-dd-timeline-item cc-dd-timeline-success">
+            <div class="cc-dd-timeline-text"><strong>Hour 2:</strong> ${s.aiActions[0]}</div>
+            <div class="cc-dd-timeline-time">+2 hours</div>
+          </div>
+          <div class="cc-dd-timeline-item cc-dd-timeline-success">
+            <div class="cc-dd-timeline-text"><strong>Hour 4:</strong> ${s.aiActions[1]}</div>
+            <div class="cc-dd-timeline-time">+4 hours</div>
+          </div>
+          ${s.aiActions[2] ? `<div class="cc-dd-timeline-item cc-dd-timeline-success"><div class="cc-dd-timeline-text"><strong>Hour 8:</strong> ${s.aiActions[2]}</div><div class="cc-dd-timeline-time">+8 hours</div></div>` : ''}
+          ${s.aiActions[3] ? `<div class="cc-dd-timeline-item cc-dd-timeline-info"><div class="cc-dd-timeline-text"><strong>Day 1:</strong> ${s.aiActions[3]}</div><div class="cc-dd-timeline-time">+24 hours</div></div>` : ''}
+          ${s.aiActions[4] ? `<div class="cc-dd-timeline-item cc-dd-timeline-info"><div class="cc-dd-timeline-text"><strong>Day 2:</strong> ${s.aiActions[4]}</div><div class="cc-dd-timeline-time">+48 hours</div></div>` : ''}
+          <div class="cc-dd-timeline-item cc-dd-timeline-success">
+            <div class="cc-dd-timeline-text"><strong>Day ${Math.ceil(s.recoveryDays * 0.5)}:</strong> Recovery complete. All operations normalized. Total cost: ${formatCurrency(withAI)} (vs ${formatCurrency(withoutAI)} without AI).</div>
+            <div class="cc-dd-timeline-time">+${Math.ceil(s.recoveryDays * 0.5)} days</div>
+          </div>
+        </div>
+
+        <!-- Warehouse impact -->
+        <div style="margin-top:16px;padding:12px 16px;background:rgba(245,158,11,0.06);border:1px solid rgba(245,158,11,0.15);border-radius:8px;font-size:12px;color:#fbbf24">
+          🏭 <strong>Warehouse Impact:</strong> ${s.warehouseImpact}
+        </div>
+
+        <!-- AI actions taken -->
+        <div style="margin-top:16px">
+          <div style="font-size:13px;font-weight:700;color:#10B981;margin-bottom:10px">🤖 AI Actions Taken (Automated):</div>
+          ${s.aiActions.map((action, i) => `
+            <div style="display:flex;align-items:flex-start;gap:10px;padding:8px 12px;background:rgba(16,185,129,0.04);border:1px solid rgba(16,185,129,0.1);border-radius:6px;margin-bottom:6px">
+              <div style="width:24px;height:24px;border-radius:50%;background:rgba(16,185,129,0.15);display:flex;align-items:center;justify-content:center;color:#10B981;font-weight:700;font-size:12px;flex-shrink:0">${i + 1}</div>
+              <div style="font-size:12px;color:#e2e8f0">${action}</div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `;
+  }
+
+  // ------------------------------------------------------------------
   // 5. CONTROL TOWER
   // ------------------------------------------------------------------
   function renderTower(container) {
@@ -3115,7 +3607,7 @@
   // ------------------------------------------------------------------
   function init() {
     injectStyles();
-    window.__ccDD = { open, close, setView, filterVessels, showBerthGantt, updatePickPath };
+    window.__ccDD = { open, close, setView, filterVessels, showBerthGantt, updatePickPath, runScenario };
 
     function injectButton() {
       if (document.getElementById('cc-dd-trigger-btn')) return;
