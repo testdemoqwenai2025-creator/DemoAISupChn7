@@ -1425,6 +1425,373 @@
           </table>
         </div>
       </div>
+
+      <!-- Pick Path Optimization -->
+      <div class="cc-dd-section">
+        <div class="cc-dd-section-title">🗺️ Pick Path Optimization — AI-Optimized Routes</div>
+        <div style="display:flex;gap:8px;margin-bottom:12px;align-items:center;flex-wrap:wrap">
+          <span style="font-size:12px;color:#64748b">Warehouse:</span>
+          <select class="cc-dd-search" style="width:auto;padding:6px 12px" id="cc-dd-pickpath-wh" onchange="window.__ccDD.updatePickPath(this.value)">
+            ${db.warehouses.map(w => `<option value="${w.id}">${w.name}</option>`).join('')}
+          </select>
+          <div style="display:flex;gap:8px;margin-left:auto">
+            <div style="padding:6px 12px;background:rgba(59,130,246,0.08);border:1px solid rgba(59,130,246,0.2);border-radius:6px;font-size:11px"><span style="color:#3b82f6;font-weight:700">Current:</span> <span id="cc-dd-pick-current">412m</span> travel</div>
+            <div style="padding:6px 12px;background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.2);border-radius:6px;font-size:11px"><span style="color:#10B981;font-weight:700">AI-Optimized:</span> <span id="cc-dd-pick-optimized">298m</span> travel</div>
+            <div style="padding:6px 12px;background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.2);border-radius:6px;font-size:11px"><span style="color:#10B981;font-weight:700">Savings:</span> <span id="cc-dd-pick-savings">28%</span></div>
+          </div>
+        </div>
+        <div id="cc-dd-pickpath-container">${renderPickPath(db.warehouses[0].id)}</div>
+      </div>
+
+      <!-- Cycle Counting Schedule -->
+      <div class="cc-dd-section">
+        <div class="cc-dd-section-title">📋 Cycle Counting Schedule — Daily Counts & Variance Tracking</div>
+        ${renderCycleCounting(db)}
+      </div>
+
+      <!-- Returns Processing -->
+      <div class="cc-dd-section">
+        <div class="cc-dd-section-title">↩️ Returns Processing Dashboard — Reverse Logistics</div>
+        ${renderReturns(db)}
+      </div>
+    `;
+  }
+
+  // ------------------------------------------------------------------
+  // 3A. PICK PATH VISUALIZATION (SVG warehouse floor map)
+  // ------------------------------------------------------------------
+  function renderPickPath(warehouseId) {
+    const db = initDatabase();
+    const wh = db.warehouses.find(w => w.id === warehouseId) || db.warehouses[0];
+
+    // Generate a warehouse grid (rows × columns of shelving)
+    const rows = 6, cols = 10;
+    const cellW = 55, cellH = 35, offsetX = 30, offsetY = 30;
+    const svgW = cols * cellW + offsetX * 2;
+    const svgH = rows * cellH + offsetY * 2 + 40;
+
+    // Generate pick locations (random shelves have items to pick)
+    const picks = [];
+    const pickCount = Math.floor(Math.random() * 6) + 8;
+    for (let i = 0; i < pickCount; i++) {
+      const r = Math.floor(Math.random() * rows);
+      const c = Math.floor(Math.random() * cols);
+      picks.push({ r, c, sku: 'SKU-' + (Math.floor(Math.random() * 40) + 10001), qty: Math.floor(Math.random() * 10) + 1 });
+    }
+
+    // Current path (suboptimal — sequential)
+    const currentPath = picks.map((p, i) => ({ r: p.r, c: p.c }));
+    // Optimized path (serpentine — row by row)
+    const optimizedPath = [...picks].sort((a, b) => a.r - b.r || a.c - b.c);
+
+    // Calculate coordinates
+    function cellCenter(r, c) {
+      return { x: offsetX + c * cellW + cellW / 2, y: offsetY + r * cellH + cellH / 2 };
+    }
+
+    // Current path line
+    let currentPathStr = '';
+    currentPath.forEach((p, i) => {
+      const pt = cellCenter(p.r, p.c);
+      currentPathStr += (i === 0 ? 'M' : 'L') + pt.x + ',' + pt.y + ' ';
+    });
+
+    // Optimized path line
+    let optimizedPathStr = '';
+    optimizedPath.forEach((p, i) => {
+      const pt = cellCenter(p.r, p.c);
+      optimizedPathStr += (i === 0 ? 'M' : 'L') + pt.x + ',' + pt.y + ' ';
+    });
+
+    // Start point (shipping dock — bottom left)
+    const startPoint = { x: offsetX + cellW / 2, y: svgH - 25 };
+    currentPathStr = 'M' + startPoint.x + ',' + startPoint.y + ' L' + cellCenter(currentPath[0].r, currentPath[0].c).x + ',' + cellCenter(currentPath[0].r, currentPath[0].c).y + ' ' + currentPathStr;
+    optimizedPathStr = 'M' + startPoint.x + ',' + startPoint.y + ' L' + cellCenter(optimizedPath[0].r, optimizedPath[0].c).x + ',' + cellCenter(optimizedPath[0].r, optimizedPath[0].c).y + ' ' + optimizedPathStr;
+
+    // Generate shelf SVG
+    let shelvesSvg = '';
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        const x = offsetX + c * cellW;
+        const y = offsetY + r * cellH;
+        const isPick = picks.some(p => p.r === r && p.c === c);
+        shelvesSvg += `<rect x="${x + 4}" y="${y + 4}" width="${cellW - 8}" height="${cellH - 8}" rx="3" fill="${isPick ? 'rgba(59,130,246,0.15)' : 'rgba(255,255,255,0.03)'}" stroke="${isPick ? '#3b82f6' : 'rgba(255,255,255,0.08)'}" stroke-width="1"/>`;
+        if (isPick) {
+          const pick = picks.find(p => p.r === r && p.c === c);
+          shelvesSvg += `<text x="${x + cellW/2}" y="${y + cellH/2 + 3}" fill="#93c5fd" font-size="8" text-anchor="middle" font-family="sans-serif">${pick.qty}</text>`;
+        } else {
+          shelvesSvg += `<text x="${x + cellW/2}" y="${y + cellH/2 + 3}" fill="#334155" font-size="7" text-anchor="middle" font-family="sans-serif">A${r+1}-${c+1}</text>`;
+        }
+      }
+    }
+
+    // Pick markers (numbered circles)
+    let pickMarkers = '';
+    optimizedPath.forEach((p, i) => {
+      const pt = cellCenter(p.r, p.c);
+      pickMarkers += `<circle cx="${pt.x}" cy="${pt.y}" r="10" fill="#10B981" stroke="#0a0e1a" stroke-width="2"/>`;
+      pickMarkers += `<text x="${pt.x}" y="${pt.y + 3}" fill="#fff" font-size="9" text-anchor="middle" font-family="sans-serif" font-weight="700">${i + 1}</text>`;
+    });
+
+    return `
+      <div style="display:flex;gap:20px;flex-wrap:wrap">
+        <!-- Warehouse floor map -->
+        <div style="flex:1;min-width:400px">
+          <svg viewBox="0 0 ${svgW} ${svgH}" style="width:100%;height:auto;display:block;background:rgba(255,255,255,0.02);border-radius:8px">
+            <!-- Shelves -->
+            ${shelvesSvg}
+
+            <!-- Current path (red, dashed) -->
+            <path d="${currentPathStr}" fill="none" stroke="#ef4444" stroke-width="2" stroke-dasharray="4,3" opacity="0.5"/>
+
+            <!-- Optimized path (green, solid) -->
+            <path d="${optimizedPathStr}" fill="none" stroke="#10B981" stroke-width="2.5" opacity="0.8"/>
+
+            <!-- Pick markers -->
+            ${pickMarkers}
+
+            <!-- Start point (shipping dock) -->
+            <rect x="${startPoint.x - 20}" y="${startPoint.y - 12}" width="40" height="20" rx="4" fill="#06B6D4" opacity="0.8"/>
+            <text x="${startPoint.x}" y="${startPoint.y + 2}" fill="#fff" font-size="8" text-anchor="middle" font-family="sans-serif" font-weight="700">DOCK</text>
+          </svg>
+          <div style="display:flex;gap:16px;margin-top:8px;flex-wrap:wrap">
+            <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:#94a3b8"><div style="width:16px;height:2px;background:#ef4444;opacity:0.5;border-top:2px dashed #ef4444"></div> Current path</div>
+            <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:#94a3b8"><div style="width:16px;height:2px;background:#10B981"></div> AI-optimized path</div>
+            <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:#94a3b8"><div style="width:10px;height:10px;border-radius:50%;background:#3b82f6;opacity:0.3;border:1px solid #3b82f6"></div> Pick location</div>
+            <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:#94a3b8"><div style="width:10px;height:10px;border-radius:50%;background:#10B981"></div> Optimized pick order</div>
+          </div>
+        </div>
+
+        <!-- Pick list -->
+        <div style="flex:0 0 280px">
+          <div style="font-size:12px;font-weight:700;color:#e2e8f0;margin-bottom:8px">📋 Optimized Pick List (${picks.length} items)</div>
+          <div class="cc-dd-scroll" style="max-height:280px">
+            <table class="cc-dd-table">
+              <thead>
+                <tr><th>#</th><th>Location</th><th>SKU</th><th>Qty</th></tr>
+              </thead>
+              <tbody>
+                ${optimizedPath.map((p, i) => {
+                  const pick = picks.find(pk => pk.r === p.r && pk.c === p.c);
+                  return `<tr><td style="text-align:center;color:#10B981;font-weight:700">${i + 1}</td><td style="font-family:monospace;font-size:11px">A${p.r+1}-${p.c+1}</td><td style="font-size:11px;color:#06B6D4">${pick.sku}</td><td style="text-align:center">${pick.qty}</td></tr>`;
+                }).join('')}
+              </tbody>
+            </table>
+          </div>
+          <div style="margin-top:10px;padding:10px 12px;background:rgba(16,185,129,0.06);border:1px solid rgba(16,185,129,0.15);border-radius:6px;font-size:11px;color:#6ee7b7">
+            🤖 <strong>AI Optimization:</strong> Genetic algorithm reduced travel distance by 28% (412m → 298m). Estimated time saved: 3.2 min per batch. At ${wh.picks_today} picks/day, daily savings: ~2.1 hours of labor.
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  function updatePickPath(warehouseId) {
+    const container = document.getElementById('cc-dd-pickpath-container');
+    if (container) container.innerHTML = renderPickPath(warehouseId);
+    // Update stats
+    const current = Math.floor(Math.random() * 200) + 350;
+    const optimized = Math.floor(current * (0.65 + Math.random() * 0.1));
+    const savings = Math.round((1 - optimized / current) * 100);
+    const el1 = document.getElementById('cc-dd-pick-current');
+    const el2 = document.getElementById('cc-dd-pick-optimized');
+    const el3 = document.getElementById('cc-dd-pick-savings');
+    if (el1) el1.textContent = current + 'm';
+    if (el2) el2.textContent = optimized + 'm';
+    if (el3) el3.textContent = savings + '%';
+  }
+
+  // ------------------------------------------------------------------
+  // 3B. CYCLE COUNTING SCHEDULE
+  // ------------------------------------------------------------------
+  function renderCycleCounting(db) {
+    const zones = ['Zone A (Electronics)', 'Zone B (Apparel)', 'Zone C (Food & Bev)', 'Zone D (Pharma)', 'Zone E (Automotive)', 'Zone F (Industrial)'];
+    const counts = zones.map((zone, i) => {
+      const expected = Math.floor(Math.random() * 300) + 200;
+      const actual = expected + Math.floor(Math.random() * 20) - 10;
+      const variance = actual - expected;
+      const variancePct = Math.round(Math.abs(variance) / expected * 100 * 10) / 10;
+      const countedBy = ['Mike R.', 'Sarah C.', 'Aisha P.', 'David K.', 'Lisa M.', 'Tom B.'][i % 6];
+      const status = Math.abs(variance) < 5 ? 'matched' : Math.abs(variance) < 15 ? 'minor-variance' : 'major-variance';
+      return { zone, expected, actual, variance, variancePct, countedBy, status, items: Math.floor(Math.random() * 50) + 30 };
+    });
+
+    const totalExpected = counts.reduce((s, c) => s + c.expected, 0);
+    const totalActual = counts.reduce((s, c) => s + c.actual, 0);
+    const totalVariance = totalActual - totalExpected;
+    const accuracy = Math.round((1 - Math.abs(totalVariance) / totalExpected) * 1000) / 10;
+
+    return `
+      <div style="display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap">
+        <div style="padding:10px 16px;background:rgba(6,182,212,0.06);border:1px solid rgba(6,182,212,0.15);border-radius:8px;flex:1;min-width:140px">
+          <div style="font-size:10px;color:#64748b;text-transform:uppercase">Count Accuracy</div>
+          <div style="font-size:22px;font-weight:800;color:#10B981">${accuracy}%</div>
+        </div>
+        <div style="padding:10px 16px;background:rgba(245,158,11,0.06);border:1px solid rgba(245,158,11,0.15);border-radius:8px;flex:1;min-width:140px">
+          <div style="font-size:10px;color:#64748b;text-transform:uppercase">Total Variance</div>
+          <div style="font-size:22px;font-weight:800;color:${totalVariance === 0 ? '#10B981' : '#f59e0b'}">${totalVariance > 0 ? '+' : ''}${totalVariance}</div>
+        </div>
+        <div style="padding:10px 16px;background:rgba(59,130,246,0.06);border:1px solid rgba(59,130,246,0.15);border-radius:8px;flex:1;min-width:140px">
+          <div style="font-size:10px;color:#64748b;text-transform:uppercase">Zones Counted</div>
+          <div style="font-size:22px;font-weight:800;color:#3b82f6">${counts.length}/${zones.length}</div>
+        </div>
+        <div style="padding:10px 16px;background:rgba(139,92,246,0.06);border:1px solid rgba(139,92,246,0.15);border-radius:8px;flex:1;min-width:140px">
+          <div style="font-size:10px;color:#64748b;text-transform:uppercase">Items Counted</div>
+          <div style="font-size:22px;font-weight:800;color:#8b5cf6">${counts.reduce((s, c) => s + c.items, 0)}</div>
+        </div>
+      </div>
+
+      <div class="cc-dd-scroll">
+        <table class="cc-dd-table">
+          <thead>
+            <tr>
+              <th>Zone</th>
+              <th>Items Counted</th>
+              <th>Expected Qty</th>
+              <th>Actual Qty</th>
+              <th>Variance</th>
+              <th>Variance %</th>
+              <th>Counted By</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${counts.map(c => `
+              <tr>
+                <td style="font-weight:600">${c.zone}</td>
+                <td style="text-align:center">${c.items}</td>
+                <td style="text-align:right">${c.expected}</td>
+                <td style="text-align:right">${c.actual}</td>
+                <td style="text-align:center;color:${c.variance === 0 ? '#10B981' : c.variance > 0 ? '#f59e0b' : '#ef4444'};font-weight:700">${c.variance > 0 ? '+' : ''}${c.variance}</td>
+                <td style="text-align:center;color:${c.variancePct < 1 ? '#10B981' : c.variancePct < 3 ? '#f59e0b' : '#ef4444'}">${c.variancePct}%</td>
+                <td style="font-size:11px">${c.countedBy}</td>
+                <td><span class="cc-dd-status cc-dd-status-${c.status === 'matched' ? 'operational' : c.status === 'minor-variance' ? 'high-capacity' : 'congested'}">${c.status.replace('-', ' ')}</span></td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+      <div style="margin-top:10px;padding:10px 14px;background:rgba(6,182,212,0.06);border:1px solid rgba(6,182,212,0.15);border-radius:6px;font-size:12px;color:#67e8f9">
+        🤖 <strong>AI Insight:</strong> Overall count accuracy is ${accuracy}%. ${counts.filter(c => c.status !== 'matched').length} zones have variances requiring investigation. AI anomaly detection flagged ${Math.floor(Math.random() * 3) + 1} items as potential miscounts or shrinkage.
+      </div>
+    `;
+  }
+
+  // ------------------------------------------------------------------
+  // 3C. RETURNS PROCESSING DASHBOARD
+  // ------------------------------------------------------------------
+  function renderReturns(db) {
+    const returnReasons = [
+      { reason: 'Damaged in transit', count: Math.floor(Math.random() * 30) + 15, color: '#ef4444' },
+      { reason: 'Wrong item shipped', count: Math.floor(Math.random() * 20) + 8, color: '#f59e0b' },
+      { reason: 'Quality issue', count: Math.floor(Math.random() * 15) + 10, color: '#8b5cf6' },
+      { reason: 'Customer changed mind', count: Math.floor(Math.random() * 25) + 20, color: '#3b82f6' },
+      { reason: 'Expired/Out of date', count: Math.floor(Math.random() * 8) + 3, color: '#ec4899' },
+      { reason: 'Not as described', count: Math.floor(Math.random() * 12) + 6, color: '#06B6D4' },
+      { reason: 'Late delivery', count: Math.floor(Math.random() * 10) + 4, color: '#14b8a6' }
+    ];
+    const totalReturns = returnReasons.reduce((s, r) => s + r.count, 0);
+    const returnRate = (Math.random() * 2 + 3).toFixed(1);
+    const totalReturnvalue = Math.floor(Math.random() * 50000) + 20000;
+    const processedToday = Math.floor(totalReturns * 0.6);
+    const pendingProcessing = totalReturns - processedToday;
+
+    const returnSkus = SKU_NAMES.slice(0, 6).map((name, i) => ({
+      name, sku: 'SKU-' + (10001 + i), returns: Math.floor(Math.random() * 15) + 3, value: Math.floor(Math.random() * 5000) + 500, returnRate: (Math.random() * 8 + 2).toFixed(1)
+    })).sort((a, b) => b.returns - a.returns);
+
+    return `
+      <div style="display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap">
+        <div style="padding:10px 16px;background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.15);border-radius:8px;flex:1;min-width:140px">
+          <div style="font-size:10px;color:#64748b;text-transform:uppercase">Return Rate</div>
+          <div style="font-size:22px;font-weight:800;color:#ef4444">${returnRate}%</div>
+        </div>
+        <div style="padding:10px 16px;background:rgba(245,158,11,0.06);border:1px solid rgba(245,158,11,0.15);border-radius:8px;flex:1;min-width:140px">
+          <div style="font-size:10px;color:#64748b;text-transform:uppercase">Total Returns (30d)</div>
+          <div style="font-size:22px;font-weight:800;color:#f59e0b">${totalReturns}</div>
+        </div>
+        <div style="padding:10px 16px;background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.15);border-radius:8px;flex:1;min-width:140px">
+          <div style="font-size:10px;color:#64748b;text-transform:uppercase">Return Value</div>
+          <div style="font-size:22px;font-weight:800;color:#ef4444">$${totalReturnvalue.toLocaleString()}</div>
+        </div>
+        <div style="padding:10px 16px;background:rgba(16,185,129,0.06);border:1px solid rgba(16,185,129,0.15);border-radius:8px;flex:1;min-width:140px">
+          <div style="font-size:10px;color:#64748b;text-transform:uppercase">Processed Today</div>
+          <div style="font-size:22px;font-weight:800;color:#10B981">${processedToday}/${totalReturns}</div>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:20px;flex-wrap:wrap">
+        <!-- Return reasons donut + breakdown -->
+        <div style="flex:1;min-width:300px">
+          <div style="font-size:12px;font-weight:700;color:#e2e8f0;margin-bottom:12px">📊 Returns by Reason</div>
+          <div class="cc-dd-donut-row">
+            ${renderDonut(
+              Object.fromEntries(returnReasons.map(r => [r.reason, r.count])),
+              returnReasons.map(r => r.color),
+              totalReturns,
+              'Returns'
+            )}
+            <div class="cc-dd-legend">
+              ${returnReasons.sort((a, b) => b.count - a.count).map(r => `
+                <div class="cc-dd-legend-item">
+                  <div class="cc-dd-legend-dot" style="background:${r.color}"></div>
+                  <div class="cc-dd-legend-label">${r.reason}</div>
+                  <div class="cc-dd-legend-value">${r.count} (${Math.round(r.count / totalReturns * 100)}%)</div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        </div>
+
+        <!-- High-return SKUs -->
+        <div style="flex:1;min-width:300px">
+          <div style="font-size:12px;font-weight:700;color:#e2e8f0;margin-bottom:12px">⚠️ High-Return Products (AI Flagged)</div>
+          <div class="cc-dd-scroll" style="max-height:200px">
+            <table class="cc-dd-table">
+              <thead>
+                <tr><th>SKU</th><th>Product</th><th>Returns</th><th>Value</th><th>Return Rate</th></tr>
+              </thead>
+              <tbody>
+                ${returnSkus.map(s => `
+                  <tr>
+                    <td style="font-weight:600;color:#06B6D4;font-family:monospace">${s.sku}</td>
+                    <td style="font-size:11px">${s.name}</td>
+                    <td style="text-align:center">${s.returns}</td>
+                    <td style="text-align:right;color:#ef4444">$${s.value.toLocaleString()}</td>
+                    <td style="text-align:center;color:${s.returnRate > 5 ? '#ef4444' : '#f59e0b'};font-weight:700">${s.returnRate}%</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Reverse logistics workflow -->
+      <div style="margin-top:16px">
+        <div style="font-size:12px;font-weight:700;color:#e2e8f0;margin-bottom:10px">🔄 Reverse Logistics Pipeline</div>
+        <div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap">
+          ${[
+            { name: 'Return Initiated', count: Math.floor(totalReturns * 0.3), color: '#3b82f6' },
+            { name: 'Received at WH', count: Math.floor(totalReturns * 0.25), color: '#06B6D4' },
+            { name: 'Inspected', count: Math.floor(totalReturns * 0.2), color: '#f59e0b' },
+            { name: 'Restocked', count: Math.floor(totalReturns * 0.12), color: '#10B981' },
+            { name: 'Refurbished', count: Math.floor(totalReturns * 0.08), color: '#8b5cf6' },
+            { name: 'Disposed', count: Math.floor(totalReturns * 0.05), color: '#ef4444' }
+          ].map((stage, i, arr) => `
+            <div style="flex:1;min-width:110px;text-align:center;padding:10px;background:rgba(255,255,255,0.02);border:1px solid ${stage.color}30;border-radius:8px;position:relative">
+              <div style="width:24px;height:24px;border-radius:50%;background:${stage.color}20;margin:0 auto 6px;display:flex;align-items:center;justify-content:center"><div style="width:10px;height:10px;border-radius:50%;background:${stage.color}"></div></div>
+              <div style="font-size:10px;font-weight:600;color:${stage.color}">${stage.name}</div>
+              <div style="font-size:16px;font-weight:800;color:#e2e8f0">${stage.count}</div>
+              ${i < arr.length - 1 ? '<div style="position:absolute;right:-6px;top:50%;transform:translateY(-50%);color:#64748b;font-size:12px">→</div>' : ''}
+            </div>
+          `).join('')}
+        </div>
+      </div>
+
+      <div style="margin-top:12px;padding:10px 14px;background:rgba(6,182,212,0.06);border:1px solid rgba(6,182,212,0.15);border-radius:6px;font-size:12px;color:#67e8f9">
+        🤖 <strong>AI Returns Prediction:</strong> ML model predicts ${Math.floor(Math.random() * 30 + 20)} returns in the next 7 days based on order patterns and seasonal trends. Top return-risk product: ${returnSkus[0].name} (${returnSkus[0].returnRate}% return rate). Recommend quality review for this SKU.
+      </div>
     `;
   }
 
@@ -2347,7 +2714,7 @@
   // ------------------------------------------------------------------
   function init() {
     injectStyles();
-    window.__ccDD = { open, close, setView, filterVessels, showBerthGantt };
+    window.__ccDD = { open, close, setView, filterVessels, showBerthGantt, updatePickPath };
 
     function injectButton() {
       if (document.getElementById('cc-dd-trigger-btn')) return;
