@@ -17,13 +17,13 @@
 
 ## 🔗 Live Demo — Available 24/7, 365 Days a Year
 
-### 👉 [Click here to view the live demo](https://testdemoqwenai2025-creator.github.io/demo6AISupChn-Advanced/)
+### 👉 [Click here to view the live demo](https://testdemoqwenai2025-creator.github.io/DemoAISupChn7/)
 
 <br />
 
 | Detail | Value |
 |--------|-------|
-| **Live URL** | https://testdemoqwenai2025-creator.github.io/demo6AISupChn-Advanced/ |
+| **Live URL** | https://testdemoqwenai2025-creator.github.io/DemoAISupChn7/ |
 | **Availability** | 24 hours / 7 days / 365 days a year |
 | **NDA Required** | ❌ No — open access for all interested parties |
 | **Registration** | ❌ No — click and view immediately |
@@ -58,25 +58,25 @@ This public demo repository contains a **client-viewable static site** — inves
 ### Static Marketing Site (15 pages)
 | Page | URL | Description |
 |------|-----|-------------|
-| **Home** | [/](https://testdemoqwenai2025-creator.github.io/demo6AISupChn-Advanced/) | Landing page with platform overview |
-| **Dashboard** | [/dashboard.html](https://testdemoqwenai2025-creator.github.io/demo6AISupChn-Advanced/dashboard.html) | Enterprise intelligence dashboard |
-| **Dashboard (Enhanced)** | [/dashboard-enhanced.html](https://testdemoqwenai2025-creator.github.io/demo6AISupChn-Advanced/dashboard-enhanced.html) | Advanced analytics view |
-| **Intelligence** | [/intelligence.html](https://testdemoqwenai2025-creator.github.io/demo6AISupChn-Advanced/intelligence.html) | AI/ML engine capabilities |
-| **Intelligence (Enhanced)** | [/intelligence-enhanced.html](https://testdemoqwenai2025-creator.github.io/demo6AISupChn-Advanced/intelligence-enhanced.html) | Explainable AI deep-dive |
-| **Platform** | [/platform.html](https://testdemoqwenai2025-creator.github.io/demo6AISupChn-Advanced/platform.html) | Architecture overview |
-| **Platform (Enhanced)** | [/platform-enhanced.html](https://testdemoqwenai2025-creator.github.io/demo6AISupChn-Advanced/platform-enhanced.html) | Infrastructure deep-dive |
-| **Industries** | [/industries.html](https://testdemoqwenai2025-creator.github.io/demo6AISupChn-Advanced/industries.html) | 8 industry vertical solutions |
-| **Customers** | [/customers.html](https://testdemoqwenai2025-creator.github.io/demo6AISupChn-Advanced/customers.html) | Testimonials & case studies |
-| **Product** | [/product.html](https://testdemoqwenai2025-creator.github.io/demo6AISupChn-Advanced/product.html) | Complete product suite |
-| **Pricing** | [/pricing.html](https://testdemoqwenai2025-creator.github.io/demo6AISupChn-Advanced/pricing.html) | Plans & feature comparison |
-| **Events** | [/events.html](https://testdemoqwenai2025-creator.github.io/demo6AISupChn-Advanced/events.html) | Webinars & industry events |
-| **Support** | [/support.html](https://testdemoqwenai2025-creator.github.io/demo6AISupChn-Advanced/support.html) | Help center & resources |
-| **About** | [/about.html](https://testdemoqwenai2025-creator.github.io/demo6AISupChn-Advanced/about.html) | Company mission & team |
+| **Home** | [/](https://testdemoqwenai2025-creator.github.io/DemoAISupChn7/) | Landing page with platform overview |
+| **Dashboard** | [/dashboard.html](https://testdemoqwenai2025-creator.github.io/DemoAISupChn7/dashboard.html) | Enterprise intelligence dashboard |
+| **Dashboard (Enhanced)** | [/dashboard-enhanced.html](https://testdemoqwenai2025-creator.github.io/DemoAISupChn7/dashboard-enhanced.html) | Advanced analytics view |
+| **Intelligence** | [/intelligence.html](https://testdemoqwenai2025-creator.github.io/DemoAISupChn7/intelligence.html) | AI/ML engine capabilities |
+| **Intelligence (Enhanced)** | [/intelligence-enhanced.html](https://testdemoqwenai2025-creator.github.io/DemoAISupChn7/intelligence-enhanced.html) | Explainable AI deep-dive |
+| **Platform** | [/platform.html](https://testdemoqwenai2025-creator.github.io/DemoAISupChn7/platform.html) | Architecture overview |
+| **Platform (Enhanced)** | [/platform-enhanced.html](https://testdemoqwenai2025-creator.github.io/DemoAISupChn7/platform-enhanced.html) | Infrastructure deep-dive |
+| **Industries** | [/industries.html](https://testdemoqwenai2025-creator.github.io/DemoAISupChn7/industries.html) | 8 industry vertical solutions |
+| **Customers** | [/customers.html](https://testdemoqwenai2025-creator.github.io/DemoAISupChn7/customers.html) | Testimonials & case studies |
+| **Product** | [/product.html](https://testdemoqwenai2025-creator.github.io/DemoAISupChn7/product.html) | Complete product suite |
+| **Pricing** | [/pricing.html](https://testdemoqwenai2025-creator.github.io/DemoAISupChn7/pricing.html) | Plans & feature comparison |
+| **Events** | [/events.html](https://testdemoqwenai2025-creator.github.io/DemoAISupChn7/events.html) | Webinars & industry events |
+| **Support** | [/support.html](https://testdemoqwenai2025-creator.github.io/DemoAISupChn7/support.html) | Help center & resources |
+| **About** | [/about.html](https://testdemoqwenai2025-creator.github.io/DemoAISupChn7/about.html) | Company mission & team |
 
 ### Command Center SPA
 | Page | URL | Description |
 |------|-----|-------------|
-| **Command Center** | [/cc-app/](https://testdemoqwenai2025-creator.github.io/demo6AISupChn-Advanced/cc-app/) | Interactive Next.js SPA — live monitoring, orders, tenders, suppliers, compliance, analytics |
+| **Command Center** | [/cc-app/](https://testdemoqwenai2025-creator.github.io/DemoAISupChn7/cc-app/) | Interactive Next.js SPA — live monitoring, orders, tenders, suppliers, compliance, analytics |
 
 ---
 
@@ -98,7 +98,7 @@ This repository is protected by the following guardrails to ensure the demo rema
 ## 🏗️ Repository Structure
 
 ```
-demo6AISupChn-Advanced/
+DemoAISupChn7/
 ├── .github/
 │   ├── workflows/
 │   │   └── validate-pages.yml      # Guardrails: validate site on every PR
@@ -120,7 +120,7 @@ demo6AISupChn-Advanced/
 
 | Channel | Details |
 |---------|---------|
-| **Live Demo** | https://testdemoqwenai2025-creator.github.io/demo6AISupChn-Advanced/ |
+| **Live Demo** | https://testdemoqwenai2025-creator.github.io/DemoAISupChn7/ |
 | **Email** | contact@aisupplychain-advanced.com |
 | **LinkedIn** | [AI Supply Chain Advanced](https://www.linkedin.com/company/aisupplychain-advanced) |
 | **X (Twitter)** | [@AISupChnAdvanced](https://x.com/AISupChnAdvanced) |
@@ -131,6 +131,6 @@ demo6AISupChn-Advanced/
 
 **Available 24/7, 365 days a year — no NDA required.**
 
-[View Live Demo](https://testdemoqwenai2025-creator.github.io/demo6AISupChn-Advanced/) · [Contact Us](mailto:contact@aisupplychain-advanced.com)
+[View Live Demo](https://testdemoqwenai2025-creator.github.io/DemoAISupChn7/) · [Contact Us](mailto:contact@aisupplychain-advanced.com)
 
 </div>
