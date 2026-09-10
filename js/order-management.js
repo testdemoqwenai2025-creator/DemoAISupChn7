@@ -244,11 +244,30 @@
       .cc-om-stat-label { font-size: 10px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; }
 
       /* Orders Table */
+      .cc-om-orders-scroll {
+        max-height: 420px;
+        overflow-y: auto;
+        overflow-x: auto;
+        border: 1px solid rgba(255,255,255,0.06);
+        border-radius: 8px;
+        scrollbar-width: thin;
+        scrollbar-color: rgba(16, 185, 129, 0.4) rgba(255,255,255,0.05);
+      }
+      .cc-om-orders-scroll::-webkit-scrollbar { width: 8px; height: 8px; }
+      .cc-om-orders-scroll::-webkit-scrollbar-track { background: rgba(255,255,255,0.03); border-radius: 4px; }
+      .cc-om-orders-scroll::-webkit-scrollbar-thumb {
+        background: rgba(16, 185, 129, 0.3); border-radius: 4px;
+      }
+      .cc-om-orders-scroll::-webkit-scrollbar-thumb:hover {
+        background: rgba(16, 185, 129, 0.5);
+      }
       .cc-om-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+      .cc-om-table thead { position: sticky; top: 0; z-index: 1; }
       .cc-om-table th {
         text-align: left; padding: 10px 8px; font-size: 10px;
         text-transform: uppercase; letter-spacing: 0.05em;
         color: #64748b; border-bottom: 1px solid rgba(255,255,255,0.08);
+        background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(4px);
       }
       .cc-om-table td {
         padding: 12px 8px; border-bottom: 1px solid rgba(255,255,255,0.05);
@@ -516,6 +535,7 @@
     }
 
     container.innerHTML = `
+      <div class="cc-om-orders-scroll">
       <table class="cc-om-table">
         <thead>
           <tr>
@@ -549,6 +569,7 @@
           `).join('')}
         </tbody>
       </table>
+      </div>
     `;
   }
 

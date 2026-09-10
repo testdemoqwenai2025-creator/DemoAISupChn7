@@ -16,6 +16,12 @@
   var inSubdir = window.location.pathname.indexOf('/cc-app') !== -1;
   var prefix = inSubdir ? '../' : '/DemoAISupChn7/';
 
+  // Mark the body so CSS can hide banners on cc-app pages (full-screen
+  // dashboard where fixed banners obstruct the sidebar and main content).
+  if (inSubdir) {
+    document.body.classList.add('cc-app-page');
+  }
+
   // Banner configuration
   var banners = [
     {
@@ -102,7 +108,10 @@
     '.side-banner:hover {',
     '  opacity: 0.92;',
     '  transform: translateY(-50%) scale(1.02);',
-    '}'
+    '}',
+    '/* Hide banners on cc-app pages — it is a full-screen dashboard',
+    '   where fixed banners obstruct the sidebar and main content. */',
+    'body.cc-app-page .side-banner { display: none !important; }'
   ].join('\n');
   document.head.appendChild(style);
 
