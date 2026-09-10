@@ -917,9 +917,29 @@
         </div>
         <div id="cc-dd-vessels-container"></div>
       </div>
+
+      <div id="cc-dd-berth-gantt-container">
+        ${renderBerthGantt(db.ports[0].id)}
+      </div>
+
+      <div style="margin-bottom:16px">
+        <div class="cc-dd-search-wrap" style="margin-bottom:8px">
+          <span style="font-size:12px;color:#64748b;margin-right:8px">Select port for berth schedule:</span>
+          <select class="cc-dd-search" style="width:auto;padding:6px 12px 6px 12px" onchange="window.__ccDD.showBerthGantt(this.value)">
+            ${db.ports.map(p => `<option value="${p.id}" ${p.id === db.ports[0].id ? 'selected' : ''}>${p.name}</option>`).join('')}
+          </select>
+        </div>
+      </div>
     `;
 
     renderVesselsTable('all');
+  }
+
+  function showBerthGantt(portId) {
+    const container = document.getElementById('cc-dd-berth-gantt-container');
+    if (container) {
+      container.innerHTML = renderBerthGantt(portId);
+    }
   }
 
   function renderVesselsTable(filter) {
@@ -961,6 +981,298 @@
             `).join('')}
           </tbody>
         </table>
+      </div>
+    `;
+  }
+
+  // ------------------------------------------------------------------
+  // 2A. BERTH GANTT CHART
+  // ------------------------------------------------------------------
+  function renderBerthGantt(portId) {
+    const db = initDatabase();
+    const port = db.ports.find(p => p.id === portId) || db.ports[0];
+    const berthCount = Math.min(port.berths, 15); // Limit for display
+    const hours = 24; // Next 24 hours
+
+    // Generate berth schedule
+    const schedule = [];
+    for (let b = 0; b < berthCount; b++) {
+      const berthSchedule = [];
+      let currentHour = 0;
+      while (currentHour < hours) {
+        const occupied = Math.random() > (b < port.berths_occupied ? 0.3 : 0.6);
+        const duration = occupied ? Math.floor(Math.random() * 6) + 2 : Math.floor(Math.random() * 3) + 1;
+        const vessel = occupied ? db.vessels.filter(v => v.port_id === port.id)[Math.floor(Math.random() * 10)] : null;
+        berthSchedule.push({
+          start: currentHour,
+          end: Math.min(currentHour + duration, hours),
+          occupied: occupied,
+          vessel: vessel ? vessel.name.split(' ').slice(0, 2).join(' ') : null,
+          vesselType: vessel ? vessel.type : null
+        });
+        currentHour += duration;
+      }
+      schedule.push({ berth: b + 1, slots: berthSchedule });
+    }
+
+    const berthColors = ['#3b82f6', '#8b5cf6', '#06B6D4', '#10B981', '#f59e0b', '#ec4899', '#14b8a6'];
+
+    return `
+      <div class="cc-dd-section">
+        <div class="cc-dd-section-title">📅 Berth Schedule — Gantt Chart (${port.name}, Next 24 Hours)</div>
+        <div style="overflow-x:auto">
+          <div style="min-width:700px">
+            <!-- Hour headers -->
+            <div style="display:flex;border-bottom:1px solid rgba(255,255,255,0.08);padding-bottom:4px;margin-bottom:4px">
+              <div style="width:80px;font-size:10px;color:#64748b;font-weight:600">Berth</div>
+              <div style="flex:1;display:flex">
+                ${Array.from({length: hours}, (_, h) => `<div style="flex:1;text-align:center;font-size:9px;color:#64748b;border-left:1px solid rgba(255,255,255,0.04)">${h.toString().padStart(2,'0')}</div>`).join('')}
+              </div>
+            </div>
+            <!-- Berth rows -->
+            ${schedule.map((berth, bi) => {
+              const color = berthColors[bi % berthColors.length];
+              return `
+                <div style="display:flex;align-items:center;height:28px;margin-bottom:2px">
+                  <div style="width:80px;font-size:11px;color:#cbd5e1;font-weight:600">B-${berth.berth}</div>
+                  <div style="flex:1;display:flex;position:relative;height:24px;background:rgba(255,255,255,0.02);border-radius:4px">
+                    ${berth.slots.map(slot => {
+                      const width = ((slot.end - slot.start) / hours) * 100;
+                      const left = (slot.start / hours) * 100;
+                      if (slot.occupied) {
+                        return `<div style="position:absolute;left:${left}%;width:${width}%;top:2px;height:20px;background:${color};border-radius:3px;opacity:0.8;display:flex;align-items:center;padding:0 4px;overflow:hidden" title="${slot.vessel} (${slot.vesselType}) — ${slot.start}:00 to ${slot.end}:00">
+                          <span style="font-size:8px;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${slot.vessel || 'Vessel'}</span>
+                        </div>`;
+                      } else {
+                        return `<div style="position:absolute;left:${left}%;width:${width}%;top:2px;height:20px;background:rgba(16,185,129,0.08);border:1px dashed rgba(16,185,129,0.2);border-radius:3px;display:flex;align-items:center;justify-content:center" title="Available ${slot.start}:00 to ${slot.end}:00">
+                          <span style="font-size:8px;color:#10B981">Free</span>
+                        </div>`;
+                      }
+                    }).join('')}
+                  </div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        </div>
+        <div style="display:flex;gap:16px;margin-top:12px;flex-wrap:wrap">
+          <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:#94a3b8"><div style="width:12px;height:12px;border-radius:3px;background:#3b82f6;opacity:0.8"></div> Occupied (vessel berthed)</div>
+          <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:#94a3b8"><div style="width:12px;height:12px;border-radius:3px;background:rgba(16,185,129,0.08);border:1px dashed rgba(16,185,129,0.2)"></div> Available (open slot)</div>
+          <div style="font-size:11px;color:#64748b">Showing ${berthCount} of ${port.berths} berths · ${port.berths_occupied} currently occupied</div>
+        </div>
+      </div>
+
+      <!-- Pilot/Tug Services Status Board -->
+      <div class="cc-dd-section">
+        <div class="cc-dd-section-title">🚢 Pilot & Tug Services — ${port.name}</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px">
+          ${renderPilotTugCard('Pilot Boats', port, 3, 5)}
+          ${renderPilotTugCard('Tug Boats', port, 4, 6)}
+          ${renderPilotTugCard('Line Handlers', port, 8, 12)}
+          ${renderPilotTugCard('Mooring Boats', port, 2, 3)}
+        </div>
+      </div>
+
+      <!-- Container Tracking + Customs Pipeline -->
+      <div class="cc-dd-section">
+        <div class="cc-dd-section-title">📦 Container Tracking & Customs Pipeline — ${port.name}</div>
+        ${renderContainerPipeline(port)}
+      </div>
+
+      <!-- Demurrage Calculator -->
+      <div class="cc-dd-section">
+        <div class="cc-dd-section-title">💰 Demurrage Calculator — ${port.name}</div>
+        ${renderDemurrageCalculator(port)}
+      </div>
+    `;
+  }
+
+  function renderPilotTugCard(serviceName, port, active, total) {
+    const utilization = Math.round(active / total * 100);
+    const color = utilization > 80 ? '#ef4444' : utilization > 60 ? '#f59e0b' : '#10B981';
+    const assignments = ['Vessel Ever Given', 'Vessel Maersk Seletar', 'Vessel MSC Gulgun', 'Standby', 'Vessel CMA CGM Marco Polo', 'Standby', 'Vessel Cosco Universe'];
+    return `
+      <div style="padding:14px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:8px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <div style="font-size:13px;font-weight:700;color:#e2e8f0">${serviceName}</div>
+          <div class="cc-dd-status cc-dd-status-${utilization > 80 ? 'congested' : utilization > 60 ? 'high-capacity' : 'operational'}">${utilization > 80 ? 'Busy' : 'Available'}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+          <div style="flex:1;height:8px;border-radius:4px;background:rgba(255,255,255,0.08);overflow:hidden">
+            <div style="height:100%;width:${utilization}%;background:${color};border-radius:4px;transition:width 0.4s"></div>
+          </div>
+          <div style="font-size:12px;font-weight:700;color:${color}">${active}/${total}</div>
+        </div>
+        <div style="font-size:10px;color:#64748b;margin-bottom:6px">Current Assignments:</div>
+        ${Array.from({length: Math.min(active, 4)}, (_, i) => `
+          <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:#94a3b8;margin-bottom:3px">
+            <div style="width:6px;height:6px;border-radius:50%;background:${color}"></div>
+            <span>${assignments[i % assignments.length]}</span>
+          </div>
+        `).join('')}
+        ${active > 4 ? `<div style="font-size:10px;color:#64748b;margin-top:4px">+${active - 4} more active</div>` : ''}
+      </div>
+    `;
+  }
+
+  function renderContainerPipeline(port) {
+    const stages = [
+      { id: 'discharged', name: 'Discharged', icon: 'Crane', color: '#3b82f6', count: Math.floor(Math.random() * 200) + 150 },
+      { id: 'in_yard', name: 'In Yard', icon: 'Yard', color: '#06B6D4', count: Math.floor(Math.random() * 300) + 400 },
+      { id: 'customs_review', name: 'Customs Review', icon: 'Customs', color: '#f59e0b', count: Math.floor(Math.random() * 80) + 40 },
+      { id: 'cleared', name: 'Cleared', icon: 'Cleared', color: '#10B981', count: Math.floor(Math.random() * 200) + 250 },
+      { id: 'gate_out', name: 'Gate Out', icon: 'Gate', color: '#8b5cf6', count: Math.floor(Math.random() * 150) + 180 },
+      { id: 'delivered', name: 'Delivered', icon: 'Delivered', color: '#14b8a6', count: Math.floor(Math.random() * 120) + 140 }
+    ];
+    const totalContainers = stages.reduce((s, st) => s + st.count, 0);
+
+    // Generate sample container tracking numbers
+    const sampleContainers = Array.from({length: 8}, (_, i) => {
+      const trackingNumber = ['MSCU', 'TGHU', 'CMAU', 'COSU', 'ONEU', 'HLXU'][Math.floor(Math.random() * 6)] + Math.floor(Math.random() * 9000000 + 1000000).toString();
+      const stage = stages[Math.floor(Math.random() * stages.length)];
+      const blNumber = 'BL-' + Math.floor(Math.random() * 90000 + 10000);
+      const vessel = VESSEL_NAMES[Math.floor(Math.random() * VESSEL_NAMES.length)];
+      const arrivedAt = new Date(Date.now() - Math.random() * 72 * 3600000);
+      const stageSince = new Date(Date.now() - Math.random() * 24 * 3600000);
+      return { trackingNumber, stage: stage.id, stageName: stage.name, stageColor: stage.color, blNumber, vessel, arrivedAt, stageSince };
+    });
+
+    return `
+      <!-- Pipeline visualization -->
+      <div style="display:flex;align-items:center;gap:4px;margin-bottom:20px;flex-wrap:wrap">
+        ${stages.map((stage, i) => `
+          <div style="flex:1;min-width:120px;text-align:center;padding:12px;background:rgba(255,255,255,0.02);border:1px solid ${stage.color}30;border-radius:8px;position:relative">
+            <div style="font-size:24px;margin-bottom:4px;opacity:0.8">
+              <div style="width:32px;height:32px;border-radius:50%;background:${stage.color}20;display:flex;align-items:center;justify-content:center;margin:0 auto">
+                <div style="width:12px;height:12px;border-radius:50%;background:${stage.color}"></div>
+              </div>
+            </div>
+            <div style="font-size:11px;font-weight:700;color:${stage.color}">${stage.name}</div>
+            <div style="font-size:20px;font-weight:800;color:#e2e8f0;margin-top:2px">${stage.count}</div>
+            <div style="font-size:9px;color:#64748b">${Math.round(stage.count / totalContainers * 100)}% of total</div>
+            ${i < stages.length - 1 ? '<div style="position:absolute;right:-8px;top:50%;transform:translateY(-50%);color:#64748b;font-size:14px">→</div>' : ''}
+          </div>
+        `).join('')}
+      </div>
+
+      <!-- Sample container tracking -->
+      <div style="font-size:13px;font-weight:700;color:#e2e8f0;margin-bottom:10px">📋 Sample Container Tracking</div>
+      <div class="cc-dd-scroll" style="max-height:280px">
+        <table class="cc-dd-table">
+          <thead>
+            <tr>
+              <th>Container #</th>
+              <th>B/L #</th>
+              <th>Vessel</th>
+              <th>Arrived</th>
+              <th>Current Stage</th>
+              <th>Stage Since</th>
+              <th>Time in Stage</th>
+              <th>Progress</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${sampleContainers.map(c => {
+              const stageIndex = stages.findIndex(s => s.id === c.stage);
+              const progressPct = (stageIndex + 1) / stages.length * 100;
+              const hoursInStage = Math.round((Date.now() - c.stageSince.getTime()) / 3600000);
+              return `
+                <tr>
+                  <td style="font-weight:600;color:#06B6D4;font-family:monospace">${c.trackingNumber}</td>
+                  <td style="font-size:11px;font-family:monospace">${c.blNumber}</td>
+                  <td style="font-size:11px">${c.vessel}</td>
+                  <td style="font-size:11px;color:#64748b">${c.arrivedAt.toLocaleDateString('en-US', {month:'short',day:'numeric'})} ${c.arrivedAt.toLocaleTimeString('en-US', {hour:'2-digit',minute:'2-digit'})}</td>
+                  <td><span class="cc-dd-status" style="background:${c.stageColor}15;color:${c.stageColor};border:1px solid ${c.stageColor}30">${c.stageName}</span></td>
+                  <td style="font-size:11px;color:#64748b">${c.stageSince.toLocaleTimeString('en-US', {hour:'2-digit',minute:'2-digit'})}</td>
+                  <td style="text-align:center;color:${hoursInStage > 12 ? '#ef4444' : hoursInStage > 6 ? '#f59e0b' : '#e2e8f0'};font-weight:600">${hoursInStage}h</td>
+                  <td>
+                    <div style="display:flex;align-items:center;gap:4px">
+                      <div style="width:60px;height:6px;border-radius:3px;background:rgba(255,255,255,0.08);overflow:hidden">
+                        <div style="height:100%;width:${progressPct}%;background:${c.stageColor};border-radius:3px"></div>
+                      </div>
+                      <span style="font-size:10px;color:#64748b">${Math.round(progressPct)}%</span>
+                    </div>
+                  </td>
+                </tr>
+              `;
+            }).join('')}
+          </tbody>
+        </table>
+      </div>
+    `;
+  }
+
+  function renderDemurrageCalculator(port) {
+    // Generate sample containers with demurrage exposure
+    const containers = Array.from({length: 10}, (_, i) => {
+      const trackingNumber = ['MSCU', 'TGHU', 'CMAU', 'COSU'][i % 4] + Math.floor(Math.random() * 9000000 + 1000000).toString();
+      const freeTimeDays = [3, 5, 7][Math.floor(Math.random() * 3)];
+      const daysInPort = Math.floor(Math.random() * 15) + 1;
+      const overdueDays = Math.max(0, daysInPort - freeTimeDays);
+      const dailyRate = port.demurrage_rate;
+      const totalCharge = overdueDays * dailyRate;
+      const vessel = VESSEL_NAMES[i % VESSEL_NAMES.length];
+      return { trackingNumber, freeTimeDays, daysInPort, overdueDays, dailyRate, totalCharge, vessel };
+    });
+    const totalExposure = containers.reduce((s, c) => s + c.totalCharge, 0);
+    const atRisk = containers.filter(c => c.overdueDays > 0).length;
+
+    return `
+      <div style="display:flex;gap:16px;margin-bottom:16px;flex-wrap:wrap">
+        <div style="padding:12px 20px;background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.2);border-radius:8px;flex:1;min-width:160px">
+          <div style="font-size:10px;color:#64748b;text-transform:uppercase">Total Exposure</div>
+          <div style="font-size:24px;font-weight:800;color:#ef4444">$${totalExposure.toLocaleString()}</div>
+          <div style="font-size:11px;color:#64748b">${atRisk} containers accruing charges</div>
+        </div>
+        <div style="padding:12px 20px;background:rgba(245,158,11,0.06);border:1px solid rgba(245,158,11,0.2);border-radius:8px;flex:1;min-width:160px">
+          <div style="font-size:10px;color:#64748b;text-transform:uppercase">Demurrage Rate</div>
+          <div style="font-size:24px;font-weight:800;color:#f59e0b">$${port.demurrage_rate}</div>
+          <div style="font-size:11px;color:#64748b">per container per day</div>
+        </div>
+        <div style="padding:12px 20px;background:rgba(16,185,129,0.06);border:1px solid rgba(16,185,129,0.2);border-radius:8px;flex:1;min-width:160px">
+          <div style="font-size:10px;color:#64748b;text-transform:uppercase">Free Time</div>
+          <div style="font-size:24px;font-weight:800;color:#10B981">3-7 days</div>
+          <div style="font-size:11px;color:#64748b">varies by container type</div>
+        </div>
+      </div>
+
+      <div class="cc-dd-scroll" style="max-height:320px">
+        <table class="cc-dd-table">
+          <thead>
+            <tr>
+              <th>Container #</th>
+              <th>Vessel</th>
+              <th>Days in Port</th>
+              <th>Free Time</th>
+              <th>Overdue Days</th>
+              <th>Daily Rate</th>
+              <th>Total Charge</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${containers.map(c => {
+              const status = c.overdueDays === 0 ? 'within-free-time' : c.overdueDays > 3 ? 'critical' : 'accruing';
+              return `
+                <tr>
+                  <td style="font-weight:600;color:#06B6D4;font-family:monospace">${c.trackingNumber}</td>
+                  <td style="font-size:11px">${c.vessel}</td>
+                  <td style="text-align:center">${c.daysInPort}d</td>
+                  <td style="text-align:center">${c.freeTimeDays}d</td>
+                  <td style="text-align:center;color:${c.overdueDays > 0 ? '#ef4444' : '#10B981'};font-weight:700">${c.overdueDays > 0 ? '+' + c.overdueDays + 'd' : '—'}</td>
+                  <td style="text-align:right">$${c.dailyRate}/day</td>
+                  <td style="text-align:right;color:${c.totalCharge > 0 ? '#ef4444' : '#64748b'};font-weight:700">$${c.totalCharge.toLocaleString()}</td>
+                  <td><span class="cc-dd-status cc-dd-status-${status === 'critical' ? 'congested' : status === 'accruing' ? 'high-capacity' : 'operational'}">${status === 'critical' ? 'Critical' : status === 'accruing' ? 'Accruing' : 'Free'}</span></td>
+                  <td><button class="cc-dd-btn cc-dd-btn-secondary" onclick="alert('Demo: Would auto-generate pickup request for ${c.trackingNumber}')">🚛 Pickup</button></td>
+                </tr>
+              `;
+            }).join('')}
+          </tbody>
+        </table>
+      </div>
+      <div style="margin-top:12px;padding:10px 14px;background:rgba(6,182,212,0.06);border:1px solid rgba(6,182,212,0.15);border-radius:6px;font-size:12px;color:#67e8f9">
+        💡 <strong>AI Recommendation:</strong> ${atRisk} containers are accruing demurrage charges totaling $${totalExposure.toLocaleString()}. Auto-generating pickup requests for the ${atRisk} most critical containers would save an estimated $${(atRisk * port.demurrage_rate).toLocaleString()}/day.
       </div>
     `;
   }
@@ -2035,7 +2347,7 @@
   // ------------------------------------------------------------------
   function init() {
     injectStyles();
-    window.__ccDD = { open, close, setView, filterVessels };
+    window.__ccDD = { open, close, setView, filterVessels, showBerthGantt };
 
     function injectButton() {
       if (document.getElementById('cc-dd-trigger-btn')) return;
