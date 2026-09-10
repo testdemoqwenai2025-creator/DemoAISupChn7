@@ -219,7 +219,7 @@
       /* Order Management Panel */
       .cc-om-panel {
         font-family: 'Inter', system-ui, -apple-system, sans-serif;
-        background: rgba(10, 10, 10, 0.95);
+        background: rgba(10, 10, 10, 0.98);
         border: 1px solid rgba(16, 185, 129, 0.3);
         border-radius: 16px;
         padding: 24px;
@@ -227,6 +227,25 @@
         color: #e2e8f0;
         backdrop-filter: blur(10px);
       }
+      /* When used as a full-screen modal */
+      .cc-om-panel-modal {
+        position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+        z-index: 10004; margin: 0; border-radius: 0;
+        overflow-y: auto; padding: 80px 24px 24px;
+        background: rgba(10, 10, 10, 0.99);
+      }
+      .cc-om-panel-modal .cc-om-panel-inner {
+        max-width: 1200px; margin: 0 auto;
+      }
+      .cc-om-close-panel {
+        position: fixed; top: 16px; right: 20px; z-index: 10005;
+        width: 40px; height: 40px; border-radius: 10px;
+        background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3);
+        color: #ef4444; font-size: 22px; cursor: pointer; line-height: 1;
+        display: flex; align-items: center; justify-content: center;
+        transition: all 0.2s;
+      }
+      .cc-om-close-panel:hover { background: rgba(239, 68, 68, 0.25); transform: scale(1.05); }
       .cc-om-header {
         display: flex; justify-content: space-between; align-items: center;
         margin-bottom: 20px; padding-bottom: 16px;
@@ -246,6 +265,7 @@
       /* Orders Table */
       .cc-om-orders-scroll {
         max-height: 420px;
+        min-height: 280px;
         overflow-y: auto;
         overflow-x: auto;
         border: 1px solid rgba(255,255,255,0.06);
@@ -260,6 +280,23 @@
       }
       .cc-om-orders-scroll::-webkit-scrollbar-thumb:hover {
         background: rgba(16, 185, 129, 0.5);
+      }
+      /* Search box */
+      .cc-om-search {
+        padding: 8px 14px 8px 36px; border-radius: 8px;
+        border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.04);
+        color: #fff; font-size: 13px; font-family: inherit;
+        width: 280px; max-width: 100%; transition: border 0.2s;
+        box-sizing: border-box;
+      }
+      .cc-om-search:focus { outline: none; border-color: #10B981; }
+      .cc-om-search::placeholder { color: #475569; }
+      .cc-om-search-wrap {
+        position: relative; display: inline-block;
+      }
+      .cc-om-search-wrap svg {
+        position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+        color: #64748b; pointer-events: none;
       }
       .cc-om-table { width: 100%; border-collapse: collapse; font-size: 12px; }
       .cc-om-table thead { position: sticky; top: 0; z-index: 1; }
@@ -460,7 +497,7 @@
   }
 
   // ------------------------------------------------------------------
-  // RENDER ORDERS PANEL
+  // RENDER ORDERS PANEL (as a full-screen modal)
   // ------------------------------------------------------------------
   function renderOrdersPanel() {
     const db = initDatabase();
@@ -468,69 +505,113 @@
     const paidCount = db.orders.filter(o => ['paid', 'shipped', 'delivered'].includes(o.status)).length;
     const totalRevenue = db.payments.reduce((sum, p) => sum + p.amount, 0);
 
-    const panel = document.createElement('div');
-    panel.id = 'cc-om-panel';
-    panel.className = 'cc-om-panel';
-    panel.innerHTML = `
-      <div class="cc-om-header">
-        <div>
-          <h3 class="cc-om-title">
-            Order Management
-            <span class="cc-om-title-badge">LIVE DEMO</span>
-          </h3>
-          <div style="font-size:11px;color:#64748b;margin-top:4px">
-            Synthetic database · ${db.orders.length} orders · ${db.clients.length} clients · Payments & confirmation emails
+    // Create the full-screen modal overlay
+    const overlay = document.createElement('div');
+    overlay.id = 'cc-om-panel-overlay';
+    overlay.className = 'cc-om-panel-modal';
+    overlay.innerHTML = `
+      <button class="cc-om-close-panel" onclick="window.__ccOM.closePanel()" aria-label="Close order management">×</button>
+      <div class="cc-om-panel-inner">
+        <div class="cc-om-panel">
+          <div class="cc-om-header">
+            <div>
+              <h3 class="cc-om-title">
+                Order Management
+                <span class="cc-om-title-badge">LIVE DEMO</span>
+              </h3>
+              <div style="font-size:11px;color:#64748b;margin-top:4px">
+                Synthetic database · ${db.orders.length} orders · ${db.clients.length} clients · Payments & confirmation emails
+              </div>
+            </div>
+            <div class="cc-om-stats">
+              <div class="cc-om-stat">
+                <div class="cc-om-stat-value">${pendingCount}</div>
+                <div class="cc-om-stat-label">Pending</div>
+              </div>
+              <div class="cc-om-stat">
+                <div class="cc-om-stat-value">${paidCount}</div>
+                <div class="cc-om-stat-label">Paid</div>
+              </div>
+              <div class="cc-om-stat">
+                <div class="cc-om-stat-value">${formatCurrency(totalRevenue)}</div>
+                <div class="cc-om-stat-label">Revenue</div>
+              </div>
+            </div>
           </div>
-        </div>
-        <div class="cc-om-stats">
-          <div class="cc-om-stat">
-            <div class="cc-om-stat-value">${pendingCount}</div>
-            <div class="cc-om-stat-label">Pending</div>
+
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px">
+            <div class="cc-om-tabs">
+              <button class="cc-om-tab active" data-filter="all">All Orders</button>
+              <button class="cc-om-tab" data-filter="pending">Pending</button>
+              <button class="cc-om-tab" data-filter="processing">Processing</button>
+              <button class="cc-om-tab" data-filter="paid">Paid</button>
+              <button class="cc-om-tab" data-filter="shipped">Shipped</button>
+              <button class="cc-om-tab" data-filter="delivered">Delivered</button>
+            </div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <button class="cc-om-btn cc-om-btn-primary" id="cc-om-new-order">
+                + New Order
+              </button>
+              <button class="cc-om-btn cc-om-btn-secondary" id="cc-om-export-csv">
+                ⬇ Export CSV
+              </button>
+              <button class="cc-om-btn cc-om-btn-secondary" id="cc-om-reset-db">
+                ↻ Reset Data
+              </button>
+            </div>
           </div>
-          <div class="cc-om-stat">
-            <div class="cc-om-stat-value">${paidCount}</div>
-            <div class="cc-om-stat-label">Paid</div>
+
+          <div style="margin-bottom:12px">
+            <div class="cc-om-search-wrap">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+              <input type="text" class="cc-om-search" id="cc-om-search-input" placeholder="Search by order ID, client name, or product...">
+            </div>
+            <span id="cc-om-search-count" style="font-size:11px;color:#64748b;margin-left:12px"></span>
           </div>
-          <div class="cc-om-stat">
-            <div class="cc-om-stat-value">${formatCurrency(totalRevenue)}</div>
-            <div class="cc-om-stat-label">Revenue</div>
-          </div>
+
+          <div id="cc-om-orders-container"></div>
         </div>
       </div>
-
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px">
-        <div class="cc-om-tabs">
-          <button class="cc-om-tab active" data-filter="all">All Orders</button>
-          <button class="cc-om-tab" data-filter="pending">Pending</button>
-          <button class="cc-om-tab" data-filter="processing">Processing</button>
-          <button class="cc-om-tab" data-filter="paid">Paid</button>
-          <button class="cc-om-tab" data-filter="shipped">Shipped</button>
-          <button class="cc-om-tab" data-filter="delivered">Delivered</button>
-        </div>
-        <button class="cc-om-btn cc-om-btn-secondary" id="cc-om-reset-db">
-          ↻ Reset Demo Data
-        </button>
-      </div>
-
-      <div id="cc-om-orders-container"></div>
     `;
 
-    return panel;
+    return overlay;
   }
 
-  function renderOrdersTable(filter) {
+  // Current filter + search state
+  let currentFilter = 'all';
+  let currentSearch = '';
+
+  function renderOrdersTable(filter, search) {
     const db = initDatabase();
+    if (filter !== undefined) currentFilter = filter;
+    if (search !== undefined) currentSearch = search;
+
     let orders = db.orders;
-    if (filter && filter !== 'all') {
-      orders = orders.filter(o => o.status === filter);
+    if (currentFilter && currentFilter !== 'all') {
+      orders = orders.filter(o => o.status === currentFilter);
+    }
+    if (currentSearch) {
+      const q = currentSearch.toLowerCase();
+      orders = orders.filter(o =>
+        o.id.toLowerCase().indexOf(q) !== -1 ||
+        o.client_name.toLowerCase().indexOf(q) !== -1 ||
+        o.product.toLowerCase().indexOf(q) !== -1 ||
+        o.client_email.toLowerCase().indexOf(q) !== -1
+      );
     }
     orders.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 
     const container = document.getElementById('cc-om-orders-container');
     if (!container) return;
 
+    // Update search count
+    const countEl = document.getElementById('cc-om-search-count');
+    if (countEl) {
+      countEl.textContent = 'Showing ' + orders.length + ' order' + (orders.length !== 1 ? 's' : '');
+    }
+
     if (orders.length === 0) {
-      container.innerHTML = '<div style="text-align:center;padding:40px;color:#64748b;font-size:13px">No orders with this status.</div>';
+      container.innerHTML = '<div style="text-align:center;padding:60px 40px;color:#64748b;font-size:13px;min-height:280px;display:flex;align-items:center;justify-content:center"><div><div style="font-size:32px;margin-bottom:8px;opacity:0.4">🔍</div>No orders match your filter or search.<br><span style="font-size:11px">Try a different tab or clear the search box.</span></div></div>';
       return;
     }
 
@@ -947,6 +1028,123 @@
     if (overlay) overlay.remove();
   }
 
+  function closePanel() {
+    const overlay = document.getElementById('cc-om-panel-overlay');
+    if (overlay) overlay.remove();
+  }
+
+  function exportCSV() {
+    const db = initDatabase();
+    let orders = db.orders;
+    if (currentFilter && currentFilter !== 'all') {
+      orders = orders.filter(o => o.status === currentFilter);
+    }
+    if (currentSearch) {
+      const q = currentSearch.toLowerCase();
+      orders = orders.filter(o =>
+        o.id.toLowerCase().indexOf(q) !== -1 ||
+        o.client_name.toLowerCase().indexOf(q) !== -1 ||
+        o.product.toLowerCase().indexOf(q) !== -1 ||
+        o.client_email.toLowerCase().indexOf(q) !== -1
+      );
+    }
+    orders.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
+    const headers = ['Order ID', 'Client', 'Email', 'Country', 'Product', 'Category', 'Quantity', 'Amount', 'Currency', 'Status', 'Created', 'Tracking Number'];
+    const rows = orders.map(o => [
+      o.id,
+      '"' + o.client_name.replace(/"/g, '""') + '"',
+      o.client_email,
+      o.client_country,
+      '"' + o.product.replace(/"/g, '""') + '"',
+      o.category,
+      o.quantity,
+      o.amount.toFixed(2),
+      o.currency,
+      o.status,
+      o.created_at,
+      o.tracking_number || ''
+    ]);
+
+    const csv = [headers.join(',')].concat(rows.map(r => r.join(','))).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'orders-export-' + new Date().toISOString().substr(0, 10) + '.csv';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  }
+
+  function createNewOrder() {
+    const db = initDatabase();
+    const client = SYNTHETIC_CLIENTS[Math.floor(Math.random() * SYNTHETIC_CLIENTS.length)];
+    const template = ORDER_TEMPLATES[Math.floor(Math.random() * ORDER_TEMPLATES.length)];
+    const quantity = Math.floor(Math.random() * 3) + 1;
+    const amount = template.basePrice * quantity;
+    const orderNum = 10001 + db.orders.length;
+    const order = {
+      id: 'ORD-' + String(orderNum),
+      client_id: client.id,
+      client_name: client.name,
+      client_email: client.email,
+      client_country: client.country,
+      product: template.product,
+      category: template.category,
+      quantity: quantity,
+      amount: amount,
+      currency: 'USD',
+      status: 'pending',
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      payment_id: null,
+      tracking_number: null,
+      notes: 'Created via Create Order button'
+    };
+    db.orders.push(order);
+    logAudit(db, order.id, 'order_created', 'Order created for ' + client.name + ' via Create Order button');
+    saveDatabase(db);
+
+    // Refresh the panel
+    refreshPanelStats();
+    renderOrdersTable(currentFilter, currentSearch);
+
+    // Show a brief toast
+    showToast('Order ' + order.id + ' created for ' + client.name + ' — ' + formatCurrency(amount));
+
+    // Open the payment modal for the new order
+    setTimeout(function() {
+      openPaymentModal(order.id);
+    }, 800);
+  }
+
+  function showToast(message) {
+    let toast = document.getElementById('cc-om-toast');
+    if (toast) toast.remove();
+    toast = document.createElement('div');
+    toast.id = 'cc-om-toast';
+    toast.style.cssText = [
+      'position: fixed', 'bottom: 30px', 'left: 50%',
+      "transform: translateX(-50%)",
+      'background: linear-gradient(135deg, #10B981, #06B6D4)',
+      'color: #fff', 'padding: 12px 24px', 'border-radius: 10px',
+      'font-size: 13px', 'font-weight: 600', 'z-index: 10006',
+      'box-shadow: 0 8px 24px rgba(16, 185, 129, 0.4)',
+      'font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+      'transition: opacity 0.3s, transform 0.3s',
+      'max-width: 90vw', 'text-align: 'center'
+    ].join(';');
+    toast.textContent = '✓ ' + message;
+    document.body.appendChild(toast);
+    setTimeout(function() {
+      toast.style.opacity = '0';
+      toast.style.transform = 'translateX(-50%) translateY(10px)';
+      setTimeout(function() { toast.remove(); }, 300);
+    }, 3500);
+  }
+
   function refreshPanelStats() {
     const db = initDatabase();
     const pendingCount = db.orders.filter(o => o.status === 'pending').length;
@@ -964,7 +1162,64 @@
   function resetDatabase() {
     localStorage.removeItem(DB_KEY);
     localStorage.removeItem(EMAIL_LOG_KEY);
-    location.reload();
+    closePanel();
+    openPanel();
+  }
+
+  // ------------------------------------------------------------------
+  // OPEN PANEL (replaces the old auto-inject)
+  // ------------------------------------------------------------------
+  function openPanel() {
+    // Remove any existing panel
+    closePanel();
+    // Render and append the panel
+    const panel = renderOrdersPanel();
+    document.body.appendChild(panel);
+    // Render initial orders table
+    renderOrdersTable('all', '');
+    // Wire up events
+    wireUpPanelEvents();
+  }
+
+  function wireUpPanelEvents() {
+    // Tab clicks
+    document.querySelectorAll('.cc-om-tab').forEach(function(tab) {
+      tab.addEventListener('click', function() {
+        document.querySelectorAll('.cc-om-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        renderOrdersTable(tab.dataset.filter, currentSearch);
+      });
+    });
+    // Search input
+    const searchInput = document.getElementById('cc-om-search-input');
+    if (searchInput) {
+      let debounceTimer;
+      searchInput.addEventListener('input', function() {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(function() {
+          renderOrdersTable(currentFilter, searchInput.value);
+        }, 200);
+      });
+    }
+    // Export CSV
+    const exportBtn = document.getElementById('cc-om-export-csv');
+    if (exportBtn) {
+      exportBtn.addEventListener('click', exportCSV);
+    }
+    // New Order
+    const newOrderBtn = document.getElementById('cc-om-new-order');
+    if (newOrderBtn) {
+      newOrderBtn.addEventListener('click', createNewOrder);
+    }
+    // Reset Data
+    const resetBtn = document.getElementById('cc-om-reset-db');
+    if (resetBtn) {
+      resetBtn.addEventListener('click', function() {
+        if (confirm('Reset all demo data? This will regenerate the synthetic database with fresh orders.')) {
+          resetDatabase();
+        }
+      });
+    }
   }
 
   // ------------------------------------------------------------------
@@ -979,108 +1234,117 @@
       processPayment: processPayment,
       showOrderDetail: showOrderDetail,
       closeModal: closeModal,
+      closePanel: closePanel,
+      openPanel: openPanel,
+      exportCSV: exportCSV,
+      createNewOrder: createNewOrder,
       resetDatabase: resetDatabase
     };
 
-    function findAndInject() {
-      // Try to find the main content area where Orders would appear
-      // The SPA renders content dynamically, so we look for the overview/monitoring area
-      const mainContent = document.querySelector('main, [class*="main-content"], [class*="overview"], [class*="Overview"]');
+    // Inject a "Create Order" button into the SPA
+    function injectCreateOrderButton() {
+      if (document.getElementById('cc-om-trigger-btn')) return;
 
-      // If we can't find the main content, inject after the auth bar / top area
-      let target = mainContent;
-      if (!target) {
-        // Look for the content area after the sidebar
-        const contentArea = document.querySelector('[class*="flex-1"], [class*="content-area"]');
-        target = contentArea || document.body;
+      const btn = document.createElement('button');
+      btn.id = 'cc-om-trigger-btn';
+      btn.style.cssText = [
+        'position: fixed',
+        'bottom: 80px',
+        'right: 20px',
+        'z-index: 9999',
+        'padding: 14px 24px',
+        'border-radius: 12px',
+        'background: linear-gradient(135deg, #10B981, #06B6D4)',
+        'color: #fff',
+        'border: none',
+        'font-size: 14px',
+        'font-weight: 700',
+        'cursor: pointer',
+        'box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4)',
+        'transition: all 0.2s',
+        'display: flex',
+        'align-items: center',
+        'gap: 8px',
+        'font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+      ].join(';');
+      btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg> Create Order';
+      btn.setAttribute('aria-label', 'Open Order Management — create a new order');
+      btn.onmouseover = function() {
+        btn.style.transform = 'translateY(-2px)';
+        btn.style.boxShadow = '0 8px 24px rgba(16, 185, 129, 0.5)';
+      };
+      btn.onmouseout = function() {
+        btn.style.transform = '';
+        btn.style.boxShadow = '0 6px 20px rgba(16, 185, 129, 0.4)';
+      };
+      btn.onclick = function() { openPanel(); };
+      document.body.appendChild(btn);
+
+      // Also add a small badge showing pending order count
+      const db = initDatabase();
+      const pendingCount = db.orders.filter(o => o.status === 'pending').length;
+      if (pendingCount > 0) {
+        const badge = document.createElement('span');
+        badge.style.cssText = [
+          'position: absolute',
+          'top: -6px',
+          'right: -6px',
+          'background: #ef4444',
+          'color: #fff',
+          'font-size: 10px',
+          'font-weight: 700',
+          'padding: 2px 6px',
+          'border-radius: 10px',
+          'min-width: 18px',
+          'text-align: center',
+          'border: 2px solid #0a0a0a'
+        ].join(';');
+        badge.textContent = pendingCount;
+        btn.style.position = 'fixed';
+        btn.appendChild(badge);
       }
 
-      // Check if already injected
-      if (document.getElementById('cc-om-panel')) return;
-
-      // Inject the panel
-      const panel = renderOrdersPanel();
-      if (mainContent && mainContent.tagName !== 'BODY') {
-        mainContent.appendChild(panel);
-      } else {
-        // Insert near the top of the content area
-        const contentDiv = document.querySelector('[class*="flex-1"] > div, main > div');
-        if (contentDiv) {
-          contentDiv.parentElement.insertBefore(panel, contentDiv.nextSibling);
-        } else {
-          document.body.appendChild(panel);
-        }
-      }
-
-      // Render initial orders table
-      renderOrdersTable('all');
-
-      // Wire up tab clicks
-      document.querySelectorAll('.cc-om-tab').forEach(function(tab) {
-        tab.addEventListener('click', function() {
-          document.querySelectorAll('.cc-om-tab').forEach(t => t.classList.remove('active'));
-          tab.classList.add('active');
-          renderOrdersTable(tab.dataset.filter);
-        });
-      });
-
-      // Wire up reset button
-      const resetBtn = document.getElementById('cc-om-reset-db');
-      if (resetBtn) {
-        resetBtn.addEventListener('click', function() {
-          if (confirm('Reset all demo data? This will regenerate the synthetic database with fresh orders.')) {
-            resetDatabase();
-          }
-        });
-      }
-
-      console.log('[order-management.js] Order management system injected. 12 synthetic orders loaded.');
+      console.log('[order-management.js] "Create Order" button injected. Click to open the order management panel.');
     }
 
-    // The SPA takes time to render — retry injection
+    // The SPA takes time to render — retry button injection
     let attempts = 0;
     function tryInject() {
       attempts++;
-      if (document.getElementById('cc-om-panel')) return;
-      if (attempts > 20) {
-        // Fallback: just append to body
-        if (!document.getElementById('cc-om-panel')) {
-          const panel = renderOrdersPanel();
-          document.body.appendChild(panel);
-          renderOrdersTable('all');
-          wireUpEvents();
-        }
-        return;
-      }
-      findAndInject();
-      if (!document.getElementById('cc-om-panel')) {
+      if (document.getElementById('cc-om-trigger-btn')) return;
+      if (attempts > 20) return;
+      injectCreateOrderButton();
+      if (!document.getElementById('cc-om-trigger-btn')) {
         setTimeout(tryInject, 500);
-      }
-    }
-
-    function wireUpEvents() {
-      document.querySelectorAll('.cc-om-tab').forEach(function(tab) {
-        tab.addEventListener('click', function() {
-          document.querySelectorAll('.cc-om-tab').forEach(t => t.classList.remove('active'));
-          tab.classList.add('active');
-          renderOrdersTable(tab.dataset.filter);
-        });
-      });
-      const resetBtn = document.getElementById('cc-om-reset-db');
-      if (resetBtn) {
-        resetBtn.addEventListener('click', function() {
-          if (confirm('Reset all demo data?')) resetDatabase();
-        });
       }
     }
 
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', function() {
-        setTimeout(tryInject, 1000);
+        setTimeout(tryInject, 1500);
       });
     } else {
-      setTimeout(tryInject, 1000);
+      setTimeout(tryInject, 1500);
     }
+
+    // Keyboard shortcut: press "O" to open order management
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'o' || e.key === 'O') {
+        // Don't trigger if user is typing in an input
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable) return;
+        if (e.metaKey || e.ctrlKey) return;
+        if (!document.getElementById('cc-om-panel-overlay')) {
+          openPanel();
+          e.preventDefault();
+        }
+      }
+      // ESC to close panel
+      if (e.key === 'Escape') {
+        if (document.getElementById('cc-om-panel-overlay')) {
+          closePanel();
+        }
+      }
+    });
   }
 
   init();
