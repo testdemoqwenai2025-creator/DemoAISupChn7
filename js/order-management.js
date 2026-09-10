@@ -492,6 +492,46 @@
         color: #e2e8f0; font-family: inherit; cursor: pointer;
       }
       .cc-om-filter:focus { outline: none; border-color: #10B981; }
+
+      /* Mobile responsive — card layout for screens < 768px */
+      @media (max-width: 767px) {
+        .cc-om-panel { padding: 16px; }
+        .cc-om-panel-modal { padding: 60px 12px 16px; }
+        .cc-om-header { flex-direction: column; align-items: flex-start; gap: 12px; }
+        .cc-om-stats { width: 100%; justify-content: space-between; }
+        .cc-om-stat { text-align: left; }
+        .cc-om-tabs { flex-wrap: wrap; gap: 2px; }
+        .cc-om-tab { padding: 6px 10px; font-size: 11px; }
+        .cc-om-search { width: 100%; }
+        .cc-om-search-wrap { display: block; width: 100%; }
+        /* Hide table, show cards on mobile */
+        .cc-om-orders-scroll { border: none; max-height: none; min-height: 0; overflow: visible; }
+        .cc-om-table { display: none; }
+        .cc-om-cards { display: flex; flex-direction: column; gap: 12px; }
+        .cc-om-card {
+          background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06);
+          border-radius: 10px; padding: 14px;
+        }
+        .cc-om-card-header {
+          display: flex; justify-content: space-between; align-items: flex-start;
+          margin-bottom: 10px; padding-bottom: 10px;
+          border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+        .cc-om-card-id { font-weight: 700; color: #06B6D4; font-size: 13px; cursor: pointer; }
+        .cc-om-card-row {
+          display: flex; justify-content: space-between; padding: 4px 0;
+          font-size: 12px;
+        }
+        .cc-om-card-label { color: #64748b; }
+        .cc-om-card-value { color: #e2e8f0; text-align: right; max-width: 60%; }
+        .cc-om-card-actions { margin-top: 10px; display: flex; gap: 8px; }
+        .cc-om-card-actions .cc-om-btn { flex: 1; justify-content: center; }
+      }
+      /* Show table on desktop, hide cards */
+      .cc-om-cards { display: none; }
+      @media (max-width: 767px) {
+        .cc-om-cards { display: flex; }
+      }
     `;
     document.head.appendChild(style);
   }
@@ -641,15 +681,50 @@
               <td>
                 ${o.status === 'pending' || o.status === 'processing'
                   ? `<button class="cc-om-btn cc-om-btn-primary" onclick="window.__ccOM.openPaymentModal('${o.id}')">💳 Accept Payment</button>`
-                  : o.status === 'paid' || o.status === 'shipped'
-                  ? `<button class="cc-om-btn cc-om-btn-secondary" onclick="window.__ccOM.showOrderDetail('${o.id}')">View</button>`
-                  : `<button class="cc-om-btn cc-om-btn-secondary" onclick="window.__ccOM.showOrderDetail('${o.id}')">View</button>`
+                  : o.status === 'paid'
+                  ? `<button class="cc-om-btn cc-om-btn-primary" style="background:linear-gradient(135deg,#8b5cf6,#3b82f6)" onclick="window.__ccOM.markAsShipped('${o.id}')">📦 Ship</button>`
+                  : o.status === 'shipped'
+                  ? `<button class="cc-om-btn cc-om-btn-primary" style="background:linear-gradient(135deg,#14b8a6,#06B6D4)" onclick="window.__ccOM.markAsDelivered('${o.id}')">✓ Deliver</button>`
+                  : ``
                 }
+                ${o.status === 'paid' || o.status === 'shipped' || o.status === 'delivered'
+                  ? `<button class="cc-om-btn cc-om-btn-secondary" onclick="window.__ccOM.downloadReceipt('${o.id}')" title="Download receipt PDF">🧾</button>`
+                  : ``}
+                <button class="cc-om-btn cc-om-btn-secondary" onclick="window.__ccOM.showOrderDetail('${o.id}')">View</button>
               </td>
             </tr>
           `).join('')}
         </tbody>
       </table>
+      </div>
+      <div class="cc-om-cards">
+        ${orders.map(o => `
+          <div class="cc-om-card">
+            <div class="cc-om-card-header">
+              <span class="cc-om-card-id" onclick="window.__ccOM.showOrderDetail('${o.id}')">${o.id}</span>
+              <span class="cc-om-status cc-om-status-${o.status}">${o.status}</span>
+            </div>
+            <div class="cc-om-card-row"><span class="cc-om-card-label">Client</span><span class="cc-om-card-value">${o.client_name}</span></div>
+            <div class="cc-om-card-row"><span class="cc-om-card-label">Product</span><span class="cc-om-card-value" style="font-size:11px">${o.product}</span></div>
+            <div class="cc-om-card-row"><span class="cc-om-card-label">Amount</span><span class="cc-om-card-value" style="color:#10B981;font-weight:700">${formatCurrency(o.amount)}</span></div>
+            <div class="cc-om-card-row"><span class="cc-om-card-label">Date</span><span class="cc-om-card-value" style="font-size:11px">${new Date(o.created_at).toLocaleDateString('en-US', {month:'short',day:'numeric',year:'numeric'})}</span></div>
+            <div class="cc-om-card-actions">
+              ${o.status === 'pending' || o.status === 'processing'
+                ? `<button class="cc-om-btn cc-om-btn-primary" onclick="window.__ccOM.openPaymentModal('${o.id}')">💳 Pay</button>`
+                : o.status === 'paid'
+                ? `<button class="cc-om-btn cc-om-btn-primary" style="background:linear-gradient(135deg,#8b5cf6,#3b82f6)" onclick="window.__ccOM.markAsShipped('${o.id}')">📦 Ship</button>`
+                : o.status === 'shipped'
+                ? `<button class="cc-om-btn cc-om-btn-primary" style="background:linear-gradient(135deg,#14b8a6,#06B6D4)" onclick="window.__ccOM.markAsDelivered('${o.id}')">✓ Deliver</button>`
+                : ``
+              }
+              ${o.status === 'paid' || o.status === 'shipped' || o.status === 'delivered'
+                ? `<button class="cc-om-btn cc-om-btn-secondary" onclick="window.__ccOM.downloadReceipt('${o.id}')">🧾 Receipt</button>`
+                : ``
+              }
+              <button class="cc-om-btn cc-om-btn-secondary" onclick="window.__ccOM.showOrderDetail('${o.id}')">View</button>
+            </div>
+          </div>
+        `).join('')}
       </div>
     `;
   }
@@ -1120,6 +1195,220 @@
     }, 800);
   }
 
+  // ------------------------------------------------------------------
+  // STATUS PROGRESSION: paid → shipped → delivered
+  // ------------------------------------------------------------------
+  function markAsShipped(orderId) {
+    const db = initDatabase();
+    const order = db.orders.find(o => o.id === orderId);
+    if (!order || order.status !== 'paid') return;
+
+    order.status = 'shipped';
+    order.tracking_number = 'TRK' + Math.floor(Math.random() * 9000000 + 1000000);
+    order.updated_at = new Date().toISOString();
+    logAudit(db, order.id, 'order_shipped', 'Order shipped. Tracking: ' + order.tracking_number);
+
+    // Send shipping confirmation email
+    const email = {
+      id: generateId('eml'),
+      order_id: order.id,
+      to: order.client_email,
+      from: 'orders@aisupplychain-advanced.com',
+      subject: 'Shipping Confirmation — ' + order.id + ' (Tracking: ' + order.tracking_number + ')',
+      template: 'shipping_confirmation',
+      sent_at: new Date().toISOString(),
+      status: 'delivered',
+      body: '<p>Dear ' + order.client_name + ',</p><p>Your order has been shipped!</p><p><strong>Tracking Number:</strong> ' + order.tracking_number + '</p><p>You can track your shipment using the tracking number above. Expected delivery within 2-3 business days.</p>'
+    };
+    logEmail(db, email);
+    logAudit(db, order.id, 'shipping_email_sent', 'Shipping confirmation sent to ' + order.client_email);
+    saveDatabase(db);
+
+    showToast('Order ' + order.id + ' shipped — Tracking: ' + order.tracking_number);
+    refreshPanelStats();
+    renderOrdersTable(currentFilter, currentSearch);
+  }
+
+  function markAsDelivered(orderId) {
+    const db = initDatabase();
+    const order = db.orders.find(o => o.id === orderId);
+    if (!order || order.status !== 'shipped') return;
+
+    order.status = 'delivered';
+    order.updated_at = new Date().toISOString();
+    logAudit(db, order.id, 'order_delivered', 'Order delivered to ' + order.client_name);
+
+    // Send delivery confirmation email
+    const email = {
+      id: generateId('eml'),
+      order_id: order.id,
+      to: order.client_email,
+      from: 'orders@aisupplychain-advanced.com',
+      subject: 'Delivery Confirmed — ' + order.id,
+      template: 'delivery_confirmation',
+      sent_at: new Date().toISOString(),
+      status: 'delivered',
+      body: '<p>Dear ' + order.client_name + ',</p><p>Your order has been successfully delivered!</p><p>We hope you enjoy your purchase. If you have any questions or need support, please don\'t hesitate to contact us.</p><p>Thank you for choosing AI Supply Chain Advanced.</p>'
+    };
+    logEmail(db, email);
+    logAudit(db, order.id, 'delivery_email_sent', 'Delivery confirmation sent to ' + order.client_email);
+    saveDatabase(db);
+
+    showToast('Order ' + order.id + ' delivered to ' + order.client_name);
+    refreshPanelStats();
+    renderOrdersTable(currentFilter, currentSearch);
+  }
+
+  // ------------------------------------------------------------------
+  // RECEIPT PDF DOWNLOAD (via print-to-PDF)
+  // ------------------------------------------------------------------
+  function downloadReceipt(orderId) {
+    const db = initDatabase();
+    const order = db.orders.find(o => o.id === orderId);
+    if (!order) return;
+    const payment = db.payments.find(p => p.id === order.payment_id);
+    if (!payment) {
+      showToast('No payment found for order ' + orderId);
+      return;
+    }
+
+    // Build a print-friendly receipt HTML
+    const receiptHTML = generateReceiptHTML(order, payment);
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) {
+      showToast('Please allow popups to download the receipt');
+      return;
+    }
+    printWindow.document.write(receiptHTML);
+    printWindow.document.close();
+    // Trigger print dialog after a short delay (allows rendering)
+    setTimeout(function() {
+      printWindow.print();
+    }, 500);
+  }
+
+  function generateReceiptHTML(order, payment) {
+    return `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Receipt — ${order.id}</title>
+<style>
+  @page { margin: 20mm; }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    color: #1e293b; max-width: 600px; margin: 0 auto; padding: 40px 20px;
+    line-height: 1.6;
+  }
+  .header {
+    text-align: center; border-bottom: 3px solid #10B981;
+    padding-bottom: 20px; margin-bottom: 30px;
+  }
+  .logo {
+    font-size: 24px; font-weight: 800; color: #0f172a; margin-bottom: 4px;
+  }
+  .logo span { color: #10B981; }
+  .tagline { font-size: 12px; color: #64748b; }
+  .receipt-title {
+    font-size: 20px; font-weight: 700; color: #0f172a;
+    margin: 30px 0 8px; text-transform: uppercase; letter-spacing: 0.05em;
+  }
+  .receipt-meta {
+    font-size: 12px; color: #64748b; margin-bottom: 24px;
+    display: flex; justify-content: space-between;
+  }
+  .section { margin-bottom: 24px; }
+  .section h3 {
+    font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em;
+    color: #64748b; margin: 0 0 8px; border-bottom: 1px solid #e2e8f0;
+    padding-bottom: 4px;
+  }
+  .row { display: flex; justify-content: space-between; padding: 4px 0; font-size: 13px; }
+  .label { color: #64748b; }
+  .value { color: #1e293b; font-weight: 500; }
+  .total {
+    background: #f0fdf4; border: 1px solid #10B981; border-radius: 8px;
+    padding: 12px 16px; margin: 16px 0; display: flex; justify-content: space-between;
+    align-items: center;
+  }
+  .total-label { font-size: 14px; font-weight: 700; color: #065f46; }
+  .total-value { font-size: 20px; font-weight: 800; color: #10B981; }
+  .status-badge {
+    display: inline-block; padding: 3px 10px; border-radius: 12px;
+    font-size: 11px; font-weight: 700; text-transform: uppercase;
+    background: #dcfce7; color: #065f46; border: 1px solid #10B981;
+  }
+  .footer {
+    margin-top: 40px; padding-top: 20px; border-top: 1px solid #e2e8f0;
+    text-align: center; font-size: 11px; color: #94a3b8;
+  }
+  .footer a { color: #10B981; text-decoration: none; }
+  @media print {
+    body { padding: 0; }
+    .no-print { display: none; }
+  }
+</style>
+</head>
+<body>
+  <div class="header">
+    <div class="logo">AI Supply Chain <span>Advanced</span></div>
+    <div class="tagline">Enterprise Intelligence Platform</div>
+  </div>
+
+  <div class="receipt-title">Payment Receipt</div>
+  <div class="receipt-meta">
+    <span>Receipt #: ${payment.id.substr(-12).toUpperCase()}</span>
+    <span>Date: ${formatDate(payment.processed_at)}</span>
+  </div>
+
+  <div class="section">
+    <h3>Order Information</h3>
+    <div class="row"><span class="label">Order ID</span><span class="value">${order.id}</span></div>
+    <div class="row"><span class="label">Order Date</span><span class="value">${formatDate(order.created_at)}</span></div>
+    <div class="row"><span class="label">Status</span><span class="value"><span class="status-badge">${order.status}</span></span></div>
+    ${order.tracking_number ? '<div class="row"><span class="label">Tracking Number</span><span class="value">' + order.tracking_number + '</span></div>' : ''}
+  </div>
+
+  <div class="section">
+    <h3>Client</h3>
+    <div class="row"><span class="label">Name</span><span class="value">${order.client_name}</span></div>
+    <div class="row"><span class="label">Email</span><span class="value">${order.client_email}</span></div>
+    <div class="row"><span class="label">Country</span><span class="value">${order.client_country}</span></div>
+  </div>
+
+  <div class="section">
+    <h3>Product</h3>
+    <div class="row"><span class="label">Product</span><span class="value">${order.product}</span></div>
+    <div class="row"><span class="label">Category</span><span class="value">${order.category}</span></div>
+    <div class="row"><span class="label">Quantity</span><span class="value">${order.quantity}</span></div>
+    <div class="row"><span class="label">Unit Price</span><span class="value">${formatCurrency(order.amount / order.quantity)}</span></div>
+  </div>
+
+  <div class="total">
+    <span class="total-label">Total Paid</span>
+    <span class="total-value">${formatCurrency(order.amount)} ${order.currency}</span>
+  </div>
+
+  <div class="section">
+    <h3>Payment Details</h3>
+    <div class="row"><span class="label">Transaction ID</span><span class="value">${payment.transaction_id}</span></div>
+    <div class="row"><span class="label">Payment Method</span><span class="value">${payment.method}</span></div>
+    <div class="row"><span class="label">Processor</span><span class="value">${payment.processor}</span></div>
+    <div class="row"><span class="label">Processed At</span><span class="value">${formatDate(payment.processed_at)}</span></div>
+    <div class="row"><span class="label">Payment Status</span><span class="value"><span class="status-badge">Completed</span></span></div>
+  </div>
+
+  <div class="footer">
+    <p>This is a computer-generated receipt from AI Supply Chain Advanced.</p>
+    <p>© 2026 AI Supply Chain Advanced. All rights reserved.</p>
+    <p>71-75 Shelton Street, Covent Garden, London, WC2H 9JQ, United Kingdom</p>
+    <p>Email: testdemoqwenai2025@gmail.com · Phone: +44 (0) 20 7946 0958</p>
+    <p class="no-print" style="margin-top:16px;font-size:10px;color:#cbd5e1">Use your browser's "Save as PDF" option in the print dialog to save this receipt.</p>
+  </div>
+</body>
+</html>`;
+  }
+
   function showToast(message) {
     let toast = document.getElementById('cc-om-toast');
     if (toast) toast.remove();
@@ -1238,6 +1527,9 @@
       openPanel: openPanel,
       exportCSV: exportCSV,
       createNewOrder: createNewOrder,
+      markAsShipped: markAsShipped,
+      markAsDelivered: markAsDelivered,
+      downloadReceipt: downloadReceipt,
       resetDatabase: resetDatabase
     };
 
