@@ -493,6 +493,74 @@
       }
       .cc-om-filter:focus { outline: none; border-color: #10B981; }
 
+      /* Analytics Chart */
+      .cc-om-chart {
+        display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 16px;
+        padding: 16px; background: rgba(255,255,255,0.02);
+        border: 1px solid rgba(255,255,255,0.05); border-radius: 10px;
+      }
+      .cc-om-chart-section { flex: 1; min-width: 280px; }
+      .cc-om-chart-title {
+        font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em;
+        color: #64748b; margin-bottom: 10px; font-weight: 600;
+      }
+      .cc-om-chart-bars {
+        display: flex; align-items: flex-end; gap: 6px; height: 80px;
+        padding: 0 4px;
+      }
+      .cc-om-chart-bar-wrap {
+        flex: 1; display: flex; flex-direction: column; align-items: center;
+        gap: 4px; height: 100%; justify-content: flex-end;
+      }
+      .cc-om-chart-bar {
+        width: 100%; max-width: 36px; border-radius: 4px 4px 0 0;
+        transition: height 0.4s ease, opacity 0.2s; min-height: 4px;
+        position: relative; cursor: pointer;
+      }
+      .cc-om-chart-bar:hover { opacity: 0.85; }
+      .cc-om-chart-bar-tooltip {
+        position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%);
+        background: #1e293b; color: #fff; padding: 4px 8px; border-radius: 4px;
+        font-size: 10px; white-space: nowrap; opacity: 0; pointer-events: none;
+        transition: opacity 0.2s; margin-bottom: 4px; z-index: 5;
+      }
+      .cc-om-chart-bar:hover .cc-om-chart-bar-tooltip { opacity: 1; }
+      .cc-om-chart-label {
+        font-size: 9px; color: #64748b; text-transform: uppercase;
+        letter-spacing: 0.03em; text-align: center;
+      }
+      .cc-om-chart-value {
+        font-size: 11px; font-weight: 700; color: #e2e8f0;
+      }
+      /* Revenue sparkline */
+      .cc-om-sparkline {
+        display: flex; align-items: flex-end; gap: 3px; height: 60px;
+      }
+      .cc-om-sparkline-bar {
+        flex: 1; background: linear-gradient(180deg, #10B981, #06B6D4);
+        border-radius: 2px 2px 0 0; min-height: 3px; opacity: 0.7;
+        transition: opacity 0.2s;
+      }
+      .cc-om-sparkline-bar:hover { opacity: 1; }
+      .cc-om-sparkline-label {
+        font-size: 9px; color: #64748b; text-align: center; margin-top: 4px;
+      }
+
+      /* Bulk Actions Bar */
+      .cc-om-bulk-bar {
+        display: none; align-items: center; justify-content: space-between;
+        padding: 10px 14px; margin-bottom: 12px;
+        background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3);
+        border-radius: 8px; flex-wrap: wrap; gap: 8px;
+      }
+      .cc-om-bulk-bar.active { display: flex; }
+      .cc-om-bulk-count { font-size: 13px; color: #93c5fd; font-weight: 600; }
+      .cc-om-bulk-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+      .cc-om-checkbox {
+        width: 16px; height: 16px; cursor: pointer; accent-color: #10B981;
+      }
+      .cc-om-checkbox-cell { width: 32px; text-align: center; }
+
       /* Mobile responsive — card layout for screens < 768px */
       @media (max-width: 767px) {
         .cc-om-panel { padding: 16px; }
@@ -601,6 +669,18 @@
             </div>
           </div>
 
+          <div id="cc-om-chart-container"></div>
+
+          <div class="cc-om-bulk-bar" id="cc-om-bulk-bar">
+            <span class="cc-om-bulk-count" id="cc-om-bulk-count">0 selected</span>
+            <div class="cc-om-bulk-actions">
+              <button class="cc-om-btn cc-om-btn-primary" style="background:linear-gradient(135deg,#8b5cf6,#3b82f6)" onclick="window.__ccOM.bulkShip()">📦 Ship Selected</button>
+              <button class="cc-om-btn cc-om-btn-primary" style="background:linear-gradient(135deg,#14b8a6,#06B6D4)" onclick="window.__ccOM.bulkDeliver()">✓ Deliver Selected</button>
+              <button class="cc-om-btn cc-om-btn-secondary" onclick="window.__ccOM.bulkExportCSV()">⬇ Export Selected</button>
+              <button class="cc-om-btn cc-om-btn-danger" onclick="window.__ccOM.clearSelection()">✕ Clear</button>
+            </div>
+          </div>
+
           <div style="margin-bottom:12px">
             <div class="cc-om-search-wrap">
               <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
@@ -660,6 +740,7 @@
       <table class="cc-om-table">
         <thead>
           <tr>
+            <th class="cc-om-checkbox-cell"><input type="checkbox" class="cc-om-checkbox" id="cc-om-select-all" onchange="window.__ccOM.toggleSelectAll(this.checked)"></th>
             <th>Order ID</th>
             <th>Client</th>
             <th>Product</th>
@@ -672,6 +753,7 @@
         <tbody>
           ${orders.map(o => `
             <tr>
+              <td class="cc-om-checkbox-cell"><input type="checkbox" class="cc-om-checkbox cc-om-row-checkbox" value="${o.id}" onchange="window.__ccOM.updateBulkBar()"></td>
               <td><span class="cc-om-order-id" onclick="window.__ccOM.showOrderDetail('${o.id}')">${o.id}</span></td>
               <td>${o.client_name}<div style="font-size:10px;color:#64748b">${o.client_country}</div></td>
               <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${o.product}</td>
@@ -1446,6 +1528,196 @@
     if (stats[0]) stats[0].textContent = pendingCount;
     if (stats[1]) stats[1].textContent = paidCount;
     if (stats[2]) stats[2].textContent = formatCurrency(totalRevenue);
+
+    // Also refresh the chart
+    renderChart();
+  }
+
+  // ------------------------------------------------------------------
+  // ANALYTICS CHART
+  // ------------------------------------------------------------------
+  function renderChart() {
+    const db = initDatabase();
+    const chartContainer = document.getElementById('cc-om-chart-container');
+    if (!chartContainer) return;
+
+    // Orders by status
+    const statusCounts = {
+      pending: 0, processing: 0, paid: 0, shipped: 0, delivered: 0, cancelled: 0
+    };
+    db.orders.forEach(o => { if (statusCounts[o.status] !== undefined) statusCounts[o.status]++; });
+
+    const maxCount = Math.max(...Object.values(statusCounts), 1);
+    const statusColors = {
+      pending: '#f59e0b', processing: '#3b82f6', paid: '#10B981',
+      shipped: '#8b5cf6', delivered: '#14b8a6', cancelled: '#ef4444'
+    };
+
+    // Revenue last 7 days sparkline
+    const now = new Date();
+    const days = [];
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(now.getTime() - i * 86400000);
+      const dayKey = d.toISOString().substr(0, 10);
+      const dayRevenue = db.payments
+        .filter(p => p.processed_at.substr(0, 10) === dayKey)
+        .reduce((sum, p) => sum + p.amount, 0);
+      days.push({
+        label: d.toLocaleDateString('en-US', { weekday: 'short' }),
+        revenue: dayRevenue,
+        date: dayKey
+      });
+    }
+    const maxRevenue = Math.max(...days.map(d => d.revenue), 1);
+
+    chartContainer.innerHTML = `
+      <div class="cc-om-chart">
+        <div class="cc-om-chart-section">
+          <div class="cc-om-chart-title">Orders by Status</div>
+          <div class="cc-om-chart-bars">
+            ${Object.entries(statusCounts).map(([status, count]) => `
+              <div class="cc-om-chart-bar-wrap">
+                <div class="cc-om-chart-value">${count}</div>
+                <div class="cc-om-chart-bar" style="height: ${(count / maxCount * 100)}%; background: ${statusColors[status]}" onclick="window.__ccOM.filterByStatus('${status}')">
+                  <div class="cc-om-chart-bar-tooltip">${status}: ${count} order${count !== 1 ? 's' : ''}</div>
+                </div>
+                <div class="cc-om-chart-label">${status.substr(0, 4)}</div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+        <div class="cc-om-chart-section">
+          <div class="cc-om-chart-title">Revenue — Last 7 Days</div>
+          <div class="cc-om-chart-bars">
+            ${days.map(d => `
+              <div class="cc-om-chart-bar-wrap">
+                <div class="cc-om-chart-value">${d.revenue > 0 ? '$' + (d.revenue / 1000).toFixed(0) + 'k' : ''}</div>
+                <div class="cc-om-chart-bar" style="height: ${(d.revenue / maxRevenue * 100)}%; background: linear-gradient(180deg, #10B981, #06B6D4)" onclick="window.__ccOM.showDayRevenue('${d.date}', ${d.revenue})">
+                  <div class="cc-om-chart-bar-tooltip">${d.label}: ${formatCurrency(d.revenue)}</div>
+                </div>
+                <div class="cc-om-chart-label">${d.label}</div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  function filterByStatus(status) {
+    // Switch to the tab for the clicked status
+    const tab = document.querySelector('.cc-om-tab[data-filter="' + status + '"]');
+    if (tab) tab.click();
+  }
+
+  function showDayRevenue(date, revenue) {
+    showToast(formatCurrency(revenue) + ' revenue on ' + date);
+  }
+
+  // ------------------------------------------------------------------
+  // BULK ACTIONS
+  // ------------------------------------------------------------------
+  let selectedOrderIds = new Set();
+
+  function toggleSelectAll(checked) {
+    document.querySelectorAll('.cc-om-row-checkbox').forEach(cb => {
+      cb.checked = checked;
+      if (checked) selectedOrderIds.add(cb.value);
+      else selectedOrderIds.delete(cb.value);
+    });
+    updateBulkBar();
+  }
+
+  function updateBulkBar() {
+    // Rebuild selected set from checkboxes
+    selectedOrderIds = new Set();
+    document.querySelectorAll('.cc-om-row-checkbox:checked').forEach(cb => {
+      selectedOrderIds.add(cb.value);
+    });
+
+    const bulkBar = document.getElementById('cc-om-bulk-bar');
+    const countEl = document.getElementById('cc-om-bulk-count');
+    if (bulkBar && countEl) {
+      const count = selectedOrderIds.size;
+      countEl.textContent = count + ' order' + (count !== 1 ? 's' : '') + ' selected';
+      if (count > 0) {
+        bulkBar.classList.add('active');
+      } else {
+        bulkBar.classList.remove('active');
+      }
+    }
+  }
+
+  function clearSelection() {
+    document.querySelectorAll('.cc-om-row-checkbox').forEach(cb => { cb.checked = false; });
+    const selectAll = document.getElementById('cc-om-select-all');
+    if (selectAll) selectAll.checked = false;
+    selectedOrderIds = new Set();
+    updateBulkBar();
+  }
+
+  function getSelectedOrders() {
+    const db = initDatabase();
+    return db.orders.filter(o => selectedOrderIds.has(o.id));
+  }
+
+  function bulkShip() {
+    const orders = getSelectedOrders();
+    const shippable = orders.filter(o => o.status === 'paid');
+    if (shippable.length === 0) {
+      showToast('No paid orders selected (only paid orders can be shipped)');
+      return;
+    }
+    if (!confirm('Ship ' + shippable.length + ' order' + (shippable.length !== 1 ? 's' : '') + '?')) return;
+    shippable.forEach(o => markAsShipped(o.id));
+    clearSelection();
+  }
+
+  function bulkDeliver() {
+    const orders = getSelectedOrders();
+    const deliverable = orders.filter(o => o.status === 'shipped');
+    if (deliverable.length === 0) {
+      showToast('No shipped orders selected (only shipped orders can be delivered)');
+      return;
+    }
+    if (!confirm('Deliver ' + deliverable.length + ' order' + (deliverable.length !== 1 ? 's' : '') + '?')) return;
+    deliverable.forEach(o => markAsDelivered(o.id));
+    clearSelection();
+  }
+
+  function bulkExportCSV() {
+    const orders = getSelectedOrders();
+    if (orders.length === 0) {
+      showToast('No orders selected');
+      return;
+    }
+    const headers = ['Order ID', 'Client', 'Email', 'Country', 'Product', 'Category', 'Quantity', 'Amount', 'Currency', 'Status', 'Created', 'Tracking Number'];
+    const rows = orders.map(o => [
+      o.id,
+      '"' + o.client_name.replace(/"/g, '""') + '"',
+      o.client_email,
+      o.client_country,
+      '"' + o.product.replace(/"/g, '""') + '"',
+      o.category,
+      o.quantity,
+      o.amount.toFixed(2),
+      o.currency,
+      o.status,
+      o.created_at,
+      o.tracking_number || ''
+    ]);
+    const csv = [headers.join(',')].concat(rows.map(r => r.join(','))).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'selected-orders-' + new Date().toISOString().substr(0, 10) + '.csv';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    showToast('Exported ' + orders.length + ' order' + (orders.length !== 1 ? 's' : '') + ' to CSV');
+    clearSelection();
   }
 
   function resetDatabase() {
@@ -1461,10 +1733,13 @@
   function openPanel() {
     // Remove any existing panel
     closePanel();
+    // Clear any previous selection
+    selectedOrderIds = new Set();
     // Render and append the panel
     const panel = renderOrdersPanel();
     document.body.appendChild(panel);
-    // Render initial orders table
+    // Render chart + initial orders table
+    renderChart();
     renderOrdersTable('all', '');
     // Wire up events
     wireUpPanelEvents();
@@ -1530,6 +1805,14 @@
       markAsShipped: markAsShipped,
       markAsDelivered: markAsDelivered,
       downloadReceipt: downloadReceipt,
+      filterByStatus: filterByStatus,
+      showDayRevenue: showDayRevenue,
+      toggleSelectAll: toggleSelectAll,
+      updateBulkBar: updateBulkBar,
+      clearSelection: clearSelection,
+      bulkShip: bulkShip,
+      bulkDeliver: bulkDeliver,
+      bulkExportCSV: bulkExportCSV,
       resetDatabase: resetDatabase
     };
 
