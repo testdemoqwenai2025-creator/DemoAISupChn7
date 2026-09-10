@@ -718,5 +718,6 @@
         function toggleBilling() { var annual=document.getElementById('billing-toggle').checked; var price=document.getElementById('analyst-price'); var strike=document.getElementById('analyst-strike'); var period=document.getElementById('analyst-period'); var note=document.getElementById('analyst-annual-note'); var lm=document.getElementById('label-monthly'); var la=document.getElementById('label-annual'); if(annual){ price.textContent='119'; strike.style.display='inline'; period.textContent='/user/mo'; note.style.display='block'; la.classList.add('active-label'); lm.classList.remove('active-label'); } else { price.textContent='149'; strike.style.display='none'; period.textContent='/user/mo'; note.style.display='none'; lm.classList.add('active-label'); la.classList.remove('active-label'); } }
         function toggleFaq(btn) { var answer=btn.nextElementSibling; var isOpen=answer.classList.contains('open'); document.querySelectorAll('.faq-answer').forEach(function(a){a.classList.remove('open');}); document.querySelectorAll('.faq-toggle').forEach(function(t){t.classList.remove('open');}); if(!isOpen){answer.classList.add('open');btn.classList.add('open');} }
     </script>
+<script src="/DemoAISupChn7/js/banners.js" defer></script>
 </body>
 </html>
