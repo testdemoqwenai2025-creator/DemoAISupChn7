@@ -1941,6 +1941,407 @@
           </table>
         </div>
       </div>
+
+      <!-- AI Anomaly Detection -->
+      <div class="cc-dd-section">
+        <div class="cc-dd-section-title">🔍 AI Anomaly Detection — Isolation Forest Model</div>
+        ${renderAnomalyDetection(db)}
+      </div>
+
+      <!-- AI Labor Forecasting -->
+      <div class="cc-dd-section">
+        <div class="cc-dd-section-title">👷 AI Labor Forecasting — Staffing Predictions (7-Day)</div>
+        ${renderLaborForecast(db)}
+      </div>
+
+      <!-- AI Slotting Optimization -->
+      <div class="cc-dd-section">
+        <div class="cc-dd-section-title">📦 AI Slotting Optimization — ABC Analysis & Reassignment</div>
+        ${renderSlottingOptimization(db)}
+      </div>
+
+      <!-- AI Returns Prediction -->
+      <div class="cc-dd-section">
+        <div class="cc-dd-section-title">↩️ AI Returns Prediction — ML Risk Scoring per SKU</div>
+        ${renderReturnsPrediction(db)}
+      </div>
+    `;
+  }
+
+  // ------------------------------------------------------------------
+  // 4A. AI ANOMALY DETECTION
+  // ------------------------------------------------------------------
+  function renderAnomalyDetection(db) {
+    const anomalies = [
+      { id: 'an1', type: 'Inventory Shrinkage', sku: 'SKU-10003', product: '4K Monitor', warehouse: 'Rotterdam DC-1', expected: 320, actual: 298, delta: -22, severity: 'high', confidence: 94, detected: new Date(Date.now() - 3 * 3600000).toISOString(), aiNote: 'Unexplained reduction of 22 units. Possible theft, miscount, or undocumented damage. Recommend physical audit.' },
+      { id: 'an2', type: 'Demand Spike', sku: 'SKU-10005', product: 'Gaming Mouse', warehouse: 'Singapore Hub', expected: 45, actual: 128, delta: 183, severity: 'medium', confidence: 87, detected: new Date(Date.now() - 8 * 3600000).toISOString(), aiNote: 'Demand 183% above forecast. Possible viral marketing event or competitor stockout. Consider emergency reorder.' },
+      { id: 'an3', type: 'Miscount Detected', sku: 'SKU-10012', product: 'Vitamin D3', warehouse: 'LA Distribution', expected: 500, actual: 547, delta: 47, severity: 'low', confidence: 91, detected: new Date(Date.now() - 14 * 3600000).toISOString(), aiNote: 'Count variance of 47 units exceeds 3-sigma threshold. Likely receiving error. Recommend recount.' },
+      { id: 'an4', type: 'Inventory Shrinkage', sku: 'SKU-10008', product: 'Winter Jacket', warehouse: 'Dubai Logistics City', expected: 180, actual: 162, delta: -18, severity: 'medium', confidence: 89, detected: new Date(Date.now() - 20 * 3600000).toISOString(), aiNote: 'Shrinkage of 18 units (10%). Pattern matches seasonal theft trend. Recommend security review.' },
+      { id: 'an5', type: 'Demand Drop', sku: 'SKU-10015', product: 'Green Tea 100pk', warehouse: 'Rotterdam DC-1', expected: 210, actual: 89, delta: -58, severity: 'medium', confidence: 85, detected: new Date(Date.now() - 26 * 3600000).toISOString(), aiNote: 'Demand dropped 58% below forecast. Possible expired listing or competitor promotion. Investigate cause.' },
+      { id: 'an6', type: 'Price Anomaly', sku: 'SKU-10002', product: 'Wireless Earbuds', warehouse: 'Singapore Hub', expected: 89.99, actual: 49.99, delta: -44, severity: 'high', confidence: 96, detected: new Date(Date.now() - 30 * 3600000).toISOString(), aiNote: 'Unit price dropped 44% unexpectedly. Possible pricing error or unauthorized discount. Immediate review needed.' }
+    ];
+    const highSeverity = anomalies.filter(a => a.severity === 'high').length;
+    const totalValue = Math.floor(Math.random() * 80000) + 40000;
+
+    return `
+      <div style="display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap">
+        <div style="padding:10px 16px;background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.15);border-radius:8px;flex:1;min-width:140px">
+          <div style="font-size:10px;color:#64748b;text-transform:uppercase">Anomalies Detected</div>
+          <div style="font-size:22px;font-weight:800;color:#ef4444">${anomalies.length}</div>
+        </div>
+        <div style="padding:10px 16px;background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.15);border-radius:8px;flex:1;min-width:140px">
+          <div style="font-size:10px;color:#64748b;text-transform:uppercase">High Severity</div>
+          <div style="font-size:22px;font-weight:800;color:#ef4444">${highSeverity}</div>
+        </div>
+        <div style="padding:10px 16px;background:rgba(245,158,11,0.06);border:1px solid rgba(245,158,11,0.15);border-radius:8px;flex:1;min-width:140px">
+          <div style="font-size:10px;color:#64748b;text-transform:uppercase">Est. Value Impact</div>
+          <div style="font-size:22px;font-weight:800;color:#f59e0b">$${totalValue.toLocaleString()}</div>
+        </div>
+        <div style="padding:10px 16px;background:rgba(6,182,212,0.06);border:1px solid rgba(6,182,212,0.15);border-radius:8px;flex:1;min-width:140px">
+          <div style="font-size:10px;color:#64748b;text-transform:uppercase">Model Accuracy</div>
+          <div style="font-size:22px;font-weight:800;color:#06B6D4">93.2%</div>
+        </div>
+      </div>
+
+      <div class="cc-dd-scroll">
+        <table class="cc-dd-table">
+          <thead>
+            <tr>
+              <th>Type</th>
+              <th>SKU</th>
+              <th>Product</th>
+              <th>Warehouse</th>
+              <th>Expected</th>
+              <th>Actual</th>
+              <th>Delta</th>
+              <th>Severity</th>
+              <th>Confidence</th>
+              <th>AI Note</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${anomalies.map(a => `
+              <tr>
+                <td style="font-weight:600;color:${a.severity === 'high' ? '#ef4444' : a.severity === 'medium' ? '#f59e0b' : '#06B6D4'}">${a.type}</td>
+                <td style="font-family:monospace;font-size:11px;color:#06B6D4">${a.sku}</td>
+                <td style="font-size:11px">${a.product}</td>
+                <td style="font-size:11px">${a.warehouse}</td>
+                <td style="text-align:right">${a.expected}</td>
+                <td style="text-align:right">${a.actual}</td>
+                <td style="text-align:center;color:${a.delta < 0 ? '#ef4444' : a.delta > 50 ? '#f59e0b' : '#10B981'};font-weight:700">${a.delta > 0 ? '+' : ''}${a.delta}${a.type === 'Price Anomaly' ? '%' : ''}</td>
+                <td><span class="cc-dd-status cc-dd-status-${a.severity === 'high' ? 'congested' : a.severity === 'medium' ? 'high-capacity' : 'operational'}">${a.severity}</span></td>
+                <td style="text-align:center">
+                  <span class="cc-dd-congestion-bar"><span class="cc-dd-congestion-fill" style="width:${a.confidence}%;background:${a.confidence > 90 ? '#10B981' : '#f59e0b'}"></span></span>
+                  ${a.confidence}%
+                </td>
+                <td style="font-size:10px;color:#94a3b8;max-width:250px">${a.aiNote}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+      <div style="margin-top:10px;padding:10px 14px;background:rgba(6,182,212,0.06);border:1px solid rgba(6,182,212,0.15);border-radius:6px;font-size:12px;color:#67e8f9">
+        🔍 <strong>Isolation Forest Model:</strong> Trained on 90 days of historical data across ${db.inventory.length} SKUs and ${db.warehouses.length} warehouses. Detects anomalies using 3-sigma deviation from expected values. Model retrains weekly. ${highSeverity} high-severity anomalies require immediate attention.
+      </div>
+    `;
+  }
+
+  // ------------------------------------------------------------------
+  // 4B. AI LABOR FORECASTING
+  // ------------------------------------------------------------------
+  function renderLaborForecast(db) {
+    const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    const laborData = db.warehouses.map(wh => {
+      const dailyForecast = days.map((day, i) => {
+        const predictedVolume = Math.floor(Math.random() * 80) + 120 + (i < 5 ? 50 : -30);
+        const recommendedStaff = Math.ceil(predictedVolume / 25);
+        const currentStaff = Math.floor(recommendedStaff * (0.85 + Math.random() * 0.3));
+        const overtime = Math.max(0, currentStaff - recommendedStaff);
+        const gap = recommendedStaff - currentStaff;
+        return { day, predictedVolume, recommendedStaff, currentStaff, overtime, gap };
+      });
+      return { warehouse: wh, daily: dailyForecast };
+    });
+
+    const maxVolume = Math.max(...laborData.flatMap(w => w.daily.map(d => d.predictedVolume)));
+
+    return `
+      <div style="display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap">
+        <div style="padding:10px 16px;background:rgba(59,130,246,0.06);border:1px solid rgba(59,130,246,0.15);border-radius:8px;flex:1;min-width:140px">
+          <div style="font-size:10px;color:#64748b;text-transform:uppercase">Total Staff (4 WH)</div>
+          <div style="font-size:22px;font-weight:800;color:#3b82f6">${db.warehouses.reduce((s,w) => s + w.total_staff, 0)}</div>
+        </div>
+        <div style="padding:10px 16px;background:rgba(16,185,129,0.06);border:1px solid rgba(16,185,129,0.15);border-radius:8px;flex:1;min-width:140px">
+          <div style="font-size:10px;color:#64748b;text-transform:uppercase">Recommended (7d avg)</div>
+          <div style="font-size:22px;font-weight:800;color:#10B981">${Math.round(laborData.flatMap(w=>w.daily).reduce((s,d)=>s+d.recommendedStaff,0)/7)}</div>
+        </div>
+        <div style="padding:10px 16px;background:rgba(245,158,11,0.06);border:1px solid rgba(245,158,11,0.15);border-radius:8px;flex:1;min-width:140px">
+          <div style="font-size:10px;color:#64748b;text-transform:uppercase">Est. Overtime Cost/wk</div>
+          <div style="font-size:22px;font-weight:800;color:#f59e0b">$${(Math.random()*8000+5000).toFixed(0)}</div>
+        </div>
+        <div style="padding:10px 16px;background:rgba(6,182,212,0.06);border:1px solid rgba(6,182,212,0.15);border-radius:8px;flex:1;min-width:140px">
+          <div style="font-size:10px;color:#64748b;text-transform:uppercase">Model</div>
+          <div style="font-size:14px;font-weight:800;color:#06B6D4">XGBoost Reg.</div>
+        </div>
+      </div>
+
+      ${laborData.map((wh, wi) => `
+        <div style="margin-bottom:20px">
+          <div style="font-size:13px;font-weight:700;color:#e2e8f0;margin-bottom:10px">🏭 ${wh.warehouse.name}</div>
+          <div style="display:flex;gap:6px;margin-bottom:8px">
+            ${wh.daily.map((d, i) => {
+              const heightPct = (d.predictedVolume / maxVolume) * 100;
+              const barColor = d.gap > 0 ? '#ef4444' : d.gap === 0 ? '#10B981' : '#f59e0b';
+              return `
+                <div style="flex:1;text-align:center">
+                  <div style="font-size:9px;color:#64748b;margin-bottom:4px">${d.day}</div>
+                  <div style="height:60px;display:flex;align-items:flex-end;justify-content:center">
+                    <div style="width:80%;height:${heightPct}%;background:linear-gradient(180deg,${barColor},${barColor}80);border-radius:4px 4px 0 0;min-height:8px;transition:height 0.4s" title="${d.day}: ${d.predictedVolume} orders predicted, ${d.recommendedStaff} staff recommended, ${d.currentStaff} scheduled"></div>
+                  </div>
+                  <div style="font-size:10px;font-weight:700;color:${barColor};margin-top:4px">${d.recommendedStaff}</div>
+                  <div style="font-size:8px;color:#64748b">${d.currentStaff} sched</div>
+                  <div style="font-size:8px;color:${d.gap > 0 ? '#ef4444' : d.gap === 0 ? '#10B981' : '#64748b'}">${d.gap > 0 ? '⚠️ +' + d.gap + ' needed' : d.gap === 0 ? '✅ optimal' : '↓ ' + Math.abs(d.gap) + ' over'}</div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        </div>
+      `).join('')}
+
+      <div class="cc-dd-scroll">
+        <table class="cc-dd-table">
+          <thead>
+            <tr>
+              <th>Warehouse</th>
+              <th>Day</th>
+              <th>Predicted Volume</th>
+              <th>Recommended Staff</th>
+              <th>Currently Scheduled</th>
+              <th>Gap</th>
+              <th>Overtime Est.</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${laborData.flatMap((wh, wi) => wh.daily.map((d, di) => `
+              <tr>
+                <td style="font-weight:600;font-size:11px">${wh.warehouse.name}</td>
+                <td>${d.day}</td>
+                <td style="text-align:center">${d.predictedVolume} orders</td>
+                <td style="text-align:center;color:#10B981;font-weight:600">${d.recommendedStaff}</td>
+                <td style="text-align:center">${d.currentStaff}</td>
+                <td style="text-align:center;color:${d.gap > 0 ? '#ef4444' : d.gap === 0 ? '#10B981' : '#64748b'};font-weight:700">${d.gap > 0 ? '+' + d.gap + ' needed' : d.gap === 0 ? '✅' : '-' + Math.abs(d.gap)}</td>
+                <td style="text-align:right;color:${d.overtime > 0 ? '#f59e0b' : '#64748b'}">${d.overtime > 0 ? '$' + (d.overtime * 150) : '—'}</td>
+                <td><button class="cc-dd-btn cc-dd-btn-secondary" onclick="alert('Demo: Auto-adjust schedule for ${wh.warehouse.name} ${d.day}')">⚙️ Adjust</button></td>
+              </tr>
+            `)).slice(0, 14).join('')}
+          </tbody>
+        </table>
+      </div>
+      <div style="margin-top:10px;padding:10px 14px;background:rgba(6,182,212,0.06);border:1px solid rgba(6,182,212,0.15);border-radius:6px;font-size:12px;color:#67e8f9">
+        👷 <strong>XGBoost Regression Model:</strong> Predicts staffing needs based on order volume forecasts, day-of-week patterns, and seasonal trends. ${laborData.flatMap(w=>w.daily).filter(d=>d.gap>0).length} shifts need additional staff. Estimated overtime savings if adjusted: $${(Math.random()*5000+3000).toFixed(0)}/week.
+      </div>
+    `;
+  }
+
+  // ------------------------------------------------------------------
+  // 4C. AI SLOTTING OPTIMIZATION
+  // ------------------------------------------------------------------
+  function renderSlottingOptimization(db) {
+    // ABC analysis: A = top 20% movers (80% of picks), B = next 30%, C = bottom 50%
+    const slotData = SKU_NAMES.slice(0, 20).map((name, i) => {
+      const pickFreq = Math.floor(Math.random() * 1000) + 10;
+      const abcClass = pickFreq > 500 ? 'A' : pickFreq > 200 ? 'B' : 'C';
+      const currentZone = String.fromCharCode(65 + (i % 6)); // A-F
+      const currentAisle = Math.floor(Math.random() * 20) + 1;
+      const currentDist = Math.floor(Math.random() * 80) + 20;
+      const recommendedZone = abcClass === 'A' ? 'A' : abcClass === 'B' ? 'B' : 'F';
+      const recommendedAisle = abcClass === 'A' ? Math.floor(Math.random() * 5) + 1 : abcClass === 'B' ? Math.floor(Math.random() * 5) + 6 : Math.floor(Math.random() * 10) + 11;
+      const recommendedDist = abcClass === 'A' ? Math.floor(Math.random() * 15) + 5 : abcClass === 'B' ? Math.floor(Math.random() * 25) + 15 : Math.floor(Math.random() * 40) + 40;
+      const savings = Math.max(0, currentDist - recommendedDist);
+      const savingsPct = currentDist > 0 ? Math.round(savings / currentDist * 100) : 0;
+      return {
+        sku: 'SKU-' + (10001 + i), name, pickFreq, abcClass,
+        current: `Zone ${currentZone}, Aisle ${currentAisle} (${currentDist}m from dock)`,
+        recommended: `Zone ${recommendedZone}, Aisle ${recommendedAisle} (${recommendedDist}m from dock)`,
+        currentDist, recommendedDist, savings, savingsPct,
+        needsMove: savings > 10
+      };
+    }).sort((a, b) => b.pickFreq - a.pickFreq);
+
+    const classA = slotData.filter(s => s.abcClass === 'A').length;
+    const classB = slotData.filter(s => s.abcClass === 'B').length;
+    const classC = slotData.filter(s => s.abcClass === 'C').length;
+    const movesNeeded = slotData.filter(s => s.needsMove).length;
+    const totalSavings = slotData.reduce((s, x) => s + x.savings, 0);
+    const avgSavingsPct = Math.round(slotData.reduce((s, x) => s + x.savingsPct, 0) / slotData.length);
+
+    return `
+      <div style="display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap">
+        <div style="padding:10px 16px;background:rgba(16,185,129,0.06);border:1px solid rgba(16,185,129,0.15);border-radius:8px;flex:1;min-width:140px">
+          <div style="font-size:10px;color:#64748b;text-transform:uppercase">Class A (Fast Movers)</div>
+          <div style="font-size:22px;font-weight:800;color:#10B981">${classA} SKUs</div>
+          <div style="font-size:10px;color:#64748b">${Math.round(classA/20*100)}% of SKUs, 80% of picks</div>
+        </div>
+        <div style="padding:10px 16px;background:rgba(245,158,11,0.06);border:1px solid rgba(245,158,11,0.15);border-radius:8px;flex:1;min-width:140px">
+          <div style="font-size:10px;color:#64748b;text-transform:uppercase">Class B (Medium)</div>
+          <div style="font-size:22px;font-weight:800;color:#f59e0b">${classB} SKUs</div>
+          <div style="font-size:10px;color:#64748b">30% of SKUs, 15% of picks</div>
+        </div>
+        <div style="padding:10px 16px;background:rgba(100,116,139,0.06);border:1px solid rgba(100,116,139,0.15);border-radius:8px;flex:1;min-width:140px">
+          <div style="font-size:10px;color:#64748b;text-transform:uppercase">Class C (Slow)</div>
+          <div style="font-size:22px;font-weight:800;color:#64748b">${classC} SKUs</div>
+          <div style="font-size:10px;color:#64748b">50% of SKUs, 5% of picks</div>
+        </div>
+        <div style="padding:10px 16px;background:rgba(16,185,129,0.06);border:1px solid rgba(16,185,129,0.15);border-radius:8px;flex:1;min-width:140px">
+          <div style="font-size:10px;color:#64748b;text-transform:uppercase">Travel Reduction</div>
+          <div style="font-size:22px;font-weight:800;color:#10B981">${avgSavingsPct}%</div>
+          <div style="font-size:10px;color:#64748b">${movesNeeded} SKUs need reslotting</div>
+        </div>
+      </div>
+
+      <!-- ABC Distribution donut -->
+      <div class="cc-dd-donut-row" style="margin-bottom:20px">
+        ${renderDonut({ 'Class A': classA, 'Class B': classB, 'Class C': classC }, ['#10B981', '#f59e0b', '#64748b'], 20, 'SKUs')}
+        <div class="cc-dd-legend">
+          <div class="cc-dd-legend-item"><div class="cc-dd-legend-dot" style="background:#10B981"></div><div class="cc-dd-legend-label">Class A — Fast movers (near dock)</div><div class="cc-dd-legend-value">${classA} SKUs</div></div>
+          <div class="cc-dd-legend-item"><div class="cc-dd-legend-dot" style="background:#f59e0b"></div><div class="cc-dd-legend-label">Class B — Medium (mid-warehouse)</div><div class="cc-dd-legend-value">${classB} SKUs</div></div>
+          <div class="cc-dd-legend-item"><div class="cc-dd-legend-dot" style="background:#64748b"></div><div class="cc-dd-legend-label">Class C — Slow (back of warehouse)</div><div class="cc-dd-legend-value">${classC} SKUs</div></div>
+        </div>
+      </div>
+
+      <div class="cc-dd-scroll">
+        <table class="cc-dd-table">
+          <thead>
+            <tr>
+              <th>SKU</th>
+              <th>Product</th>
+              <th>Pick Freq (30d)</th>
+              <th>ABC Class</th>
+              <th>Current Location</th>
+              <th>AI Recommended</th>
+              <th>Distance Saved</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${slotData.map(s => `
+              <tr>
+                <td style="font-weight:600;color:#06B6D4;font-family:monospace">${s.sku}</td>
+                <td style="font-size:11px">${s.name}</td>
+                <td style="text-align:center">${s.pickFreq}</td>
+                <td style="text-align:center"><span class="cc-dd-status cc-dd-status-${s.abcClass === 'A' ? 'operational' : s.abcClass === 'B' ? 'high-capacity' : 'low'}" style="font-size:10px;padding:2px 8px">${s.abcClass}</span></td>
+                <td style="font-size:11px;color:#94a3b8">${s.current}</td>
+                <td style="font-size:11px;color:${s.needsMove ? '#10B981' : '#64748b'}">${s.recommended}</td>
+                <td style="text-align:center;color:${s.savings > 10 ? '#10B981' : '#64748b'};font-weight:${s.savings > 10 ? '700' : '400'}">${s.savings > 0 ? s.savings + 'm (' + s.savingsPct + '%)' : '—'}</td>
+                <td>${s.needsMove ? '<button class="cc-dd-btn cc-dd-btn-primary" style="font-size:10px;padding:4px 10px" onclick="alert(\'Demo: Auto-reslot ' + s.sku + '\')">📦 Reslot</button>' : '<span style="color:#64748b;font-size:10px">✅ Optimal</span>'}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+      <div style="margin-top:10px;padding:10px 14px;background:rgba(6,182,212,0.06);border:1px solid rgba(6,182,212,0.15);border-radius:6px;font-size:12px;color:#67e8f9">
+        📦 <strong>Clustering + Frequency Analysis:</strong> AI analyzed 30 days of pick data and classified ${slotData.length} SKUs using ABC analysis. ${movesNeeded} SKUs are in suboptimal locations. Reslotting all would reduce average pick travel by ${avgSavingsPct}% (${totalSavings}m total savings), saving an estimated ${(totalSavings * 0.5).toFixed(0)} hours of labor per month.
+      </div>
+    `;
+  }
+
+  // ------------------------------------------------------------------
+  // 4D. AI RETURNS PREDICTION
+  // ------------------------------------------------------------------
+  function renderReturnsPrediction(db) {
+    const returnPredictions = SKU_NAMES.slice(0, 12).map((name, i) => {
+      const returnRate = (Math.random() * 12 + 1).toFixed(1);
+      const riskScore = Math.floor(Math.random() * 100);
+      const riskLevel = riskScore > 70 ? 'high' : riskScore > 40 ? 'medium' : 'low';
+      const predictedReturns7d = Math.floor(Math.random() * 15) + 1;
+      const historicalReturns30d = Math.floor(Math.random() * 40) + 5;
+      const topReason = ['Damaged in transit', 'Wrong item', 'Quality issue', 'Not as described', 'Customer changed mind'][Math.floor(Math.random() * 5)];
+      const modelConfidence = Math.floor(Math.random() * 20) + 78;
+      const recommendedAction = riskLevel === 'high' ? 'Quality review + packaging audit' : riskLevel === 'medium' ? 'Monitor return trend' : 'No action needed';
+      return { sku: 'SKU-' + (10001 + i), name, returnRate: parseFloat(returnRate), riskScore, riskLevel, predictedReturns7d, historicalReturns30d, topReason, modelConfidence, recommendedAction };
+    }).sort((a, b) => b.riskScore - a.riskScore);
+
+    const highRisk = returnPredictions.filter(p => p.riskLevel === 'high').length;
+    const mediumRisk = returnPredictions.filter(p => p.riskLevel === 'medium').length;
+    const totalPredictedReturns = returnPredictions.reduce((s, p) => s + p.predictedReturns7d, 0);
+    const avgRiskScore = Math.round(returnPredictions.reduce((s, p) => s + p.riskScore, 0) / returnPredictions.length);
+
+    return `
+      <div style="display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap">
+        <div style="padding:10px 16px;background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.15);border-radius:8px;flex:1;min-width:140px">
+          <div style="font-size:10px;color:#64748b;text-transform:uppercase">High-Risk SKUs</div>
+          <div style="font-size:22px;font-weight:800;color:#ef4444">${highRisk}</div>
+        </div>
+        <div style="padding:10px 16px;background:rgba(245,158,11,0.06);border:1px solid rgba(245,158,11,0.15);border-radius:8px;flex:1;min-width:140px">
+          <div style="font-size:10px;color:#64748b;text-transform:uppercase">Medium-Risk SKUs</div>
+          <div style="font-size:22px;font-weight:800;color:#f59e0b">${mediumRisk}</div>
+        </div>
+        <div style="padding:10px 16px;background:rgba(6,182,212,0.06);border:1px solid rgba(6,182,212,0.15);border-radius:8px;flex:1;min-width:140px">
+          <div style="font-size:10px;color:#64748b;text-transform:uppercase">Predicted Returns (7d)</div>
+          <div style="font-size:22px;font-weight:800;color:#06B6D4">${totalPredictedReturns}</div>
+        </div>
+        <div style="padding:10px 16px;background:rgba(139,92,246,0.06);border:1px solid rgba(139,92,246,0.15);border-radius:8px;flex:1;min-width:140px">
+          <div style="font-size:10px;color:#64748b;text-transform:uppercase">Avg Risk Score</div>
+          <div style="font-size:22px;font-weight:800;color:${avgRiskScore > 50 ? '#ef4444' : '#8b5cf6'}">${avgRiskScore}/100</div>
+        </div>
+      </div>
+
+      <!-- Risk distribution donut -->
+      <div class="cc-dd-donut-row" style="margin-bottom:20px">
+        ${renderDonut(
+          { 'High Risk': highRisk, 'Medium Risk': mediumRisk, 'Low Risk': returnPredictions.filter(p=>p.riskLevel==='low').length },
+          ['#ef4444', '#f59e0b', '#10B981'],
+          returnPredictions.length,
+          'SKUs'
+        )}
+        <div class="cc-dd-legend">
+          <div class="cc-dd-legend-item"><div class="cc-dd-legend-dot" style="background:#ef4444"></div><div class="cc-dd-legend-label">High Risk (score > 70)</div><div class="cc-dd-legend-value">${highRisk} SKUs</div></div>
+          <div class="cc-dd-legend-item"><div class="cc-dd-legend-dot" style="background:#f59e0b"></div><div class="cc-dd-legend-label">Medium Risk (40-70)</div><div class="cc-dd-legend-value">${mediumRisk} SKUs</div></div>
+          <div class="cc-dd-legend-item"><div class="cc-dd-legend-dot" style="background:#10B981"></div><div class="cc-dd-legend-label">Low Risk (< 40)</div><div class="cc-dd-legend-value">${returnPredictions.filter(p=>p.riskLevel==='low').length} SKUs</div></div>
+        </div>
+      </div>
+
+      <div class="cc-dd-scroll">
+        <table class="cc-dd-table">
+          <thead>
+            <tr>
+              <th>SKU</th>
+              <th>Product</th>
+              <th>Return Rate</th>
+              <th>Risk Score</th>
+              <th>Risk Level</th>
+              <th>Returns (30d)</th>
+              <th>Predicted (7d)</th>
+              <th>Top Reason</th>
+              <th>Model Conf.</th>
+              <th>AI Recommendation</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${returnPredictions.map(p => `
+              <tr>
+                <td style="font-weight:600;color:#06B6D4;font-family:monospace">${p.sku}</td>
+                <td style="font-size:11px">${p.name}</td>
+                <td style="text-align:center;color:${p.returnRate > 5 ? '#ef4444' : p.returnRate > 3 ? '#f59e0b' : '#10B981'};font-weight:700">${p.returnRate}%</td>
+                <td style="text-align:center">
+                  <span class="cc-dd-congestion-bar"><span class="cc-dd-congestion-fill" style="width:${p.riskScore}%;background:${p.riskScore > 70 ? '#ef4444' : p.riskScore > 40 ? '#f59e0b' : '#10B981'}"></span></span>
+                  ${p.riskScore}
+                </td>
+                <td><span class="cc-dd-status cc-dd-status-${p.riskLevel === 'high' ? 'congested' : p.riskLevel === 'medium' ? 'high-capacity' : 'operational'}">${p.riskLevel}</span></td>
+                <td style="text-align:center">${p.historicalReturns30d}</td>
+                <td style="text-align:center;color:#06B6D4;font-weight:600">${p.predictedReturns7d}</td>
+                <td style="font-size:11px;color:#94a3b8">${p.topReason}</td>
+                <td style="text-align:center;color:${p.modelConfidence > 85 ? '#10B981' : '#f59e0b'}">${p.modelConfidence}%</td>
+                <td style="font-size:11px;color:${p.riskLevel === 'high' ? '#ef4444' : '#94a3b8'}">${p.recommendedAction}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+      <div style="margin-top:10px;padding:10px 14px;background:rgba(6,182,212,0.06);border:1px solid rgba(6,182,212,0.15);border-radius:6px;font-size:12px;color:#67e8f9">
+        🤖 <strong>XGBoost Classification Model:</strong> Predicts return risk using features: historical return rate, product category, price point, seasonality, shipping distance, and customer demographics. ${highRisk} SKUs flagged as high-risk. Top return-risk product: <strong>${returnPredictions[0].name}</strong> (${returnPredictions[0].returnRate}% return rate, risk score ${returnPredictions[0].riskScore}/100). Recommend: ${returnPredictions[0].recommendedAction}.
+      </div>
     `;
   }
 
