@@ -927,6 +927,196 @@
   }
 
   // ------------------------------------------------------------------
+  // #13. REAL-TIME AUTO-REFRESH
+  // ------------------------------------------------------------------
+  // Adds a pulsing "LIVE" badge to the page, refreshes random numbers on
+  // visible .cc-dd-card-value elements every 30s with small random deltas,
+  // and shows a "Last updated: Xs ago" indicator.
+  function addRealTimeRefresh() {
+    if (document.getElementById('cc-rt-live-badge')) return false;
+
+    // ---- Inject styles for the LIVE badge and timestamp indicator ----
+    if (!document.getElementById('cc-rt-styles')) {
+      var style = document.createElement('style');
+      style.id = 'cc-rt-styles';
+      style.textContent = [
+        '#cc-rt-live-badge {',
+        '  position: fixed; top: 12px; right: 140px; z-index: 10000;',
+        '  background: linear-gradient(135deg, #ef4444, #f59e0b);',
+        '  color: #fff; font-size: 10px; font-weight: 800;',
+        '  letter-spacing: 0.08em; text-transform: uppercase;',
+        '  padding: 5px 12px 5px 22px; border-radius: 14px;',
+        '  box-shadow: 0 2px 12px rgba(239,68,68,0.45);',
+        '  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;',
+        '  pointer-events: none; display: flex; align-items: center;',
+        '}',
+        '#cc-rt-live-badge::before {',
+        '  content: ""; position: absolute; left: 9px; top: 50%;',
+        '  transform: translateY(-50%); width: 8px; height: 8px;',
+        '  border-radius: 50%; background: #fff;',
+        '  animation: cc-rt-pulse 1.4s ease-in-out infinite;',
+        '}',
+        '@keyframes cc-rt-pulse {',
+        '  0%,100% { opacity: 1; transform: translateY(-50%) scale(1); }',
+        '  50% { opacity: 0.4; transform: translateY(-50%) scale(0.7); }',
+        '}',
+        '#cc-rt-timestamp {',
+        '  position: fixed; top: 38px; right: 20px; z-index: 10000;',
+        '  font-size: 10px; color: #94a3b8; font-weight: 600;',
+        '  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;',
+        '  pointer-events: none; background: rgba(15,23,42,0.6);',
+        '  padding: 3px 8px; border-radius: 6px;',
+        '  border: 1px solid rgba(255,255,255,0.08);',
+        '  backdrop-filter: blur(8px);',
+        '}',
+        'html:not(.dark) #cc-rt-timestamp {',
+        '  background: rgba(255,255,255,0.85); color: #475569;',
+        '  border-color: rgba(0,0,0,0.08);',
+        '}',
+        '.cc-rt-value-flash { animation: cc-rt-flash 0.6s ease-out; }',
+        '@keyframes cc-rt-flash {',
+        '  0% { color: #22c55e; transform: scale(1.08); }',
+        '  100% { transform: scale(1); }',
+        '}'
+      ].join('\n');
+      document.head.appendChild(style);
+    }
+
+    // ---- Add LIVE badge ----
+    var badge = document.createElement('div');
+    badge.id = 'cc-rt-live-badge';
+    badge.textContent = 'LIVE';
+    badge.title = 'Real-time data auto-refresh is active';
+    document.body.appendChild(badge);
+
+    // ---- Add "Last updated" indicator ----
+    var ts = document.createElement('div');
+    ts.id = 'cc-rt-timestamp';
+    ts.textContent = 'Last updated: 0s ago';
+    document.body.appendChild(ts);
+
+    // ---- Track last refresh time ----
+    var lastRefresh = Date.now();
+    var refreshIntervalMs = 30000; // 30 seconds
+    var tickIntervalMs = 1000;     // 1 second
+
+    // ---- Update the "Xs ago" label every second ----
+    function updateTimestamp() {
+      var secs = Math.floor((Date.now() - lastRefresh) / 1000);
+      var label;
+      if (secs < 60) label = secs + 's ago';
+      else if (secs < 3600) label = Math.floor(secs / 60) + 'm ago';
+      else label = Math.floor(secs / 3600) + 'h ago';
+      var el = document.getElementById('cc-rt-timestamp');
+      if (el) el.textContent = 'Last updated: ' + label;
+    }
+    setInterval(updateTimestamp, tickIntervalMs);
+
+    // ---- Core refresh: update visible .cc-dd-card-value elements ----
+    function refreshValues() {
+      lastRefresh = Date.now();
+
+      // Update dispatch-dashboard card values
+      var cards = document.querySelectorAll('.cc-dd-card-value');
+      var updated = 0;
+      cards.forEach(function(card) {
+        // Skip if inside a hidden modal/overlay
+        var parent = card.closest('.cc-dd-modal');
+        if (parent && parent.style.display === 'none') return;
+        // Only consider visible elements (offsetParent !== null when visible)
+        if (card.offsetParent === null) return;
+
+        var raw = card.textContent.trim();
+        // Try to parse as a number with optional prefix/suffix
+        var match = raw.match(/^([^\d-]*)(-?[\d,.]+)(.*)$/);
+        if (!match) return;
+
+        var prefix = match[1] || '';
+        var numStr = match[2].replace(/,/g, '');
+        var suffix = match[3] || '';
+        var num = parseFloat(numStr);
+        if (isNaN(num)) return;
+
+        // Apply small random delta of ±1-3%
+        var deltaPct = (Math.random() - 0.5) * 0.06; // ±3%
+        var newNum = num * (1 + deltaPct);
+
+        // Format back to match original precision
+        var decimals = (numStr.split('.')[1] || '').length;
+        var formatted;
+        if (decimals === 0) {
+          formatted = Math.round(newNum).toString();
+        } else {
+          formatted = newNum.toFixed(decimals);
+        }
+
+        // Preserve thousands separator if original had commas
+        if (numStr.indexOf(',') !== -1) {
+          var parts = formatted.split('.');
+          parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+          formatted = parts.join('.');
+        }
+
+        card.textContent = prefix + formatted + suffix;
+
+        // Brief flash animation
+        card.classList.remove('cc-rt-value-flash');
+        // Force reflow to restart animation
+        void card.offsetWidth;
+        card.classList.add('cc-rt-value-flash');
+        updated++;
+      });
+
+      // Also refresh specific known metric labels by id pattern (optional)
+      // (Dispatch dashboard exposes .cc-dd-card-value already, so above handles it.)
+
+      // Vessel counts: any element with [data-rt-vessels]
+      document.querySelectorAll('[data-rt-vessels]').forEach(function(el) {
+        var cur = parseInt(el.getAttribute('data-rt-vessels'), 10);
+        if (isNaN(cur)) return;
+        var delta = Math.floor((Math.random() - 0.5) * 4); // ±2
+        var next = Math.max(0, cur + delta);
+        el.setAttribute('data-rt-vessels', String(next));
+        el.textContent = String(next);
+      });
+
+      // Port congestion: any element with [data-rt-congestion]
+      document.querySelectorAll('[data-rt-congestion]').forEach(function(el) {
+        var cur = parseInt(el.getAttribute('data-rt-congestion'), 10);
+        if (isNaN(cur)) return;
+        var delta = Math.floor((Math.random() - 0.5) * 6); // ±3
+        var next = Math.max(0, Math.min(100, cur + delta));
+        el.setAttribute('data-rt-congestion', String(next));
+        el.textContent = next + '%';
+      });
+
+      // Warehouse metrics: any element with [data-rt-warehouse]
+      document.querySelectorAll('[data-rt-warehouse]').forEach(function(el) {
+        var cur = parseInt(el.getAttribute('data-rt-warehouse'), 10);
+        if (isNaN(cur)) return;
+        var delta = Math.floor((Math.random() - 0.5) * 4); // ±2
+        var next = Math.max(0, cur + delta);
+        el.setAttribute('data-rt-warehouse', String(next));
+        el.textContent = String(next);
+      });
+
+      if (updated > 0) {
+        console.log('[cc-enhancements] Real-time refresh: updated ' + updated + ' live values');
+      }
+      updateTimestamp();
+    }
+
+    // Schedule the periodic refresh (every 30 seconds)
+    setInterval(refreshValues, refreshIntervalMs);
+
+    // Also trigger an immediate refresh 5 seconds after load (after data populates)
+    setTimeout(refreshValues, 5000);
+
+    console.log('[cc-enhancements.js] #13 Real-time auto-refresh enabled (30s interval, LIVE badge + timestamp)');
+    return true;
+  }
+
+  // ------------------------------------------------------------------
   // INIT — Run all enhancements after DOM is ready
   // ------------------------------------------------------------------
   function init() {
@@ -944,8 +1134,9 @@
       var labeled = addIconAriaLabels(); // #5
       var stamped = addLastUpdatedTimestamps(); // #3
       fixThemeToggle();                // #11
+      var rtRefresh = addRealTimeRefresh(); // #13
 
-      console.log('[cc-enhancements.js] All 11 enhancements loaded:', {
+      console.log('[cc-enhancements.js] All 13 enhancements loaded:', {
         demoMode: true,
         backToMain: true,
         contactSales: true,
@@ -957,6 +1148,7 @@
         timestampsAdded: stamped,
         loadingSkeleton: true,
         themeToggle: true,
+        realTimeRefresh: rtRefresh,
         dispatchSidebarItem: injectDispatchSidebarItem()
       });
     }
