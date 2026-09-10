@@ -671,6 +671,134 @@
   }
 
   // ------------------------------------------------------------------
+  // #11. DARK/LIGHT THEME TOGGLE (fixes the non-functional React toggle)
+  // ------------------------------------------------------------------
+  function fixThemeToggle() {
+    // First, fix the footer visibility — the SPA uses h-screen which pushes
+    // the footer below the fold. We override to make the footer visible.
+    if (!document.getElementById('cc-footer-fix')) {
+      var style = document.createElement('style');
+      style.id = 'cc-footer-fix';
+      style.textContent = [
+        /* The SPA root has h-screen (100vh) which pushes footer below viewport. */
+        /* Override: let the page scroll naturally so footer is reachable. */
+        'html, body { height: auto !important; min-height: 100vh; }',
+        'body > div:first-child { min-height: 100vh !important; height: auto !important; }',
+        'body > div:first-child > div { min-height: 100vh !important; height: auto !important; }',
+        /* Ensure footer is always visible and not covered */
+        '.cc-footer { display: block !important; position: relative !important; z-index: 50 !important; }',
+        /* Add a visible separator before footer */
+        '.cc-footer::before { content: ""; display: block; height: 1px; background: linear-gradient(90deg, transparent, rgba(16,185,129,0.4), transparent); margin-bottom: 0; }'
+      ].join('\n');
+      document.head.appendChild(style);
+    }
+
+    var STORAGE_KEY = 'cc-theme';
+
+    function findThemeButton() {
+      var buttons = document.querySelectorAll('button');
+      for (var i = 0; i < buttons.length; i++) {
+        var btn = buttons[i];
+        var text = btn.textContent || '';
+        if (text.indexOf('Light Mode') !== -1 || text.indexOf('Dark Mode') !== -1) {
+          return btn;
+        }
+      }
+      return null;
+    }
+
+    function getCurrentTheme() {
+      return document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+    }
+
+    function applyTheme(theme) {
+      if (theme === 'light') {
+        document.documentElement.classList.remove('dark');
+      } else {
+        document.documentElement.classList.add('dark');
+      }
+      localStorage.setItem(STORAGE_KEY, theme);
+      updateButtonLabel(theme);
+    }
+
+    function updateButtonLabel(theme) {
+      var btn = findThemeButton();
+      if (!btn) return;
+      var span = btn.querySelector('span');
+      if (span) {
+        span.textContent = theme === 'dark' ? 'Light Mode' : 'Dark Mode';
+      }
+      var svg = btn.querySelector('svg');
+      if (svg) {
+        if (theme === 'dark') {
+          svg.innerHTML = '<circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path>';
+        } else {
+          svg.innerHTML = '<path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>';
+        }
+      }
+    }
+
+    function toggleTheme() {
+      var current = getCurrentTheme();
+      var newTheme = current === 'dark' ? 'light' : 'dark';
+      applyTheme(newTheme);
+    }
+
+    var attempts = 0;
+    function tryAttach() {
+      attempts++;
+      var btn = findThemeButton();
+      if (btn) {
+        btn.onclick = null;
+        btn.addEventListener('click', function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          toggleTheme();
+        });
+        updateButtonLabel(getCurrentTheme());
+        return;
+      }
+      if (attempts < 30) setTimeout(tryAttach, 500);
+    }
+
+    try {
+      var stored = localStorage.getItem(STORAGE_KEY);
+      if (stored) applyTheme(stored);
+    } catch(e) {}
+
+    setTimeout(tryAttach, 1000);
+
+    // Floating fallback toggle
+    function addFloatingToggle() {
+      if (document.getElementById('cc-floating-theme-toggle')) return;
+      var fab = document.createElement('button');
+      fab.id = 'cc-floating-theme-toggle';
+      fab.style.cssText = [
+        'position: fixed', 'bottom: 20px', 'left: 20px', 'z-index: 9999',
+        'width: 44px', 'height: 44px', 'border-radius: 50%',
+        'background: rgba(255,255,255,0.1)', 'border: 1px solid rgba(255,255,255,0.2)',
+        'color: #e2e8f0', 'cursor: pointer', 'font-size: 20px',
+        'display: flex', 'align-items: center', 'justify-content: center',
+        'transition: all 0.2s', 'backdrop-filter: blur(8px)'
+      ].join(';');
+      fab.title = 'Toggle dark/light theme';
+      fab.setAttribute('aria-label', 'Toggle dark/light theme');
+
+      function updateFabIcon() {
+        fab.innerHTML = getCurrentTheme() === 'dark' ? '☀️' : '🌙';
+      }
+      fab.onclick = function() { toggleTheme(); updateFabIcon(); };
+      updateFabIcon();
+      document.body.appendChild(fab);
+
+      var observer = new MutationObserver(function() { updateFabIcon(); });
+      observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+    }
+
+    setTimeout(addFloatingToggle, 2000);
+  }
+
+  // ------------------------------------------------------------------
   // INIT — Run all enhancements after DOM is ready
   // ------------------------------------------------------------------
   function init() {
@@ -687,8 +815,9 @@
       persistSidebarState();           // #8
       var labeled = addIconAriaLabels(); // #5
       var stamped = addLastUpdatedTimestamps(); // #3
+      fixThemeToggle();                // #11
 
-      console.log('[cc-enhancements.js] All 10 enhancements loaded:', {
+      console.log('[cc-enhancements.js] All 11 enhancements loaded:', {
         demoMode: true,
         backToMain: true,
         contactSales: true,
@@ -698,7 +827,8 @@
         sidebarPersist: true,
         iconsLabeled: labeled,
         timestampsAdded: stamped,
-        loadingSkeleton: true
+        loadingSkeleton: true,
+        themeToggle: true
       });
     }
 
