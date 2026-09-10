@@ -1134,7 +1134,7 @@
       'box-shadow: 0 8px 24px rgba(16, 185, 129, 0.4)',
       'font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
       'transition: opacity 0.3s, transform 0.3s',
-      'max-width: 90vw', 'text-align: 'center'
+      'max-width: 90vw', "text-align: center"
     ].join(';');
     toast.textContent = '✓ ' + message;
     document.body.appendChild(toast);
