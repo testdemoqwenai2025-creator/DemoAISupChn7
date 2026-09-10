@@ -1,0 +1,19 @@
+# ====================================================================
+# CODEOWNERS — demo6AISupChn-Advanced
+# ====================================================================
+# All changes require approval from the designated owners.
+# This enforces the guardrails: no direct pushes to main, all changes
+# go through pull request review.
+# ====================================================================
+
+# Default owner for everything in the repo
+*                       @testdemoqwenai2025-creator
+
+# HTML pages — require review
+*.html                  @testdemoqwenai2025-creator
+
+# cc-app SPA — require review
+/cc-app/                @testdemoqwenai2025-creator
+
+# Workflows — require review
+/.github/               @testdemoqwenai2025-creator

@@ -1,0 +1,142 @@
+name: Validate Pages (Guardrails)
+
+# ====================================================================
+# Guardrails workflow — runs on every PR and push to main.
+# Validates that the site is deployable and all key pages are present.
+# Blocks merge if any check fails.
+# ====================================================================
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages-validate
+  cancel-in-progress: true
+
+jobs:
+  validate-structure:
+    name: Validate Repository Structure
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Verify required files exist
+        run: |
+          set -e
+          echo "Checking required files..."
+          for f in .nojekyll index.html 404.html cc-app/index.html; do
+            if [ ! -f "$f" ]; then
+              echo "❌ MISSING: $f"
+              exit 1
+            fi
+            echo "✅ Found: $f"
+          done
+
+      - name: Verify all HTML pages exist
+        run: |
+          set -e
+          PAGES="about.html customers.html dashboard.html dashboard-enhanced.html \
+                 events.html industries.html intelligence.html intelligence-enhanced.html \
+                 platform.html platform-enhanced.html pricing.html product.html support.html"
+          for page in $PAGES; do
+            if [ ! -f "$page" ]; then
+              echo "❌ MISSING: $page"
+              exit 1
+            fi
+            echo "✅ Found: $page"
+          done
+
+      - name: Verify cc-app/ SPA structure
+        run: |
+          set -e
+          echo "Checking cc-app/ SPA..."
+          for f in cc-app/index.html cc-app/_next/static/chunks; do
+            if [ ! -e "$f" ]; then
+              echo "❌ MISSING: $f"
+              exit 1
+            fi
+            echo "✅ Found: $f"
+          done
+
+      - name: Verify .nojekyll exists
+        run: |
+          if [ ! -f .nojekyll ]; then
+            echo "❌ .nojekyll is missing — _next/ paths will 404 on Pages"
+            exit 1
+          fi
+          echo "✅ .nojekyll present"
+
+      - name: Check for stale references
+        run: |
+          set -e
+          echo "Checking for stale repo references..."
+          STALE=0
+          for pattern in "AISupChn6-Advanced" "AISupChn-preview"; do
+            matches=$(grep -rl "$pattern" --include="*.html" --include="*.js" --include="*.txt" . 2>/dev/null || true)
+            if [ -n "$matches" ]; then
+              echo "❌ Found stale reference '$pattern' in:"
+              echo "$matches"
+              STALE=1
+            fi
+          done
+          if [ "$STALE" -eq 1 ]; then
+            exit 1
+          fi
+          echo "✅ No stale references found"
+
+      - name: Validate HTML files are non-empty
+        run: |
+          set -e
+          echo "Checking HTML files are non-empty..."
+          for f in *.html cc-app/*.html; do
+            size=$(wc -c < "$f")
+            if [ "$size" -lt 500 ]; then
+              echo "❌ TOO SMALL ($size bytes): $f"
+              exit 1
+            fi
+          done
+          echo "✅ All HTML files have sufficient content"
+
+  deploy-pages:
+    name: Deploy to GitHub Pages
+    needs: validate-structure
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: '.'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+      - name: Summary
+        if: always()
+        run: |
+          echo "### Pages Deployment" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ job.status }}" = "success" ]; then
+            echo "✅ Deployed to: ${{ steps.deployment.outputs.page_url }}" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ Deployment failed" >> $GITHUB_STEP_SUMMARY
+          fi
