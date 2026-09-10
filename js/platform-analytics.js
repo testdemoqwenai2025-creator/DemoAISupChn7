@@ -322,6 +322,7 @@
           <button class="cc-pa-tab active" data-tab="news" onclick="window.__ccPA.setTab('news')">📰 News Feeds</button>
           <button class="cc-pa-tab" data-tab="risks" onclick="window.__ccPA.setTab('risks')">⚠️ Risk Assessments</button>
           <button class="cc-pa-tab" data-tab="orders" onclick="window.__ccPA.setTab('orders')">📦 Order Patterns</button>
+          <button class="cc-pa-tab" data-tab="products" onclick="window.__ccPA.setTab('products')">🏷️ Products</button>
         </div>
         <div id="cc-pa-content"></div>
       </div>
@@ -336,6 +337,39 @@
     if (currentTab === 'news') renderNewsAnalytics(container);
     else if (currentTab === 'risks') renderRiskAnalytics(container);
     else if (currentTab === 'orders') renderOrderAnalytics(container);
+    else if (currentTab === 'products') renderProductAnalytics(container);
+
+    // Append premium portal banner after every tab
+    appendPremiumBanner(container);
+  }
+
+  // ------------------------------------------------------------------
+  // PREMIUM PORTAL BANNER
+  // ------------------------------------------------------------------
+  function appendPremiumBanner(container) {
+    var banner = document.createElement('div');
+    banner.className = 'cc-premium-banner';
+    banner.style.cssText = [
+      'margin-top: 24px', 'padding: 20px 24px', 'border-radius: 12px',
+      'background: linear-gradient(135deg, rgba(59,130,246,0.08), rgba(139,92,246,0.08))',
+      'border: 1px solid rgba(59,130,246,0.2)', 'text-align: center',
+      'font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+    ].join(';');
+    banner.innerHTML = [
+      '<div style="font-size:11px;color:#3b82f6;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px">⭐ PREMIUM PORTAL</div>',
+      '<div class="cc-premium-banner-title" style="font-size:18px;font-weight:800;color:#fff;margin-bottom:8px">Unlock Advanced Analytics & Premium Intelligence</div>',
+      '<div class="cc-premium-banner-text" style="font-size:13px;color:#94a3b8;margin-bottom:16px;max-width:600px;margin-left:auto;margin-right:auto">Upgrade to the Enterprise Premium Portal for real-time predictive analytics, custom dashboards, API access, dedicated intelligence reports, and white-label deployment.</div>',
+      '<div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin-bottom:16px">',
+        '<div class="cc-premium-feature" style="font-size:12px;color:#94a3b8">📊 Predictive ML Models</div>',
+        '<div class="cc-premium-feature" style="font-size:12px;color:#94a3b8">📡 Real-time API Feeds</div>',
+        '<div class="cc-premium-feature" style="font-size:12px;color:#94a3b8">📋 Custom Reports</div>',
+        '<div class="cc-premium-feature" style="font-size:12px;color:#94a3b8">🏷️ White-label Deployment</div>',
+        '<div class="cc-premium-feature" style="font-size:12px;color:#94a3b8">🔒 Dedicated Support</div>',
+      '</div>',
+      '<a href="mailto:testdemoqwenai2025@gmail.com?subject=Premium%20Portal%20Inquiry" style="display:inline-block;padding:12px 28px;border-radius:10px;background:linear-gradient(135deg,#3b82f6,#8b5cf6);color:#fff;text-decoration:none;font-size:14px;font-weight:700;box-shadow:0 4px 16px rgba(59,130,246,0.4);transition:all 0.2s" onmouseover="this.style.transform=\'translateY(-2px)\'" onmouseout="this.style.transform=\'\'">🚀 Request Premium Access</a>',
+      '<div style="font-size:11px;color:#64748b;margin-top:12px">Or email us at testdemoqwenai2025@gmail.com for a guided demo</div>'
+    ].join('');
+    container.appendChild(banner);
   }
 
   // ------------------------------------------------------------------
@@ -660,6 +694,185 @@
               </div>
             `).join('')}
           </div>
+        </div>
+      </div>
+    `;
+  }
+
+  // ------------------------------------------------------------------
+  // PRODUCT ANALYTICS (top 5 products by revenue and volume)
+  // ------------------------------------------------------------------
+  const ANALYTICS_PRODUCTS = [
+    'AI Risk Intelligence Suite',
+    'Compliance Automation Module',
+    'Predictive Analytics Dashboard',
+    'Command Center Deployment',
+    'Supply Chain Monitoring',
+    'Tender Management Module',
+    'Document Intelligence Suite',
+    'API Integration Package'
+  ];
+  const PRODUCT_COLORS = ['#3b82f6', '#8b5cf6', '#06B6D4', '#10B981', '#f59e0b', '#ec4899', '#14b8a6', '#ef4444'];
+
+  function renderProductAnalytics(container) {
+    const db = generateAnalyticsDB();
+
+    // Assign products to orders if not present (backward compat)
+    db.orders.forEach((o, i) => {
+      if (!o.product) o.product = ANALYTICS_PRODUCTS[i % ANALYTICS_PRODUCTS.length];
+    });
+
+    const periodItems = filterByPeriod(db.orders, currentPeriod, 'date');
+
+    // Aggregate by product
+    const productStats = {};
+    ANALYTICS_PRODUCTS.forEach(p => { productStats[p] = { revenue: 0, count: 0 }; });
+    periodItems.forEach(o => {
+      if (productStats[o.product]) {
+        productStats[o.product].revenue += o.amount;
+        productStats[o.product].count += 1;
+      }
+    });
+
+    // Sort by revenue (top 5)
+    const sortedProducts = Object.entries(productStats)
+      .filter(([_, s]) => s.count > 0)
+      .sort((a, b) => b[1].revenue - a[1].revenue);
+    const top5 = sortedProducts.slice(0, 5);
+
+    const totalRevenue = periodItems.reduce((s, o) => s + o.amount, 0);
+    const maxRevenue = Math.max(...top5.map(([_, s]) => s.revenue), 1);
+    const maxCount = Math.max(...top5.map(([_, s]) => s.count), 1);
+
+    // Daily trend for top 3 products
+    const days = getPeriodDays(currentPeriod);
+    const dailyProductRevenue = {};
+    top5.slice(0, 3).forEach(([pname]) => { dailyProductRevenue[pname] = {}; });
+    for (let i = days - 1; i >= 0; i--) {
+      const d = new Date(Date.now() - i * 86400000);
+      const dateKey = d.toISOString().substr(0, 10);
+      Object.keys(dailyProductRevenue).forEach(p => { dailyProductRevenue[p][dateKey] = 0; });
+    }
+    periodItems.forEach(o => {
+      if (dailyProductRevenue[o.product]) {
+        const dateKey = o.date;
+        if (dailyProductRevenue[o.product][dateKey] !== undefined) {
+          dailyProductRevenue[o.product][dateKey] += o.amount;
+        }
+      }
+    });
+
+    const dateKeys = Object.keys(dailyProductRevenue[top5[0] ? top5[0][0] : ANALYTICS_PRODUCTS[0]] || {}).sort();
+    const maxDailyRev = Math.max(...Object.values(dailyProductRevenue).flatMap(d => Object.values(d)), 1);
+
+    container.innerHTML = `
+      <div class="cc-pa-cards">
+        <div class="cc-pa-card">
+          <div class="cc-pa-card-label">Active Products</div>
+          <div class="cc-pa-card-value">${sortedProducts.length}</div>
+          <div class="cc-pa-card-delta cc-pa-delta-neutral">of ${ANALYTICS_PRODUCTS.length} total</div>
+        </div>
+        <div class="cc-pa-card">
+          <div class="cc-pa-card-label">Top Product Revenue</div>
+          <div class="cc-pa-card-value" style="color:#3b82f6">${top5[0] ? formatCurrency(top5[0][1].revenue) : '$0'}</div>
+          <div class="cc-pa-card-delta cc-pa-delta-neutral">${top5[0] ? top5[0][0] : '—'}</div>
+        </div>
+        <div class="cc-pa-card">
+          <div class="cc-pa-card-label">Top Product Volume</div>
+          <div class="cc-pa-card-value" style="color:#10B981">${top5[0] ? top5[0][1].count : 0}</div>
+          <div class="cc-pa-card-delta cc-pa-delta-neutral">orders this ${currentPeriod === 'weekly' ? 'week' : 'month'}</div>
+        </div>
+        <div class="cc-pa-card">
+          <div class="cc-pa-card-label">Total Revenue</div>
+          <div class="cc-pa-card-value">${formatCurrency(totalRevenue)}</div>
+          <div class="cc-pa-card-delta cc-pa-delta-neutral">across all products</div>
+        </div>
+      </div>
+
+      <div class="cc-pa-chart-section">
+        <div class="cc-pa-chart-title"><span class="cc-pa-chart-title-icon">🏆</span> Top 5 Products by Revenue — ${currentPeriod === 'weekly' ? 'This Week' : 'This Month'}</div>
+        <div class="cc-pa-bars">
+          ${top5.map(([pname, stats], i) => {
+            const pct = (stats.revenue / maxRevenue * 100);
+            return `<div class="cc-pa-bar-wrap">
+              <div class="cc-pa-bar" style="height: ${pct}%; background: ${PRODUCT_COLORS[i % PRODUCT_COLORS.length]}">
+                <div class="cc-pa-bar-tooltip">${pname}: ${formatCurrency(stats.revenue)} (${stats.count} orders)</div>
+              </div>
+              <div class="cc-pa-bar-label" style="font-size:8px;line-height:1.2;max-width:60px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${pname.split(' ').slice(0,2).join(' ')}</div>
+            </div>`;
+          }).join('')}
+        </div>
+      </div>
+
+      <div class="cc-pa-chart-section">
+        <div class="cc-pa-chart-title"><span class="cc-pa-chart-title-icon">📦</span> Top 5 Products by Order Volume</div>
+        <div class="cc-pa-bars">
+          ${top5.map(([pname, stats], i) => {
+            const pct = (stats.count / maxCount * 100);
+            return `<div class="cc-pa-bar-wrap">
+              <div class="cc-pa-bar" style="height: ${pct}%; background: ${PRODUCT_COLORS[i % PRODUCT_COLORS.length]}">
+                <div class="cc-pa-bar-tooltip">${pname}: ${stats.count} orders (${formatCurrency(stats.revenue)})</div>
+              </div>
+              <div class="cc-pa-bar-label" style="font-size:8px;line-height:1.2;max-width:60px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${pname.split(' ').slice(0,2).join(' ')}</div>
+            </div>`;
+          }).join('')}
+        </div>
+      </div>
+
+      ${top5.slice(0, 3).length > 0 ? `
+        <div class="cc-pa-chart-section">
+          <div class="cc-pa-chart-title"><span class="cc-pa-chart-title-icon">📈</span> Revenue Trend — Top 3 Products (${currentPeriod === 'weekly' ? 'Last 7 Days' : 'Last 30 Days'})</div>
+          ${top5.slice(0, 3).map(([pname, _], i) => {
+            const dailyData = dailyProductRevenue[pname] || {};
+            const color = PRODUCT_COLORS[i % PRODUCT_COLORS.length];
+            return `
+              <div style="margin-bottom:12px">
+                <div style="font-size:11px;color:${color};font-weight:600;margin-bottom:4px">● ${pname}</div>
+                <div class="cc-pa-bars" style="height:60px">
+                  ${dateKeys.map(d => {
+                    const rev = dailyData[d] || 0;
+                    const dateLabel = new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                    return `<div class="cc-pa-bar-wrap">
+                      <div class="cc-pa-bar" style="height: ${(rev / maxDailyRev * 100)}%; background: ${color}; opacity: 0.7">
+                        <div class="cc-pa-bar-tooltip">${dateLabel}: ${formatCurrency(rev)}</div>
+                      </div>
+                    </div>`;
+                  }).join('')}
+                </div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      ` : ''}
+
+      <div class="cc-pa-chart-section">
+        <div class="cc-pa-chart-title"><span class="cc-pa-chart-title-icon">📊</span> Product Performance Summary</div>
+        <div style="overflow-x:auto">
+          <table style="width:100%;border-collapse:collapse;font-size:12px">
+            <thead>
+              <tr>
+                <th style="text-align:left;padding:8px;border-bottom:1px solid rgba(255,255,255,0.08);color:#64748b;font-size:10px;text-transform:uppercase">Product</th>
+                <th style="text-align:right;padding:8px;border-bottom:1px solid rgba(255,255,255,0.08);color:#64748b;font-size:10px;text-transform:uppercase">Orders</th>
+                <th style="text-align:right;padding:8px;border-bottom:1px solid rgba(255,255,255,0.08);color:#64748b;font-size:10px;text-transform:uppercase">Revenue</th>
+                <th style="text-align:right;padding:8px;border-bottom:1px solid rgba(255,255,255,0.08);color:#64748b;font-size:10px;text-transform:uppercase">Avg Value</th>
+                <th style="text-align:right;padding:8px;border-bottom:1px solid rgba(255,255,255,0.08);color:#64748b;font-size:10px;text-transform:uppercase">% of Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${sortedProducts.map(([pname, stats], i) => `
+                <tr>
+                  <td style="padding:8px;border-bottom:1px solid rgba(255,255,255,0.04);color:#cbd5e1">
+                    <span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:${PRODUCT_COLORS[i % PRODUCT_COLORS.length]};margin-right:6px"></span>
+                    ${pname}
+                  </td>
+                  <td style="padding:8px;border-bottom:1px solid rgba(255,255,255,0.04);color:#cbd5e1;text-align:right">${stats.count}</td>
+                  <td style="padding:8px;border-bottom:1px solid rgba(255,255,255,0.04);color:#10B981;text-align:right;font-weight:600">${formatCurrency(stats.revenue)}</td>
+                  <td style="padding:8px;border-bottom:1px solid rgba(255,255,255,0.04);color:#cbd5e1;text-align:right">${formatCurrency(stats.revenue / (stats.count || 1))}</td>
+                  <td style="padding:8px;border-bottom:1px solid rgba(255,255,255,0.04);color:#94a3b8;text-align:right">${Math.round(stats.revenue / totalRevenue * 100)}%</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
         </div>
       </div>
     `;
