@@ -388,8 +388,8 @@
     btn.id = 'cc-tour-btn';
     btn.style.cssText = [
       'position: fixed',
-      'bottom: 20px',
-      'right: 74px',
+      'bottom: 130px',
+      'right: 20px',
       'z-index: 10000',
       'padding: 10px 16px',
       'border-radius: 22px',
@@ -421,31 +421,47 @@
   }
 
   function startTour() {
+    // 8-step tour — covers the new lazy module launcher + key modules
     var steps = [
       {
-        target: '[class*="logo"], [class*="Logo"]',
+        target: '[class*="logo"], [class*="Logo"], [class*="sidebar"], nav, aside',
         title: 'Welcome to the Command Center',
-        text: 'This is the AI Supply Chain Advanced platform. Let\'s take a quick tour of the key sections.'
+        text: 'This is the AI Supply Chain Advanced platform — a private, 24/7 control room for global procurement, logistics, compliance, and AI automation. Let\'s take a quick 8-step tour.'
       },
       {
-        target: '[class*="sidebar"], nav, aside',
-        title: 'Navigation Sidebar',
-        text: 'Use the sidebar to navigate between Orders, Tenders, AI Documents, Compliance, Analytics, and more.'
+        target: '#cc-ml-launcher-btn',
+        title: 'Module Launcher',
+        text: 'Click this teal grid button (bottom-right) to open the app drawer and see all 14 modules at a glance. You can also search and use keyboard shortcuts to jump straight in.'
       },
       {
-        target: '[class*="monitoring"], [class*="Monitoring"], [class*="live"]',
-        title: 'Live Monitoring',
-        text: 'Real-time overview of 847 suppliers, 156 active orders, and 24 risk alerts across 42 countries.'
+        target: '#cc-ml-launcher-btn',
+        title: 'Try AI Chat',
+        text: 'Press N to open Natural Language Command — ask questions in plain English ("show me at-risk orders over $50k") and the AI assistant will route you to the right module with a voice-enabled chat.'
       },
       {
-        target: '[class*="search"], [class*="Search"], [class*="palette"]',
-        title: 'Command Palette (⌘K)',
-        text: 'Press ⌘K (Mac) or Ctrl+K (Windows) to open the command palette for quick navigation.'
+        target: '#cc-ml-launcher-btn',
+        title: 'Dispatch Dashboard',
+        text: 'Press D for the Dispatch Dashboard — ports, warehouse management (WMS), live weather overlays, vessel tracking, and a digital twin simulator for what-if scenario planning.'
       },
       {
-        target: '#cc-contact-sales',
-        title: 'Contact Sales',
-        text: 'Interested in this platform? Click here to email our sales team directly.'
+        target: '#cc-ml-launcher-btn',
+        title: 'Digital Twin Simulator',
+        text: 'Inside the Dispatch Dashboard, run what-if scenarios — simulate port congestion, reroute vessels, model crane breakdowns, and see the financial + schedule impact in real time.'
+      },
+      {
+        target: '#cc-ml-launcher-btn',
+        title: 'Financial Impact',
+        text: 'See $1.7M in AI-driven savings and ROI across automation, predictive maintenance, route optimization, and supplier risk avoidance — all broken down by module and quarter.'
+      },
+      {
+        target: '#cc-ml-launcher-btn',
+        title: 'API Marketplace',
+        text: 'Press P to explore 21 integrations with a sandbox, copy-paste code samples in 5 languages, and an interactive connection wizard for ERPs, carriers, customs, and weather APIs.'
+      },
+      {
+        target: 'body',
+        title: 'You\'re Ready!',
+        text: 'Press any shortcut key (O, T, A, D, S, C, B, F, P, N, G, X, M, L) or click the teal Module Launcher button to explore. Take the tour again any time from the purple button on the left.'
       }
     ];
 
@@ -463,7 +479,7 @@
       overlay.style.cssText = [
         'position: fixed',
         'top: 0', 'left: 0', 'right: 0', 'bottom: 0',
-        'z-index: 10001',
+        'z-index: 10005',
         'pointer-events: none'
       ].join(';');
 
@@ -474,26 +490,26 @@
         'left: 50%',
         "transform: translate(-50%, -50%)",
         'background: #0f172a',
-        'border: 1px solid rgba(59, 130, 246, 0.4)',
+        'border: 1px solid rgba(20, 184, 166, 0.4)',
         'border-radius: 12px',
         'padding: 24px',
-        'max-width: 420px',
+        'max-width: 440px',
         'width: 90%',
         'color: #e2e8f0',
         'font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
         'box-shadow: 0 20px 60px rgba(0,0,0,0.5)',
         'pointer-events: auto',
-        'z-index: 10002'
+        'z-index: 10006'
       ].join(';');
 
       tooltip.innerHTML = [
-        '<div style="font-size:11px;color:#3b82f6;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px">Step ' + (currentStep + 1) + ' of ' + steps.length + '</div>',
+        '<div style="font-size:11px;color:#14b8a6;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px">Step ' + (currentStep + 1) + ' of ' + steps.length + '</div>',
         '<h3 style="margin:0 0 10px;font-size:18px;color:#fff">' + step.title + '</h3>',
         '<p style="margin:0 0 20px;font-size:14px;line-height:1.6;color:#cbd5e1">' + step.text + '</p>',
-        '<div style="display:flex;gap:8px;justify-content:flex-end">',
+        '<div style="display:flex;gap:8px;justify-content:flex-end;align-items:center">',
         currentStep > 0 ? '<button id="cc-tour-prev" style="padding:8px 14px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:#94a3b8;border-radius:6px;font-size:12px;cursor:pointer">← Back</button>' : '',
         currentStep < steps.length - 1
-          ? '<button id="cc-tour-next" style="padding:8px 14px;background:linear-gradient(135deg,#3b82f6,#8b5cf6);color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer">Next →</button>'
+          ? '<button id="cc-tour-next" style="padding:8px 14px;background:linear-gradient(135deg,#14b8a6,#06B6D4);color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer">Next →</button>'
           : '<button id="cc-tour-finish" style="padding:8px 14px;background:linear-gradient(135deg,#10B981,#06B6D4);color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer">✓ Done</button>',
         '<button id="cc-tour-skip" style="padding:8px 14px;background:none;border:none;color:#64748b;font-size:12px;cursor:pointer">Skip</button>',
         '</div>'
@@ -502,12 +518,17 @@
       overlay.appendChild(tooltip);
       document.body.appendChild(overlay);
 
-      // Try to highlight the target element
-      var target = document.querySelector(step.target);
-      if (target) {
-        target.style.outline = '3px solid #3b82f6';
-        target.style.outlineOffset = '2px';
-        target.style.transition = 'outline 0.3s';
+      // Try to highlight the target element (skip for body target — center-screen tooltip)
+      var target = null;
+      if (step.target !== 'body') {
+        target = document.querySelector(step.target);
+        if (target) {
+          target.style.outline = '3px solid #14b8a6';
+          target.style.outlineOffset = '3px';
+          target.style.transition = 'outline 0.3s, outline-offset 0.3s';
+          // Scroll the target into view so the highlight is visible
+          try { target.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' }); } catch (e) {}
+        }
       }
 
       // Button handlers
@@ -1117,6 +1138,114 @@
   }
 
   // ------------------------------------------------------------------
+  // #14. POLISH & CONSISTENCY — global style block
+  // ------------------------------------------------------------------
+  // Injects a single <style id="cc-polish-styles"> block that enforces
+  // a unified look-and-feel across every module: scrollbars, table hovers,
+  // button transitions, focus rings, modal z-index, shimmer animation
+  // utility class, and print styles.
+  function addPolishStyles() {
+    if (document.getElementById('cc-polish-styles')) return true;
+
+    var css = [
+      '/* === cc-enhancements #14 — Polish & Consistency === */',
+
+      // ---- Unified scrollbar (thin, teal/green thumb) ----
+      '*, *::before, *::after { scrollbar-width: thin; scrollbar-color: rgba(20, 184, 166, 0.55) transparent; }',
+      '::-webkit-scrollbar { width: 8px; height: 8px; }',
+      '::-webkit-scrollbar-track { background: transparent; }',
+      '::-webkit-scrollbar-thumb {',
+      '  background: rgba(20, 184, 166, 0.45);',
+      '  border-radius: 8px;',
+      '  border: 2px solid transparent;',
+      '  background-clip: content-box;',
+      '}',
+      '::-webkit-scrollbar-thumb:hover { background: rgba(20, 184, 166, 0.75); background-clip: content-box; }',
+      '::-webkit-scrollbar-corner { background: transparent; }',
+
+      // ---- Unified table hover (subtle teal background) ----
+      '.cc-om-table tbody tr:hover, .cc-tm-table tbody tr:hover, .cc-pa-table tbody tr:hover,',
+      '.cc-sm-table tbody tr:hover, .cc-cm-table tbody tr:hover, .cc-cl-table tbody tr:hover,',
+      '.cc-fs-table tbody tr:hover, .cc-am-table tbody tr:hover, .cc-rg-table tbody tr:hover,',
+      '.cc-aa-table tbody tr:hover, .cc-mi-table tbody tr:hover, .cc-fl-table tbody tr:hover,',
+      '.cc-dd-table tbody tr:hover, .cc-nl-table tbody tr:hover,',
+      '[class*="cc-"][class*="-table"] tbody tr:hover,',
+      '[class*="cc-"][class*="-list"] li:hover {',
+      '  background: rgba(20, 184, 166, 0.08) !important;',
+      '  transition: background 0.18s ease;',
+      '}',
+
+      // ---- Unified button transition (0.2s ease) ----
+      'button, [role="button"], .cc-om-btn, .cc-tm-btn, .cc-pa-btn, .cc-sm-btn, .cc-cm-btn,',
+      '.cc-cl-btn, .cc-fs-btn, .cc-am-btn, .cc-rg-btn, .cc-aa-btn, .cc-mi-btn, .cc-fl-btn,',
+      '.cc-dd-btn, .cc-nl-btn, [class*="cc-"][class*="-btn"] {',
+      '  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease,',
+      '              color 0.2s ease, border-color 0.2s ease, opacity 0.2s ease;',
+      '}',
+      'button:active, [role="button"]:active { transform: translateY(1px) scale(0.99); }',
+
+      // ---- Unified focus ring (teal outline) ----
+      'button:focus-visible, [role="button"]:focus-visible, a:focus-visible,',
+      'input:focus-visible, select:focus-visible, textarea:focus-visible,',
+      '[tabindex]:focus-visible {',
+      '  outline: 2px solid #14b8a6;',
+      '  outline-offset: 2px;',
+      '  border-radius: 4px;',
+      '}',
+
+      // ---- Unified modal max-z-index (10004) ----
+      // Bump every module panel overlay to z-index: 10004 so they layer
+      // consistently above nav (9999) and below the launcher (10003) +
+      // loading spinner (10005) + tour overlay (10005).
+      '#cc-om-panel-overlay, #cc-tm-panel-overlay, #cc-pa-overlay,',
+      '#cc-dd-overlay, #cc-sm-overlay, #cc-cm-overlay, #cc-cl-overlay,',
+      '#cc-fs-overlay, #cc-am-overlay, #cc-nl-overlay, #cc-rg-overlay,',
+      '#cc-aa-overlay, #cc-mi-overlay, #cc-fl-overlay,',
+      '[id^="cc-"][id$="-overlay"], [id^="cc-"][id$="-panel-overlay"],',
+      '[id^="cc-"][id$="-modal"], [id^="cc-"][id$="-modal-overlay"] {',
+      '  z-index: 10004 !important;',
+      '}',
+
+      // ---- Loading shimmer animation utility class ----
+      '@keyframes cc-shimmer {',
+      '  0% { background-position: -800px 0; }',
+      '  100% { background-position: 800px 0; }',
+      '}',
+      '.cc-shimmer {',
+      '  background: linear-gradient(90deg,',
+      '    rgba(148, 163, 184, 0.06) 0%,',
+      '    rgba(148, 163, 184, 0.18) 50%,',
+      '    rgba(148, 163, 184, 0.06) 100%);',
+      '  background-size: 800px 100%;',
+      '  animation: cc-shimmer 1.4s linear infinite;',
+      '  border-radius: 6px;',
+      '}',
+
+      // ---- Print styles (hide floating buttons + modals) ----
+      '@media print {',
+      '  #cc-tour-btn, #cc-help-btn, #cc-ml-launcher-btn,',
+      '  #cc-back-to-main-btn, #cc-contact-sales, #cc-demo-badge,',
+      '  [id$="-trigger-btn"], [id^="cc-ml-"],',
+      '  #cc-tour-overlay, #cc-help-overlay, #cc-shortcuts-overlay,',
+      '  [id^="cc-"][id$="-overlay"], [id^="cc-"][id$="-panel-overlay"],',
+      '  [id^="cc-"][id$="-modal"], [id^="cc-"][id$="-modal-overlay"] {',
+      '    display: none !important;',
+      '  }',
+      '  body { background: #fff !important; }',
+      '  * { box-shadow: none !important; text-shadow: none !important; }',
+      '}'
+    ].join('\n');
+
+    var style = document.createElement('style');
+    style.id = 'cc-polish-styles';
+    style.textContent = css;
+    document.head.appendChild(style);
+
+    console.log('[cc-enhancements.js] #14 Polish & consistency styles injected (scrollbar, table hover, button transition, focus ring, modal z-index, shimmer, print)');
+    return true;
+  }
+
+  // ------------------------------------------------------------------
   // INIT — Run all enhancements after DOM is ready
   // ------------------------------------------------------------------
   function init() {
@@ -1124,6 +1253,7 @@
 
     // Wait for DOM to be ready for the rest
     function runEnhancements() {
+      addPolishStyles();               // #14 — inject early so polish applies to all UI
       addDemoModeBadge();              // #4
       addBackToMainSiteButton();       // #1
       addContactSalesCTA();            // #10
@@ -1135,8 +1265,9 @@
       var stamped = addLastUpdatedTimestamps(); // #3
       fixThemeToggle();                // #11
       var rtRefresh = addRealTimeRefresh(); // #13
+      var polishStyles = true;         // #14 — already injected above
 
-      console.log('[cc-enhancements.js] All 13 enhancements loaded:', {
+      console.log('[cc-enhancements.js] All 14 enhancements loaded:', {
         demoMode: true,
         backToMain: true,
         contactSales: true,
@@ -1149,6 +1280,7 @@
         loadingSkeleton: true,
         themeToggle: true,
         realTimeRefresh: rtRefresh,
+        polishStyles: polishStyles,
         dispatchSidebarItem: injectDispatchSidebarItem()
       });
     }
