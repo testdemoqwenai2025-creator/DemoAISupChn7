@@ -1,6 +1,6 @@
 // ====================================================================
 // module-loader.js — Lazy Module Loader for the AI Supply Chain Command
-// Center. Replaces 14 individual <script> tags in cc-app/index.html with
+// Center. Replaces 19 individual <script> tags in cc-app/index.html with
 // a single loader that defers module loading until the user requests it.
 // --------------------------------------------------------------------
 // Public API (window.__ccML):
@@ -19,7 +19,7 @@
   // ------------------------------------------------------------------
   // MODULE REGISTRY
   // ------------------------------------------------------------------
-  // 14 modules. Each entry:
+  // 19 modules. Each entry:
   //   id           short identifier (used by openModule)
   //   name         display name
   //   description  one-line description (shown under name in the grid)
@@ -197,6 +197,66 @@
       gradient: 'linear-gradient(135deg, #3b82f6, #8b5cf6)',
       scriptPath: '../js/federated-learning.js',
       openFn: 'window.__ccFL.open',
+      loaded: false,
+      loading: false
+    },
+    {
+      id: 'esg',
+      name: 'Carbon & ESG',
+      description: 'Scope 1-3 emissions, offsets, net-zero planner & compliance',
+      icon: '🌱',
+      shortcut: 'E',
+      gradient: 'linear-gradient(135deg,#059669,#10b8a6)',
+      scriptPath: '../js/carbon-esg.js',
+      openFn: 'window.__ccCE.open',
+      loaded: false,
+      loading: false
+    },
+    {
+      id: 'network',
+      name: 'Network Graph',
+      description: 'Collaborative supply chain graph, risk & what-if simulator',
+      icon: '🕸️',
+      shortcut: 'V',
+      gradient: 'linear-gradient(135deg,#2563eb,#06b6d4)',
+      scriptPath: '../js/network-graph.js',
+      openFn: 'window.__ccNG.open',
+      loaded: false,
+      loading: false
+    },
+    {
+      id: 'iot',
+      name: 'Edge & IoT',
+      description: 'IoT device map, sensor streams, edge nodes & anomalies',
+      icon: '📡',
+      shortcut: 'I',
+      gradient: 'linear-gradient(135deg,#ea580c,#f59e0b)',
+      scriptPath: '../js/edge-iot.js',
+      openFn: 'window.__ccEI.open',
+      loaded: false,
+      loading: false
+    },
+    {
+      id: 'quantum',
+      name: 'Quantum Ready',
+      description: 'Quantum-ready algorithms, vendor partnerships & roadmap',
+      icon: '⚛️',
+      shortcut: 'Q',
+      gradient: 'linear-gradient(135deg,#7c3aed,#a855f7)',
+      scriptPath: '../js/quantum-readiness.js',
+      openFn: 'window.__ccQR.open',
+      loaded: false,
+      loading: false
+    },
+    {
+      id: 'passport',
+      name: 'Product Passport',
+      description: 'EU DPP registry, traceability, compliance & QR scanner',
+      icon: '🛢️',
+      shortcut: 'Z',
+      gradient: 'linear-gradient(135deg,#be185d,#ec4899)',
+      scriptPath: '../js/product-passport.js',
+      openFn: 'window.__ccPP.open',
       loaded: false,
       loading: false
     }
@@ -504,9 +564,9 @@
     var btn = document.createElement('button');
     btn.id = 'cc-ml-launcher-btn';
     btn.type = 'button';
-    btn.setAttribute('aria-label', 'Open Module Launcher — see all 14 modules');
+    btn.setAttribute('aria-label', 'Open Module Launcher — see all 19 modules');
     btn.title = 'Module Launcher (click to see all modules)';
-    btn.innerHTML = GRID_ICON + '<span id="cc-ml-launcher-badge">14</span>';
+    btn.innerHTML = GRID_ICON + '<span id="cc-ml-launcher-badge">19</span>';
     btn.onclick = function (e) {
       e.preventDefault();
       openLauncher();
@@ -535,7 +595,7 @@
       '<div id="cc-ml-header">' +
         '<div>' +
           '<h2 id="cc-ml-title">Module Launcher</h2>' +
-          '<p id="cc-ml-subtitle">14 modules · click a card to open · or press a shortcut key</p>' +
+          '<p id="cc-ml-subtitle">19 modules · click a card to open · or press a shortcut key</p>' +
         '</div>' +
         '<button id="cc-ml-close" type="button" aria-label="Close launcher">×</button>' +
       '</div>' +
@@ -592,7 +652,9 @@
       'cc-om-panel-overlay', 'cc-tm-panel-overlay', 'cc-pa-overlay',
       'cc-dd-overlay', 'cc-sm-overlay', 'cc-cm-overlay', 'cc-cl-overlay',
       'cc-fs-overlay', 'cc-am-overlay', 'cc-nl-overlay', 'cc-rg-overlay',
-      'cc-aa-overlay', 'cc-mi-overlay', 'cc-fl-overlay'
+      'cc-aa-overlay', 'cc-mi-overlay', 'cc-fl-overlay',
+      'cc-ce-overlay', 'cc-ng-overlay', 'cc-ei-overlay',
+      'cc-qr-overlay', 'cc-pp-overlay'
     ];
     for (var i = 0; i < panelIds.length; i++) {
       if (document.getElementById(panelIds[i])) return true;
@@ -866,7 +928,7 @@
     watchTheme();
     injectLauncherButton();
     registerKeyboardShortcuts();
-    console.log('[module-loader.js] Initialised — 14 modules registered, launcher button + shortcuts active');
+    console.log('[module-loader.js] Initialised — 19 modules registered, launcher button + shortcuts active');
   }
 
   if (document.readyState === 'loading') {
