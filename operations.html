@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Operations Hub | AI Supply Chain Advanced</title>
+<meta name="description" content="Operations Hub — Dispatch dashboard, sustainability, future-tech, and AI analytics modules for the AI Supply Chain platform."/>
+<link rel="icon" href="https://z-cdn.chatglm.cn/z-ai/static/logo.svg"/>
+<script>
+(function(){try{var s=localStorage.getItem('cc-theme');if(s==='light'){document.documentElement.classList.remove('dark');}else{document.documentElement.classList.add('dark');}}catch(e){document.documentElement.classList.add('dark');}})();
+</script>
+<style>
+:root{
+  --background:#0b1120;--foreground:#e2e8f0;--card:#111827;--card-foreground:#e2e8f0;
+  --sidebar:#0f172a;--sidebar-foreground:#e2e8f0;--sidebar-border:rgba(255,255,255,0.06);
+  --border:rgba(255,255,255,0.08);--primary:#10b981;--accent:#06b6d4;
+  --muted-foreground:#94a3b8;--emerald:#10b981;--cyan:#06b6d4;
+  --amber:#f59e0b;--rose:#f43f5e;--violet:#8b5cf6;--blue:#3b82f6;
+}
+html.light{
+  --background:#f8fafc;--foreground:#0f172a;--card:rgba(255,255,255,0.9);--card-foreground:#0f172a;
+  --sidebar:#f1f5f9;--sidebar-foreground:#0f172a;--sidebar-border:rgba(0,0,0,0.06);
+  --border:rgba(0,0,0,0.08);--primary:#059669;--accent:#0891b2;
+  --muted-foreground:#64748b;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:var(--background);color:var(--foreground);overflow:hidden;height:100vh;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+
+/* ===== TOP BAR ===== */
+.cc-topbar{position:fixed;top:0;left:0;right:0;height:56px;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 20px;background:var(--sidebar);border-bottom:1px solid var(--sidebar-border);backdrop-filter:blur(12px)}
+.cc-topbar-left{display:flex;align-items:center;gap:14px}
+.cc-topbar-logo{display:flex;align-items:center;gap:8px;font-weight:800;font-size:14px}
+.cc-topbar-logo .icon{width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,var(--emerald),var(--cyan));display:flex;align-items:center;justify-content:center}
+.cc-topbar-logo .icon svg{width:16px;height:16px;color:#fff}
+.cc-topbar-logo .label{background:linear-gradient(135deg,var(--emerald),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.cc-topbar-logo .sub{font-size:10px;color:var(--muted-foreground);font-weight:500;margin-top:-2px}
+.cc-topbar-nav{display:flex;align-items:center;gap:2px;margin-left:16px}
+.cc-topbar-nav a{padding:6px 12px;border-radius:6px;font-size:12px;font-weight:500;color:var(--muted-foreground);transition:all .15s}
+.cc-topbar-nav a:hover{background:rgba(255,255,255,0.05);color:var(--foreground)}
+html.light .cc-topbar-nav a:hover{background:rgba(0,0,0,0.04)}
+.cc-topbar-nav a.active{color:var(--emerald);background:rgba(16,185,129,0.1)}
+.cc-topbar-right{display:flex;align-items:center;gap:10px}
+.cc-topbar-btn{padding:6px 14px;border-radius:7px;font-size:11px;font-weight:600;border:1px solid var(--border);background:transparent;color:var(--foreground);cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;gap:5px}
+.cc-topbar-btn:hover{background:rgba(255,255,255,0.05)}
+.cc-topbar-btn.primary{background:linear-gradient(135deg,var(--emerald),var(--cyan));color:#fff;border:none;box-shadow:0 2px 10px rgba(16,185,129,0.3)}
+.cc-topbar-cc{font-size:11px;font-weight:600;padding:6px 14px;border-radius:7px;background:rgba(16,185,129,0.1);color:var(--emerald);border:1px solid rgba(16,185,129,0.2);cursor:pointer;transition:all .15s}
+.cc-topbar-cc:hover{background:rgba(16,185,129,0.18)}
+
+/* ===== APP SHELL ===== */
+.cc-shell{display:flex;height:calc(100vh - 56px);margin-top:56px;overflow:hidden}
+
+/* ===== SIDEBAR ===== */
+.cc-sidebar{width:260px;flex-shrink:0;background:var(--sidebar);border-right:1px solid var(--sidebar-border);overflow-y:auto;padding:16px 10px}
+.cc-sidebar::-webkit-scrollbar{width:4px}
+.cc-sidebar::-webkit-scrollbar-thumb{background:rgba(16,185,129,0.2);border-radius:2px}
+.cc-cat{margin-bottom:18px}
+.cc-cat-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:var(--muted-foreground);padding:6px 12px 8px;display:flex;align-items:center;gap:6px}
+.cc-cat-label .dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.cc-cat-label .count{margin-left:auto;font-size:9px;font-weight:600;background:rgba(255,255,255,0.06);padding:1px 7px;border-radius:8px;color:var(--muted-foreground)}
+html.light .cc-cat-label .count{background:rgba(0,0,0,0.05)}
+.cc-mod-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;cursor:pointer;transition:all .15s;color:var(--muted-foreground);font-size:13px;font-weight:500;width:100%;text-align:left;border:none;background:transparent;font-family:inherit}
+.cc-mod-item:hover{background:rgba(255,255,255,0.04);color:var(--foreground)}
+html.light .cc-mod-item:hover{background:rgba(0,0,0,0.03)}
+.cc-mod-item.active{background:rgba(16,185,129,0.1);color:var(--emerald)}
+.cc-mod-item.loading{opacity:.5;pointer-events:none}
+.cc-mod-icon{font-size:16px;width:20px;text-align:center;flex-shrink:0}
+.cc-mod-name{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cc-mod-shortcut{font-size:9px;font-weight:700;background:rgba(255,255,255,0.06);border:1px solid var(--border);padding:1px 5px;border-radius:4px;color:var(--muted-foreground);flex-shrink:0}
+html.light .cc-mod-shortcut{background:rgba(0,0,0,0.04)}
+
+/* ===== MAIN CONTENT ===== */
+.cc-main{flex:1;overflow-y:auto;padding:32px 40px}
+.cc-main::-webkit-scrollbar{width:6px}
+.cc-main::-webkit-scrollbar-thumb{background:rgba(16,185,129,0.15);border-radius:3px}
+
+/* ===== LANDING / WELCOME ===== */
+.cc-welcome{max-width:1100px;margin:0 auto}
+.cc-welcome h1{font-size:32px;font-weight:800;margin-bottom:8px}
+.cc-welcome h1 .grad{background:linear-gradient(135deg,var(--emerald),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.cc-welcome .sub{font-size:15px;color:var(--muted-foreground);margin-bottom:32px;line-height:1.6}
+.cc-cat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px;margin-bottom:32px}
+.cc-cat-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:24px;transition:all .2s;cursor:pointer}
+.cc-cat-card:hover{border-color:rgba(16,185,129,0.3);transform:translateY(-2px);box-shadow:0 8px 32px rgba(0,0,0,0.2)}
+.cc-cat-card-head{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.cc-cat-card-icon{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+.cc-cat-card-title{font-size:16px;font-weight:700}
+.cc-cat-card-count{font-size:11px;color:var(--muted-foreground);font-weight:500}
+.cc-cat-card-desc{font-size:12px;color:var(--muted-foreground);line-height:1.6;margin-bottom:14px}
+.cc-cat-card-modules{display:flex;flex-wrap:wrap;gap:6px}
+.cc-cat-card-modules span{font-size:10px;padding:3px 8px;border-radius:5px;background:rgba(255,255,255,0.04);border:1px solid var(--border);color:var(--muted-foreground)}
+html.light .cc-cat-card-modules span{background:rgba(0,0,0,0.03)}
+
+/* category accent colors */
+.cat-operations{background:linear-gradient(135deg,rgba(14,165,233,0.15),rgba(20,184,166,0.15));border-color:rgba(14,165,233,0.2)}
+.cat-operations .cc-cat-card-icon{background:linear-gradient(135deg,#0ea5e9,#14b8a6)}
+.cat-sustainability{background:linear-gradient(135deg,rgba(16,185,129,0.12),rgba(132,204,22,0.12));border-color:rgba(16,185,129,0.2)}
+.cat-sustainability .cc-cat-card-icon{background:linear-gradient(135deg,#10b981,#84cc16)}
+.cat-future{background:linear-gradient(135deg,rgba(139,92,246,0.12),rgba(59,130,246,0.12));border-color:rgba(139,92,246,0.2)}
+.cat-future .cc-cat-card-icon{background:linear-gradient(135deg,#8b5cf6,#3b82f6)}
+.cat-ai{background:linear-gradient(135deg,rgba(245,158,11,0.12),rgba(236,72,153,0.12));border-color:rgba(245,158,11,0.2)}
+.cat-ai .cc-cat-card-icon{background:linear-gradient(135deg,#f59e0b,#ec4899)}
+
+.cat-operations .dot{background:#0ea5e9}
+.cat-sustainability .dot{background:#10b981}
+.cat-future .dot{background:#8b5cf6}
+.cat-ai .dot{background:#f59e0b}
+
+/* ===== MODULE VIEW (when a module is selected) ===== */
+.cc-module-view{max-width:1100px;margin:0 auto}
+.cc-module-header{display:flex;align-items:center;gap:14px;margin-bottom:24px;padding-bottom:20px;border-bottom:1px solid var(--border)}
+.cc-module-header .icon{font-size:36px}
+.cc-module-header h2{font-size:24px;font-weight:700}
+.cc-module-header .desc{font-size:13px;color:var(--muted-foreground);margin-top:4px}
+.cc-module-launch{margin-left:auto;padding:10px 24px;border-radius:8px;background:linear-gradient(135deg,var(--emerald),var(--cyan));color:#fff;border:none;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;box-shadow:0 4px 16px rgba(16,185,129,0.3);display:inline-flex;align-items:center;gap:8px}
+.cc-module-launch:hover{transform:translateY(-1px);box-shadow:0 6px 24px rgba(16,185,129,0.45)}
+.cc-module-launch:disabled{opacity:.6;cursor:wait;transform:none}
+.cc-module-features{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px;margin-bottom:24px}
+.cc-feature{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px}
+.cc-feature h4{font-size:13px;font-weight:600;margin-bottom:6px;color:var(--foreground)}
+.cc-feature p{font-size:11px;color:var(--muted-foreground);line-height:1.5}
+.cc-module-loading{display:flex;align-items:center;justify-content:center;padding:60px 0;flex-direction:column;gap:12px}
+.cc-spinner{width:36px;height:36px;border:3px solid rgba(16,185,129,0.15);border-top-color:var(--emerald);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ===== MOBILE ===== */
+@media(max-width:900px){
+  .cc-topbar-nav{display:none}
+  .cc-sidebar{position:fixed;left:0;top:56px;bottom:0;z-index:99;transform:translateX(-100%);transition:transform .2s;width:240px}
+  .cc-sidebar.open{transform:translateX(0)}
+  .cc-main{padding:20px 16px}
+  .cc-welcome h1{font-size:24px}
+  .cc-cat-grid{grid-template-columns:1fr}
+}
+.cc-mobile-toggle{display:none;background:transparent;border:1px solid var(--border);border-radius:7px;padding:6px 10px;cursor:pointer;color:var(--foreground)}
+@media(max-width:900px){.cc-mobile-toggle{display:flex;align-items:center;gap:6px;font-size:12px}}
+
+/* ===== BANNERS ===== */
+body.cc-app-page .side-banner{display:none!important}
+</style>
+</head>
+<body class="cc-app-page">
+
+<!-- ===== TOP BAR ===== -->
+<div class="cc-topbar">
+  <div class="cc-topbar-left">
+    <div class="cc-topbar-logo">
+      <div class="icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/></svg></div>
+      <div><div class="label">Operations Hub</div><div class="sub">AI Supply Chain Advanced</div></div>
+    </div>
+    <nav class="cc-topbar-nav">
+      <a href="./index.html">Home</a>
+      <a href="./about.html">About</a>
+      <a href="./cc-app/">Command Center</a>
+      <a href="./operations.html" class="active">Operations Hub</a>
+      <a href="./dashboard.html">Dashboard</a>
+      <a href="./intelligence.html">Intelligence</a>
+      <a href="./platform.html">Platform</a>
+      <a href="./pricing.html">Pricing</a>
+      <a href="./support.html">Support</a>
+    </nav>
+  </div>
+  <div class="cc-topbar-right">
+    <button class="cc-mobile-toggle" onclick="document.querySelector('.cc-sidebar').classList.toggle('open')">☰ Modules</button>
+    <button class="cc-topbar-cc" onclick="location.href='./cc-app/'">← Command Center</button>
+  </div>
+</div>
+
+<!-- ===== APP SHELL ===== -->
+<div class="cc-shell">
+  <!-- ===== SIDEBAR ===== -->
+  <aside class="cc-sidebar" id="opsSidebar">
+    <!-- Sidebar items injected by JS -->
+  </aside>
+
+  <!-- ===== MAIN CONTENT ===== -->
+  <main class="cc-main" id="opsMain">
+    <!-- Content injected by JS -->
+  </main>
+</div>
+
+<script>
+// ====================================================================
+// OPERATIONS HUB — Module Registry + Lazy Loader
+// ====================================================================
+(function(){
+  'use strict';
+
+  var MODULES = [
+    // --- OPERATIONS ---
+    {cat:'operations', id:'dispatch-dashboard', name:'Dispatch Dashboard', icon:'🚢', shortcut:'D',
+     desc:'Global dispatch with ports, WMS, weather, digital twin & control tower',
+     features:['Top 10 world ports with real-time vessel/berth data','Warehouse management (4 WMS hubs)','AI demand forecasting with ML accuracy','Control tower alerts & event timeline','Digital twin what-if simulator'],
+     script:'./js/dispatch-dashboard.js', openFn:'window.__ccDD.open'},
+    {cat:'operations', id:'supplier-management', name:'Supplier Management', icon:'🏭', shortcut:'S',
+     desc:'Directory, performance scorecards & risk overview for 847 suppliers',
+     features:['Supplier directory with ESG ratings','Performance scorecards (on-time, quality, cost)','Risk overview by region','Tier-1/Tier-2 dependency mapping'],
+     script:'./js/supplier-management.js', openFn:'window.__ccSM.open'},
+    {cat:'operations', id:'compliance-monitoring', name:'Compliance Monitoring', icon:'🛡️', shortcut:'C',
+     desc:'Regional scorecards, regulations & compliance heatmap',
+     features:['UFLPA, EUDR, CSRD compliance tracking','Regional compliance scorecards','Regulation timeline & deadlines','Compliance heatmap by country'],
+     script:'./js/compliance-monitoring.js', openFn:'window.__ccCM.open'},
+    {cat:'operations', id:'collaboration', name:'Collaboration', icon:'🤝', shortcut:'B',
+     desc:'Audit trail, notification acknowledgment & team workflows',
+     features:['Audit trail with immutable event log','Notification acknowledgment workflows','Team collaboration comments','Document version control'],
+     script:'./js/collaboration.js', openFn:'window.__ccCL.open'},
+    {cat:'operations', id:'forecasting-space', name:'Forecasting Space', icon:'🔮', shortcut:'F',
+     desc:'Demand forecasting, Space 2030+ supply chain & predictive models',
+     features:['Demand forecasting with confidence intervals','Space (2030+) supply chain scenarios','Seasonal pattern detection','Predictive reorder points'],
+     script:'./js/forecasting-space.js', openFn:'window.__ccFS.open'},
+
+    // --- SUSTAINABILITY ---
+    {cat:'sustainability', id:'esg', name:'Carbon & ESG', icon:'🌱', shortcut:'E',
+     desc:'Scope 1/2/3 emissions, supplier ESG ratings, carbon offsets & net-zero planner',
+     features:['Scope 1/2/3 emissions tracking','Supplier ESG scorecards (A-F rated)','Carbon offset projects with verification','Net-zero trajectory planner','CSRD/SBTi/TCFD/CDP compliance'],
+     script:'./js/carbon-esg.js', openFn:'window.__ccCE.open'},
+    {cat:'sustainability', id:'passport', name:'Product Passport', icon:'🛢️', shortcut:'Z',
+     desc:'Digital product passport for lifecycle tracking & circular economy',
+     features:['Product lifecycle tracking (cradle-to-grave)','Material composition & origin','Circular economy readiness','Regulatory compliance (EUDR, DPP)'],
+     script:'./js/product-passport.js', openFn:'window.__ccPP.open'},
+
+    // --- FUTURE TECH ---
+    {cat:'future', id:'network', name:'Network Graph', icon:'🕸️', shortcut:'V',
+     desc:'Collaborative supply chain network graph with risk & what-if analysis',
+     features:['Interactive SVG network graph (suppliers/ports/warehouses)','Nodes colored by type, sized by importance','Risk analysis & critical node identification','What-if simulator: remove node → cascading impact'],
+     script:'./js/network-graph.js', openFn:'window.__ccNG.open'},
+    {cat:'future', id:'iot', name:'Edge & IoT', icon:'📡', shortcut:'I',
+     desc:'Edge computing & IoT layer with device map, sensor streams & anomaly detection',
+     features:['SVG world map with IoT device locations','Real-time sensor data (temp, humidity, GPS, vibration)','Edge computing nodes with processing capacity','IoT anomaly detection alerts'],
+     script:'./js/edge-iot.js', openFn:'window.__ccEI.open'},
+    {cat:'future', id:'quantum', name:'Quantum Ready', icon:'⚛️', shortcut:'Q',
+     desc:'Quantum-ready optimization: TSP, VRP, portfolio & quantum vs classical comparison',
+     features:['Quantum-ready algorithm list (TSP, VRP, slotting)','Classical vs quantum time comparison','IBM/Google/D-Wave/IonQ partnerships','2026-2031 quantum adoption roadmap'],
+     script:'./js/quantum-readiness.js', openFn:'window.__ccQR.open'},
+    {cat:'future', id:'federated-learning', name:'Federated Learning', icon:'🧠', shortcut:'L',
+     desc:'Distributed ML training across supply chain partners without sharing raw data',
+     features:['Federated model training across partners','Privacy-preserving ML (no raw data sharing)','Model aggregation & convergence tracking','Partner contribution scoring'],
+     script:'./js/federated-learning.js', openFn:'window.__ccFL.open'},
+
+    // --- AI & ANALYTICS ---
+    {cat:'ai', id:'platform-analytics', name:'Platform Analytics', icon:'📊', shortcut:'A',
+     desc:'News, risk assessments & order trends across regions',
+     features:['Real-time news feed with AI sentiment analysis','Regional risk assessments','Order trend analytics','KPI dashboard with drill-down'],
+     script:'./js/platform-analytics.js', openFn:'window.__ccPA.open'},
+    {cat:'ai', id:'api-marketplace', name:'API Marketplace', icon:'🔌', shortcut:'P',
+     desc:'API catalog, health monitor, code samples & webhooks',
+     features:['API catalog with try-it playground','API health monitor (uptime, latency)','Code samples in 6 languages','Webhook configuration & logs'],
+     script:'./js/api-marketplace.js', openFn:'window.__ccAM.open'},
+    {cat:'ai', id:'nl-command', name:'Natural Language Command', icon:'💬', shortcut:'N',
+     desc:'AI-powered natural language command interface for supply chain operations',
+     features:['Natural language → supply chain actions','Context-aware query understanding','Multi-turn conversation memory','Voice input support'],
+     script:'./js/nl-command.js', openFn:'window.__ccNL.open'},
+    {cat:'ai', id:'ai-report-generator', name:'AI Report Generator', icon:'📈', shortcut:'G',
+     desc:'Automated report generation with AI-powered insights & visualizations',
+     features:['Auto-generate daily/weekly/monthly reports','AI-powered narrative insights','Custom report templates','Export to PDF/Excel/PowerPoint'],
+     script:'./js/ai-report-generator.js', openFn:'window.__ccRG.open'},
+    {cat:'ai', id:'autonomous-agent', name:'Autonomous Agent', icon:'🤖', shortcut:'X',
+     desc:'Autonomous AI agent for task execution & supply chain optimization',
+     features:['Autonomous task execution (reorder, reroute, negotiate)','Multi-step reasoning & planning','Human-in-the-loop approval workflow','Agent performance metrics'],
+     script:'./js/autonomous-agent.js', openFn:'window.__ccAA.open'},
+    {cat:'ai', id:'market-intelligence', name:'Market Intelligence', icon:'🌐', shortcut:'M',
+     desc:'Market intelligence feeds with competitor analysis & pricing trends',
+     features:['Competitor pricing & positioning analysis','Market trend detection','Supplier market intelligence','Geopolitical risk feeds'],
+     script:'./js/market-intelligence.js', openFn:'window.__ccMI.open'}
+  ];
+
+  var CATEGORIES = [
+    {id:'operations', name:'Operations', icon:'🚢', color:'#0ea5e9',
+     desc:'Core supply chain operations — dispatch, suppliers, compliance, collaboration & forecasting',
+     grad:'linear-gradient(135deg,#0ea5e9,#14b8a6)'},
+    {id:'sustainability', name:'Sustainability', icon:'🌱', color:'#10b981',
+     desc:'Carbon emissions, ESG ratings, product passport & circular economy',
+     grad:'linear-gradient(135deg,#10b981,#84cc16)'},
+    {id:'future', name:'Future Tech', icon:'⚛️', color:'#8b5cf6',
+     desc:'Emerging technologies — quantum, edge IoT, network graph & federated learning',
+     grad:'linear-gradient(135deg,#8b5cf6,#3b82f6)'},
+    {id:'ai', name:'AI & Analytics', icon:'🤖', color:'#f59e0b',
+     desc:'AI-powered analytics, reports, autonomous agents & market intelligence',
+     grad:'linear-gradient(135deg,#f59e0b,#ec4899)'}
+  ];
+
+  var loaded = {}; // id -> true once script loaded
+  var loading = {}; // id -> true while loading
+
+  // ===== RENDER SIDEBAR =====
+  function renderSidebar(){
+    var sb = document.getElementById('opsSidebar');
+    var html = '';
+    CATEGORIES.forEach(function(cat){
+      var mods = MODULES.filter(function(m){return m.cat===cat.id});
+      html += '<div class="cc-cat cat-'+cat.id+'">';
+      html += '<div class="cc-cat-label"><span class="dot"></span>'+cat.name+'<span class="count">'+mods.length+'</span></div>';
+      mods.forEach(function(m){
+        html += '<button class="cc-mod-item" data-id="'+m.id+'" onclick="window.__opsHub.select(\''+m.id+'\')">';
+        html += '<span class="cc-mod-icon">'+m.icon+'</span>';
+        html += '<span class="cc-mod-name">'+m.name+'</span>';
+        html += '<span class="cc-mod-shortcut">'+m.shortcut+'</span>';
+        html += '</button>';
+      });
+      html += '</div>';
+    });
+    sb.innerHTML = html;
+  }
+
+  // ===== RENDER LANDING =====
+  function renderLanding(){
+    var main = document.getElementById('opsMain');
+    var html = '<div class="cc-welcome">';
+    html += '<h1>Welcome to <span class="grad">Operations Hub</span></h1>';
+    html += '<p class="sub">17 specialized modules for global supply chain operations, sustainability, future technologies, and AI-powered analytics. Select a module from the sidebar to launch it, or explore the categories below.</p>';
+    html += '<div class="cc-cat-grid">';
+    CATEGORIES.forEach(function(cat){
+      var mods = MODULES.filter(function(m){return m.cat===cat.id});
+      var modNames = mods.map(function(m){return '<span>'+m.icon+' '+m.name+'</span>'}).join('');
+      html += '<div class="cc-cat-card cat-'+cat.id+'" onclick="window.__opsHub.selectCategory(\''+cat.id+'\')">';
+      html += '<div class="cc-cat-card-head">';
+      html += '<div class="cc-cat-card-icon">'+cat.icon+'</div>';
+      html += '<div><div class="cc-cat-card-title">'+cat.name+'</div><div class="cc-cat-card-count">'+mods.length+' modules</div></div>';
+      html += '</div>';
+      html += '<p class="cc-cat-card-desc">'+cat.desc+'</p>';
+      html += '<div class="cc-cat-card-modules">'+modNames+'</div>';
+      html += '</div>';
+    });
+    html += '</div>';
+    html += '<p style="text-align:center;color:var(--muted-foreground);font-size:12px;margin-top:24px">Need orders, tenders, AI documents or the command palette? Visit the <a href="./cc-app/" style="color:var(--emerald);font-weight:600">Command Center</a>.</p>';
+    html += '</div>';
+    main.innerHTML = html;
+  }
+
+  // ===== RENDER MODULE DETAIL =====
+  function renderModule(mod){
+    var main = document.getElementById('opsMain');
+    var featuresHtml = mod.features.map(function(f){
+      return '<div class="cc-feature"><h4>✓ '+f.split('(')[0].trim()+'</h4><p>'+(f.split('(')[1]?('('+f.split('(')[1]):'')+'</p></div>';
+    }).join('');
+    var html = '<div class="cc-module-view">';
+    html += '<div class="cc-module-header">';
+    html += '<span class="icon">'+mod.icon+'</span>';
+    html += '<div><h2>'+mod.name+'</h2><div class="desc">'+mod.desc+'</div></div>';
+    html += '<button class="cc-module-launch" id="launchBtn" onclick="window.__opsHub.launch(\''+mod.id+'\')">';
+    html += '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="6 3 20 12 6 21 6 3"/></svg>';
+    html += ' Launch Module</button>';
+    html += '</div>';
+    html += '<div class="cc-module-features">'+featuresHtml+'</div>';
+    html += '<div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:20px;margin-top:8px">';
+    html += '<h4 style="font-size:13px;font-weight:600;margin-bottom:10px">About this module</h4>';
+    html += '<p style="font-size:12px;color:var(--muted-foreground);line-height:1.6">'+mod.desc+'. Click "Launch Module" to open the full interactive interface. The module loads on demand for fast performance.</p>';
+    html += '</div>';
+    html += '</div>';
+    main.innerHTML = html;
+  }
+
+  // ===== LAUNCH MODULE (lazy load + open) =====
+  function launch(id){
+    var mod = MODULES.filter(function(m){return m.id===id})[0];
+    if(!mod) return;
+    var btn = document.getElementById('launchBtn');
+    if(btn){btn.disabled=true;btn.innerHTML='<div class="cc-spinner" style="width:14px;height:14px;border-width:2px"></div> Loading...';}
+
+    if(loaded[id]){
+      openModule(mod);
+      if(btn){btn.disabled=false;btn.innerHTML='<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="6 3 20 12 6 21 6 3"/></svg> Launch Module';}
+      return;
+    }
+
+    if(loading[id]) return;
+    loading[id]=true;
+
+    var s = document.createElement('script');
+    s.src = mod.script;
+    s.onload = function(){
+      loaded[id]=true;
+      loading[id]=false;
+      openModule(mod);
+      if(btn){btn.disabled=false;btn.innerHTML='<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="6 3 20 12 6 21 6 3"/></svg> Launch Module';}
+    };
+    s.onerror = function(){
+      loading[id]=false;
+      if(btn){btn.disabled=false;btn.innerHTML='<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="6 3 20 12 6 21 6 3"/></svg> Retry';}
+      alert('Failed to load module: '+mod.name+'. Please check your connection and try again.');
+    };
+    document.head.appendChild(s);
+  }
+
+  function openModule(mod){
+    try{
+      var fn = eval(mod.openFn);
+      if(typeof fn === 'function'){
+        fn();
+      } else {
+        alert('Module "'+mod.name+'" loaded but open function not found ('+mod.openFn+').');
+      }
+    }catch(e){
+      console.error('[Operations Hub] Error opening module:',e);
+      alert('Error opening module: '+mod.name+' — '+e.message);
+    }
+  }
+
+  // ===== SELECT MODULE (show detail view) =====
+  function select(id){
+    var mod = MODULES.filter(function(m){return m.id===id})[0];
+    if(!mod) return;
+    // Update sidebar active state
+    document.querySelectorAll('.cc-mod-item').forEach(function(el){
+      el.classList.toggle('active', el.dataset.id===id);
+    });
+    renderModule(mod);
+    // Close mobile sidebar
+    document.querySelector('.cc-sidebar').classList.remove('open');
+  }
+
+  function selectCategory(catId){
+    var firstMod = MODULES.filter(function(m){return m.cat===catId})[0];
+    if(firstMod) select(firstMod.id);
+  }
+
+  // ===== KEYBOARD SHORTCUTS =====
+  document.addEventListener('keydown', function(e){
+    if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA') return;
+    if(e.metaKey||e.ctrlKey||e.altKey) return;
+    var key = e.key.toUpperCase();
+    var mod = MODULES.filter(function(m){return m.shortcut===key})[0];
+    if(mod){
+      e.preventDefault();
+      launch(mod.id);
+    }
+    if(e.key==='Escape'){
+      // Close any open module overlay
+      ['__ccDD','__ccSM','__ccCM','__ccCL','__ccFS','__ccCE','__ccPP','__ccNG','__ccEI','__ccQR','__ccFL','__ccPA','__ccAM','__ccNL','__ccRG','__ccAA','__ccMI'].forEach(function(api){
+        try{ if(window[api]&&window[api].close) window[api].close(); }catch(e){}
+      });
+    }
+  });
+
+  // ===== INIT =====
+  window.__opsHub = {select:select, launch:launch, selectCategory:selectCategory};
+  renderSidebar();
+  renderLanding();
+})();
+</script>
+<script src="./js/banners.js" defer></script>
+</body>
+</html>
