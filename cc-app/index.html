@@ -208,27 +208,5 @@ document.addEventListener("keydown",function(e){if(e.key==="Escape"){ccAuthClose
 </div>
 </footer><!-- Minimal scripts for testing -->
 <script src="../js/banners.js" defer></script>
-<script id="cc-app-sidebar-cleanup">
-(function(){
-  var HIDE_LABELS = ['Suppliers','Contracts','Collaboration','Forecasting','Space (2030+)'];
-  function cleanSidebar(){
-    var btns = document.querySelectorAll('button[data-slot="tooltip-trigger"]');
-    btns.forEach(function(btn){
-      var span = btn.querySelector('span.truncate');
-      if(!span) return;
-      var label = span.textContent.trim();
-      if(HIDE_LABELS.indexOf(label) !== -1){
-        btn.style.display = 'none';
-      }
-    });
-  }
-  if(document.readyState === 'loading'){
-    document.addEventListener('DOMContentLoaded', function(){ setTimeout(cleanSidebar, 100); setTimeout(cleanSidebar, 1000); setTimeout(cleanSidebar, 3000); });
-  } else {
-    setTimeout(cleanSidebar, 100); setTimeout(cleanSidebar, 1000); setTimeout(cleanSidebar, 3000);
-  }
-  // Also observe DOM mutations (React hydration may re-render sidebar)
-  var observer = new MutationObserver(function(){ cleanSidebar(); });
-  observer.observe(document.body, {childList:true, subtree:true});
-})();
-</script></body></html>
+<script src="../js/cc-enhancements.js" defer></script>
+</body></html>
