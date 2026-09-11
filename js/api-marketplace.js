@@ -559,13 +559,13 @@
       <div class="cc-am-section">
         <div class="cc-am-section-title">🚀 Quick Start — Authentication</div>
         <div style="background:#0d1117;border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:16px;font-family:'Monaco','Menlo','Courier New',monospace;font-size:12px;color:#e2e8f0;overflow-x:auto;line-height:1.6">
-          <span style="color:#64748b">// 1. Get your API key from Settings → API Keys</span><br>
+          <span style="color:#64748b">// 1. Get your API key from Settings and API Keys</span><br>
           <span style="color:#7ee787">const</span> API_KEY = <span style="color:#a5d6ff">'sk_live_aisupplychain_xxxxxxxxxxxx'</span>;<br><br>
           <span style="color:#64748b">// 2. Base URL</span><br>
           <span style="color:#7ee787">const</span> BASE_URL = <span style="color:#a5d6ff">'https://api.aisupplychain-advanced.com/v1'</span>;<br><br>
           <span style="color:#64748b">// 3. Authenticate</span><br>
-          <span style="color:#7ee787">const</span> response = <span style="color:#7ee787">await</span> fetch(<span style="color:#a5d6ff">`\${BASE_URL}/auth/verify`</span>, {<br>
-          &nbsp;&nbsp;headers: { <span style="color:#a5d6ff">'Authorization'</span>: <span style="color:#a5d6ff">`Bearer \${API_KEY}`</span> }<br>
+          <span style="color:#7ee787">const</span> response = <span style="color:#7ee787">await</span> fetch(BASE_URL + <span style="color:#a5d6ff">'/auth/verify'</span>, {<br>
+          &nbsp;&nbsp;headers: { <span style="color:#a5d6ff">'Authorization'</span>: <span style="color:#a5d6ff">'Bearer '</span> + API_KEY }<br>
           });<br><br>
           <span style="color:#7ee787">const</span> data = <span style="color:#7ee787">await</span> response.json();<br>
           console.log(data); <span style="color:#64748b">// { status: "ok", plan: "enterprise", rate_limit: 100000 }</span>
