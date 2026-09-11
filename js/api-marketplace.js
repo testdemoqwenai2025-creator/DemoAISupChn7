@@ -245,6 +245,9 @@
         <button class="cc-am-nav-item ${currentView === 'overview' ? 'active' : ''}" onclick="window.__ccAM.setView('overview')"><span class="cc-am-nav-icon">📊</span> Overview</button>
         <button class="cc-am-nav-item ${currentView === 'catalog' ? 'active' : ''}" onclick="window.__ccAM.setView('catalog')"><span class="cc-am-nav-icon">📚</span> All APIs ${connectedCount > 0 ? '<span class="cc-am-nav-badge">' + connectedCount + '</span>' : ''}</button>
         <button class="cc-am-nav-item ${currentView === 'categories' ? 'active' : ''}" onclick="window.__ccAM.setView('categories')"><span class="cc-am-nav-icon">🗂️</span> Categories</button>
+        <button class="cc-am-nav-item ${currentView === 'health' ? 'active' : ''}" onclick="window.__ccAM.setView('health')"><span class="cc-am-nav-icon">💚</span> Integration Health</button>
+        <button class="cc-am-nav-item ${currentView === 'code' ? 'active' : ''}" onclick="window.__ccAM.setView('code')"><span class="cc-am-nav-icon">💻</span> Code Samples</button>
+        <button class="cc-am-nav-item ${currentView === 'webhooks' ? 'active' : ''}" onclick="window.__ccAM.setView('webhooks')"><span class="cc-am-nav-icon">🔗</span> Webhooks</button>
       </div>
       <div class="cc-am-main" id="cc-am-content"></div>
     `;
@@ -257,6 +260,9 @@
     if (currentView === 'overview') renderOverview(container);
     else if (currentView === 'catalog') renderCatalog(container);
     else if (currentView === 'categories') renderCategories(container);
+    else if (currentView === 'health') renderHealth(container);
+    else if (currentView === 'code') renderCodeSamples(container);
+    else if (currentView === 'webhooks') renderWebhooks(container);
 
     document.querySelectorAll('.cc-am-nav-item').forEach(item => {
       const onclick = item.getAttribute('onclick') || '';
@@ -455,6 +461,352 @@
   }
 
   // ------------------------------------------------------------------
+  // 4. INTEGRATION HEALTH MONITOR
+  // ------------------------------------------------------------------
+  function renderHealth(container) {
+    const db = initDatabase();
+    const connected = db.apis.filter(a => a.status === 'connected');
+
+    container.innerHTML = `
+      <div class="cc-am-header">
+        <h2 class="cc-am-page-title">💚 Integration Health Monitor <span class="cc-am-page-badge">REAL-TIME</span></h2>
+        <div class="cc-am-live-indicator"><div class="cc-am-live-dot"></div> Monitoring ${connected.length} connections</div>
+      </div>
+
+      <div class="cc-am-cards">
+        <div class="cc-am-card"><div class="cc-am-card-label">Avg Uptime (30d)</div><div class="cc-am-card-value" style="color:#10B981">${(connected.reduce((s,a) => s + (a.uptime_30d || 99), 0) / connected.length).toFixed(2)}%</div><div class="cc-am-card-delta">across all connections</div></div>
+        <div class="cc-am-card"><div class="cc-am-card-label">Avg Latency</div><div class="cc-am-card-value" style="color:#06B6D4">${Math.round(connected.reduce((s,a) => s + parseInt(a.latency), 0) / connected.length)}ms</div><div class="cc-am-card-delta">response time</div></div>
+        <div class="cc-am-card"><div class="cc-am-card-label">Total Requests (24h)</div><div class="cc-am-card-value">${(connected.reduce((s,a) => { const m = a.requests.match(/(\d+)/); return s + (m ? parseInt(m[1]) : 0); }, 0) / 1000).toFixed(0)}k</div><div class="cc-am-card-delta">across all APIs</div></div>
+        <div class="cc-am-card"><div class="cc-am-card-label">Error Rate</div><div class="cc-am-card-value" style="color:#10B981">${(Math.random() * 0.5).toFixed(2)}%</div><div class="cc-am-card-delta">below SLA threshold</div></div>
+      </div>
+
+      <div class="cc-am-section">
+        <div class="cc-am-section-title">💚 Connected API Health Status</div>
+        <div class="cc-am-scroll">
+          <table class="cc-am-table">
+            <thead>
+              <tr><th>API</th><th>Provider</th><th>Status</th><th>Uptime 30d</th><th>Avg Latency</th><th>Requests Today</th><th>Error Rate</th><th>Last Sync</th><th>SLA</th><th>Health</th></tr>
+            </thead>
+            <tbody>
+              ${connected.map(a => {
+                const uptime = a.uptime_30d || (99 + Math.random() * 0.9);
+                const latency = parseInt(a.latency);
+                const errorRate = (Math.random() * 0.3).toFixed(2);
+                const lastSync = new Date(Date.now() - Math.random() * 300000);
+                const sla = uptime > 99.5 ? 'Met' : uptime > 99 ? 'Warning' : 'Breached';
+                const healthScore = Math.round((uptime * 0.4) + ((100 - latency / 10) * 0.3) + ((100 - parseFloat(errorRate) * 100) * 0.3));
+                const healthColor = healthScore > 95 ? '#10B981' : healthScore > 85 ? '#f59e0b' : '#ef4444';
+                const reqToday = Math.floor(Math.random() * 5000) + 500;
+                return `
+                  <tr>
+                    <td style="font-weight:600;color:#14b8a6">${a.icon} ${a.name}</td>
+                    <td style="font-size:11px">${a.provider}</td>
+                    <td><span class="cc-am-status cc-am-status-connected">connected</span></td>
+                    <td style="text-align:center;color:${uptime > 99.5 ? '#10B981' : '#f59e0b'};font-weight:600">${uptime.toFixed(2)}%</td>
+                    <td style="text-align:center;color:${latency < 100 ? '#10B981' : latency < 200 ? '#f59e0b' : '#ef4444'}">${latency}ms</td>
+                    <td style="text-align:center">${reqToday.toLocaleString()}</td>
+                    <td style="text-align:center;color:#10B981">${errorRate}%</td>
+                    <td style="text-align:center;font-size:11px;color:#64748b">${lastSync.toLocaleTimeString('en-US', {hour:'2-digit',minute:'2-digit',second:'2-digit'})}</td>
+                    <td style="text-align:center"><span class="cc-am-status cc-am-status-${sla === 'Met' ? 'connected' : sla === 'Warning' ? 'available' : 'coming'}">${sla}</span></td>
+                    <td style="text-align:center">
+                      <div style="display:flex;align-items:center;gap:4px;justify-content:center">
+                        <div style="width:50px;height:6px;border-radius:3px;background:rgba(255,255,255,0.08);overflow:hidden"><div style="height:100%;width:${healthScore}%;background:${healthColor};border-radius:3px"></div></div>
+                        <span style="font-size:11px;font-weight:700;color:${healthColor}">${healthScore}</span>
+                      </div>
+                    </td>
+                  </tr>
+                `;
+              }).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="cc-am-section">
+        <div class="cc-am-section-title">📊 Request Volume (24h) by API</div>
+        <div class="cc-am-bars">
+          ${connected.slice(0, 12).map(a => {
+            const reqToday = Math.floor(Math.random() * 5000) + 500;
+            const maxReq = 5500;
+            const pct = (reqToday / maxReq) * 100;
+            return `
+              <div class="cc-am-bar-wrap">
+                <div class="cc-am-bar-value" style="font-size:10px">${(reqToday / 1000).toFixed(1)}k</div>
+                <div class="cc-am-bar" style="height:${pct}%;background:linear-gradient(180deg,#14b8a6,#06B6D4)" title="${a.name}: ${reqToday.toLocaleString()} requests today">
+                  <div class="cc-am-bar-tooltip">${a.name}: ${reqToday.toLocaleString()} requests · ${a.latency} avg latency</div>
+                </div>
+                <div class="cc-am-bar-label" style="max-width:50px;font-size:8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${a.name.split(' ')[0]}</div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      </div>
+    `;
+  }
+
+  // ------------------------------------------------------------------
+  // 5. CODE SAMPLES
+  // ------------------------------------------------------------------
+  function renderCodeSamples(container) {
+    const db = initDatabase();
+    const connected = db.apis.filter(a => a.status === 'connected').slice(0, 6);
+
+    container.innerHTML = `
+      <div class="cc-am-header">
+        <h2 class="cc-am-page-title">💻 Code Samples & Developer Documentation</h2>
+      </div>
+
+      <div class="cc-am-section">
+        <div class="cc-am-section-title">🚀 Quick Start — Authentication</div>
+        <div style="background:#0d1117;border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:16px;font-family:'Monaco','Menlo','Courier New',monospace;font-size:12px;color:#e2e8f0;overflow-x:auto;line-height:1.6">
+          <span style="color:#64748b">// 1. Get your API key from Settings → API Keys</span><br>
+          <span style="color:#7ee787">const</span> API_KEY = <span style="color:#a5d6ff">'sk_live_aisupplychain_xxxxxxxxxxxx'</span>;<br><br>
+          <span style="color:#64748b">// 2. Base URL</span><br>
+          <span style="color:#7ee787">const</span> BASE_URL = <span style="color:#a5d6ff">'https://api.aisupplychain-advanced.com/v1'</span>;<br><br>
+          <span style="color:#64748b">// 3. Authenticate</span><br>
+          <span style="color:#7ee787">const</span> response = <span style="color:#7ee787">await</span> fetch(<span style="color:#a5d6ff">`\${BASE_URL}/auth/verify`</span>, {<br>
+          &nbsp;&nbsp;headers: { <span style="color:#a5d6ff">'Authorization'</span>: <span style="color:#a5d6ff">`Bearer \${API_KEY}`</span> }<br>
+          });<br><br>
+          <span style="color:#7ee787">const</span> data = <span style="color:#7ee787">await</span> response.json();<br>
+          console.log(data); <span style="color:#64748b">// { status: "ok", plan: "enterprise", rate_limit: 100000 }</span>
+        </div>
+      </div>
+
+      ${connected.map(api => {
+        const sampleCode = generateCodeSample(api);
+        return `
+          <div class="cc-am-section">
+            <div class="cc-am-section-title">${api.icon} ${api.name} — Code Sample (${api.provider})</div>
+            <div style="display:flex;gap:6px;margin-bottom:8px">
+              <button class="cc-am-tab active" onclick="window.__ccAM.switchLang(this,'${api.id}','js')">JavaScript</button>
+              <button class="cc-am-tab" onclick="window.__ccAM.switchLang(this,'${api.id}','py')">Python</button>
+              <button class="cc-am-tab" onclick="window.__ccAM.switchLang(this,'${api.id}','curl')">cURL</button>
+            </div>
+            <div id="code-${api.id}" style="background:#0d1117;border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:16px;font-family:'Monaco','Menlo','Courier New',monospace;font-size:11px;color:#e2e8f0;overflow-x:auto;line-height:1.6;white-space:pre">${sampleCode}</div>
+            <div style="margin-top:8px;display:flex;gap:8px">
+              <button class="cc-am-btn cc-am-btn-secondary" onclick="window.__ccAM.copyCode('${api.id}')">📋 Copy Code</button>
+              <span style="font-size:11px;color:#64748b;align-self:center">Endpoint: <code style="color:#14b8a6">${api.endpoint}</code> · Auth: ${api.auth} · Rate: ${api.requests}</span>
+            </div>
+          </div>
+        `;
+      }).join('')}
+    `;
+  }
+
+  function generateCodeSample(api) {
+    const lang = 'js';
+    if (lang === 'js') {
+      return `// ${api.name} — ${api.provider}
+// ${api.description}
+
+const API_KEY = 'sk_live_aisupplychain_xxxxxxxxxxxx';
+const BASE_URL = 'https://api.aisupplychain-advanced.com/v1';
+
+// Fetch ${api.name} data
+const response = await fetch(\`\${BASE_URL}${api.endpoint}\`, {
+  method: 'GET',
+  headers: {
+    'Authorization': \`Bearer \${API_KEY}\`,
+    'Content-Type': 'application/json'
+  }
+});
+
+const data = await response.json();
+console.log(data);
+
+// Response example:
+// {
+//   "status": "success",
+//   "data": { ... },
+//   "meta": {
+//     "request_id": "req_abc123",
+//     "timestamp": "${new Date().toISOString()}",
+//     "rate_remaining": 99845
+//   }
+// }`;
+    }
+    return '// Code sample';
+  }
+
+  function switchLang(btn, apiId, lang) {
+    btn.parentElement.querySelectorAll('.cc-am-tab').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+    const api = initDatabase().apis.find(a => a.id === apiId);
+    if (!api) return;
+    let code = '';
+    if (lang === 'js') {
+      code = generateCodeSample(api);
+    } else if (lang === 'py') {
+      code = `# ${api.name} — ${api.provider}
+# ${api.description}
+
+import requests
+
+API_KEY = 'sk_live_aisupplychain_xxxxxxxxxxxx'
+BASE_URL = 'https://api.aisupplychain-advanced.com/v1'
+
+# Fetch ${api.name} data
+response = requests.get(
+    f'{BASE_URL}${api.endpoint}',
+    headers={
+        'Authorization': f'Bearer {API_KEY}',
+        'Content-Type': 'application/json'
+    }
+)
+
+data = response.json()
+print(data)`;
+    } else if (lang === 'curl') {
+      code = `# ${api.name} — ${api.provider}
+# ${api.description}
+
+curl -X GET 'https://api.aisupplychain-advanced.com/v1${api.endpoint}' \\
+  -H 'Authorization: Bearer sk_live_aisupplychain_xxxxxxxxxxxx' \\
+  -H 'Content-Type: application/json'`;
+    }
+    const el = document.getElementById('code-' + apiId);
+    if (el) el.textContent = code;
+  }
+
+  function copyCode(apiId) {
+    const el = document.getElementById('code-' + apiId);
+    if (el) {
+      navigator.clipboard.writeText(el.textContent).then(() => {
+        alert('Code copied to clipboard!');
+      }).catch(() => {
+        alert('Copy failed. Please select and copy manually.');
+      });
+    }
+  }
+
+  // ------------------------------------------------------------------
+  // 6. WEBHOOK MANAGEMENT
+  // ------------------------------------------------------------------
+  function renderWebhooks(container) {
+    const db = initDatabase();
+    const webhooks = [
+      { id: 'wh1', name: 'Vessel Arrival Notification', event: 'vessel.arrived', url: 'https://your-app.com/webhooks/vessel-arrival', status: 'active', deliveries_24h: 145, success_rate: 99.3, last_delivery: new Date(Date.now() - 120000).toISOString(), api: 'MarineTraffic Vessel Tracking' },
+      { id: 'wh2', name: 'Port Congestion Alert', event: 'port.congestion.high', url: 'https://your-app.com/webhooks/congestion', status: 'active', deliveries_24h: 12, success_rate: 100, last_delivery: new Date(Date.now() - 3600000).toISOString(), api: 'PortWatch Congestion Index' },
+      { id: 'wh3', name: 'Inventory Low Stock', event: 'inventory.below_reorder', url: 'https://your-app.com/webhooks/low-stock', status: 'active', deliveries_24h: 8, success_rate: 100, last_delivery: new Date(Date.now() - 7200000).toISOString(), api: 'SAP EWM Connector' },
+      { id: 'wh4', name: 'Shipment Status Update', event: 'shipment.status.changed', url: 'https://your-app.com/webhooks/shipment-status', status: 'active', deliveries_24h: 320, success_rate: 98.7, last_delivery: new Date(Date.now() - 30000).toISOString(), api: 'Project44 Multi-Modal' },
+      { id: 'wh5', name: 'Storm Warning', event: 'weather.storm.alert', url: 'https://your-app.com/webhooks/storm-alert', status: 'active', deliveries_24h: 3, success_rate: 100, last_delivery: new Date(Date.now() - 14400000).toISOString(), api: 'NOAA Severe Weather' },
+      { id: 'wh6', name: 'ETA Prediction Updated', event: 'eta.prediction.updated', url: 'https://your-app.com/webhooks/eta-update', status: 'active', deliveries_24h: 89, success_rate: 99.1, last_delivery: new Date(Date.now() - 600000).toISOString(), api: 'FourKites ETA Engine' },
+      { id: 'wh7', name: 'Sanctions Match Found', event: 'sanctions.match.detected', url: 'https://your-app.com/webhooks/sanctions', status: 'paused', deliveries_24h: 0, success_rate: 100, last_delivery: new Date(Date.now() - 86400000).toISOString(), api: 'Everstream Trade Sanctions' },
+      { id: 'wh8', name: 'FX Rate Threshold', event: 'fx.rate.threshold', url: 'https://your-app.com/webhooks/fx-threshold', status: 'active', deliveries_24h: 5, success_rate: 100, last_delivery: new Date(Date.now() - 1800000).toISOString(), api: 'FXRate Live Currency' }
+    ];
+
+    const activeCount = webhooks.filter(w => w.status === 'active').length;
+    const totalDeliveries = webhooks.reduce((s, w) => s + w.deliveries_24h, 0);
+    const avgSuccess = (webhooks.reduce((s, w) => s + w.success_rate, 0) / webhooks.length).toFixed(1);
+
+    container.innerHTML = `
+      <div class="cc-am-header">
+        <h2 class="cc-am-page-title">🔗 Webhook Management <span class="cc-am-page-badge">${webhooks.length} WEBHOOKS</span></h2>
+        <div class="cc-am-live-indicator"><div class="cc-am-live-dot"></div> ${activeCount} active · ${totalDeliveries} deliveries/24h</div>
+      </div>
+
+      <div class="cc-am-cards">
+        <div class="cc-am-card"><div class="cc-am-card-label">Active Webhooks</div><div class="cc-am-card-value" style="color:#10B981">${activeCount}/${webhooks.length}</div><div class="cc-am-card-delta">${webhooks.length - activeCount} paused</div></div>
+        <div class="cc-am-card"><div class="cc-am-card-label">Deliveries (24h)</div><div class="cc-am-card-value">${totalDeliveries}</div><div class="cc-am-card-delta">webhook events fired</div></div>
+        <div class="cc-am-card"><div class="cc-am-card-label">Avg Success Rate</div><div class="cc-am-card-value" style="color:#10B981">${avgSuccess}%</div><div class="cc-am-card-delta">delivery success</div></div>
+        <div class="cc-am-card"><div class="cc-am-card-label">Avg Latency</div><div class="cc-am-card-value" style="color:#06B6D4">${Math.floor(Math.random() * 50 + 80)}ms</div><div class="cc-am-card-delta">end-to-end delivery</div></div>
+      </div>
+
+      <div class="cc-am-section">
+        <div class="cc-am-section-title">🔗 Registered Webhooks</div>
+        <div class="cc-am-scroll">
+          <table class="cc-am-table">
+            <thead>
+              <tr><th>Webhook Name</th><th>Event</th><th>Endpoint URL</th><th>Source API</th><th>Status</th><th>Deliveries (24h)</th><th>Success Rate</th><th>Last Delivery</th><th>Actions</th></tr>
+            </thead>
+            <tbody>
+              ${webhooks.map(w => {
+                const lastDate = new Date(w.last_delivery);
+                const minsAgo = Math.floor((Date.now() - lastDate.getTime()) / 60000);
+                const timeStr = minsAgo < 60 ? minsAgo + 'm ago' : minsAgo < 1440 ? Math.floor(minsAgo / 60) + 'h ago' : Math.floor(minsAgo / 1440) + 'd ago';
+                return `
+                  <tr>
+                    <td style="font-weight:600;color:#14b8a6">${w.name}</td>
+                    <td style="font-family:monospace;font-size:11px;color:#a78bfa">${w.event}</td>
+                    <td style="font-family:monospace;font-size:10px;color:#64748b;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${w.url}</td>
+                    <td style="font-size:11px">${w.api}</td>
+                    <td><span class="cc-am-status cc-am-status-${w.status === 'active' ? 'connected' : 'coming'}">${w.status}</span></td>
+                    <td style="text-align:center">${w.deliveries_24h}</td>
+                    <td style="text-align:center;color:${w.success_rate > 99 ? '#10B981' : '#f59e0b'};font-weight:600">${w.success_rate}%</td>
+                    <td style="text-align:center;font-size:11px;color:#64748b">${timeStr}</td>
+                    <td>
+                      <button class="cc-am-btn cc-am-btn-secondary" style="font-size:10px;padding:3px 8px" onclick="alert('Demo: View delivery log for ${w.name}')">📋 Log</button>
+                      ${w.status === 'active'
+                        ? `<button class="cc-am-btn cc-am-btn-secondary" style="font-size:10px;padding:3px 8px" onclick="alert('Demo: Pause ${w.name}')">⏸️</button>`
+                        : `<button class="cc-am-btn cc-am-btn-primary" style="font-size:10px;padding:3px 8px" onclick="alert('Demo: Resume ${w.name}')">▶️</button>`
+                      }
+                    </td>
+                  </tr>
+                `;
+              }).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="cc-am-section">
+        <div class="cc-am-section-title">📡 Available Webhook Events</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px">
+          ${[
+            { event: 'vessel.arrived', desc: 'Fired when a vessel arrives at a monitored port', category: 'Ports' },
+            { event: 'vessel.departed', desc: 'Fired when a vessel departs from a port', category: 'Ports' },
+            { event: 'port.congestion.high', desc: 'Fired when port congestion exceeds 85%', category: 'Ports' },
+            { event: 'inventory.below_reorder', desc: 'Fired when SKU quantity drops below reorder point', category: 'WMS' },
+            { event: 'inventory.stockout_predicted', desc: 'Fired when AI predicts stockout within 7 days', category: 'WMS' },
+            { event: 'shipment.status.changed', desc: 'Fired when shipment status is updated', category: 'TMS' },
+            { event: 'eta.prediction.updated', desc: 'Fired when ETA prediction changes by >2 hours', category: 'TMS' },
+            { event: 'weather.storm.alert', desc: 'Fired when storm is predicted within 48h of a port', category: 'Weather' },
+            { event: 'sanctions.match.detected', desc: 'Fired when a sanctioned party is detected', category: 'Geopolitical' },
+            { event: 'fx.rate.threshold', desc: 'Fired when FX rate crosses a configured threshold', category: 'Financial' },
+            { event: 'compliance.audit.due', desc: 'Fired 7 days before a compliance audit is due', category: 'Compliance' },
+            { event: 'ai.anomaly.detected', desc: 'Fired when AI detects an inventory or demand anomaly', category: 'AI' }
+          ].map(e => `
+            <div style="padding:12px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:8px">
+              <div style="font-family:monospace;font-size:11px;color:#a78bfa;font-weight:600">${e.event}</div>
+              <div style="font-size:11px;color:#94a3b8;margin-top:4px">${e.desc}</div>
+              <div style="font-size:9px;color:#64748b;margin-top:4px;padding:2px 6px;background:rgba(255,255,255,0.05);border-radius:4px;display:inline-block">${e.category}</div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+
+      <div class="cc-am-section">
+        <div class="cc-am-section-title">➕ Register New Webhook</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div>
+            <label style="font-size:11px;color:#64748b;display:block;margin-bottom:4px">Webhook Name</label>
+            <input type="text" class="cc-am-search" style="width:100%" placeholder="My Webhook" />
+          </div>
+          <div>
+            <label style="font-size:11px;color:#64748b;display:block;margin-bottom:4px">Event Type</label>
+            <select class="cc-am-search" style="width:100%">
+              <option>vessel.arrived</option>
+              <option>port.congestion.high</option>
+              <option>inventory.below_reorder</option>
+              <option>shipment.status.changed</option>
+              <option>weather.storm.alert</option>
+              <option>ai.anomaly.detected</option>
+            </select>
+          </div>
+          <div style="grid-column:1/-1">
+            <label style="font-size:11px;color:#64748b;display:block;margin-bottom:4px">Endpoint URL</label>
+            <input type="text" class="cc-am-search" style="width:100%" placeholder="https://your-app.com/webhooks/my-webhook" />
+          </div>
+        </div>
+        <div style="margin-top:12px;display:flex;gap:8px">
+          <button class="cc-am-btn cc-am-btn-primary" onclick="alert('Demo: Webhook registration would create a new webhook endpoint and send a test event.')">🔗 Register Webhook</button>
+          <button class="cc-am-btn cc-am-btn-secondary" onclick="alert('Demo: A test event would be sent to your endpoint URL.')">🧪 Send Test Event</button>
+        </div>
+      </div>
+    `;
+  }
+
+  // ------------------------------------------------------------------
   // API
   // ------------------------------------------------------------------
   function open() {
@@ -499,7 +851,7 @@
   // ------------------------------------------------------------------
   function init() {
     injectStyles();
-    window.__ccAM = { open, close, setView, setTab, search, filterByCategory };
+    window.__ccAM = { open, close, setView, setTab, search, filterByCategory, switchLang, copyCode };
 
     function injectButton() {
       if (document.getElementById('cc-am-trigger-btn')) return;
