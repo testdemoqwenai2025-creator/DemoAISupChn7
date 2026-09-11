@@ -248,6 +248,10 @@
         <button class="cc-am-nav-item ${currentView === 'health' ? 'active' : ''}" onclick="window.__ccAM.setView('health')"><span class="cc-am-nav-icon">💚</span> Integration Health</button>
         <button class="cc-am-nav-item ${currentView === 'code' ? 'active' : ''}" onclick="window.__ccAM.setView('code')"><span class="cc-am-nav-icon">💻</span> Code Samples</button>
         <button class="cc-am-nav-item ${currentView === 'webhooks' ? 'active' : ''}" onclick="window.__ccAM.setView('webhooks')"><span class="cc-am-nav-icon">🔗</span> Webhooks</button>
+        <button class="cc-am-nav-item ${currentView === 'connect' ? 'active' : ''}" onclick="window.__ccAM.setView('connect')"><span class="cc-am-nav-icon">🔌</span> Connect API</button>
+        <button class="cc-am-nav-item ${currentView === 'analytics' ? 'active' : ''}" onclick="window.__ccAM.setView('analytics')"><span class="cc-am-nav-icon">📈</span> Usage Analytics</button>
+        <button class="cc-am-nav-item ${currentView === 'errors' ? 'active' : ''}" onclick="window.__ccAM.setView('errors')"><span class="cc-am-nav-icon">⚠️</span> Error Log</button>
+        <button class="cc-am-nav-item ${currentView === 'sandbox' ? 'active' : ''}" onclick="window.__ccAM.setView('sandbox')"><span class="cc-am-nav-icon">🧪</span> Sandbox</button>
       </div>
       <div class="cc-am-main" id="cc-am-content"></div>
     `;
@@ -263,6 +267,10 @@
     else if (currentView === 'health') renderHealth(container);
     else if (currentView === 'code') renderCodeSamples(container);
     else if (currentView === 'webhooks') renderWebhooks(container);
+    else if (currentView === 'connect') renderConnectWizard(container);
+    else if (currentView === 'analytics') renderUsageAnalytics(container);
+    else if (currentView === 'errors') renderErrorLog(container);
+    else if (currentView === 'sandbox') renderSandbox(container);
 
     document.querySelectorAll('.cc-am-nav-item').forEach(item => {
       const onclick = item.getAttribute('onclick') || '';
@@ -807,6 +815,481 @@ curl -X GET 'https://api.aisupplychain-advanced.com/v1${api.endpoint}' \\
   }
 
   // ------------------------------------------------------------------
+  // 7. CONNECT API WIZARD
+  // ------------------------------------------------------------------
+  function renderConnectWizard(container) {
+    const db = initDatabase();
+    const availableApis = db.apis.filter(a => a.status === 'available');
+    container.innerHTML = `
+      <div class="cc-am-header">
+        <h2 class="cc-am-page-title">🔌 Connect New API — Interactive Wizard</h2>
+      </div>
+      <div id="cc-am-wizard-container">${renderWizardStep1(db)}</div>
+    `;
+  }
+
+  function renderWizardStep1(db) {
+    const available = db.apis.filter(a => a.status === 'available');
+    return `
+      <div class="cc-am-section">
+        <div style="display:flex;gap:8px;margin-bottom:20px;align-items:center">
+          <div style="width:32px;height:32px;border-radius:50%;background:#14b8a6;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px">1</div>
+          <div style="font-size:14px;font-weight:700;color:#14b8a6">Select API</div>
+          <div style="flex:1;height:2px;background:rgba(255,255,255,0.06)"></div>
+          <div style="width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,0.05);color:#64748b;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px">2</div>
+          <div style="font-size:14px;font-weight:600;color:#64748b">Configure</div>
+          <div style="flex:1;height:2px;background:rgba(255,255,255,0.06)"></div>
+          <div style="width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,0.05);color:#64748b;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px">3</div>
+          <div style="font-size:14px;font-weight:600;color:#64748b">Test</div>
+          <div style="flex:1;height:2px;background:rgba(255,255,255,0.06)"></div>
+          <div style="width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,0.05);color:#64748b;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px">4</div>
+          <div style="font-size:14px;font-weight:600;color:#64748b">Connect</div>
+        </div>
+        <div class="cc-am-section-title">Select an API to Connect</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px">
+          ${available.map(a => `
+            <div onclick="window.__ccAM.wizardStep2('${a.id}')" style="padding:14px;background:rgba(255,255,255,0.03);border:1px solid rgba(20,184,166,0.2);border-radius:10px;cursor:pointer;transition:all 0.2s" onmouseover="this.style.borderColor='#14b8a6';this.style.background='rgba(20,184,166,0.05)'" onmouseout="this.style.borderColor='rgba(20,184,166,0.2)';this.style.background='rgba(255,255,255,0.03)'">
+              <div style="font-size:24px;margin-bottom:6px">${a.icon}</div>
+              <div style="font-size:13px;font-weight:700;color:#14b8a6">${a.name}</div>
+              <div style="font-size:11px;color:#64748b;margin-top:2px">${a.provider}</div>
+              <div style="font-size:10px;color:#64748b;margin-top:6px">Auth: ${a.auth} · ${a.requests}</div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `;
+  }
+
+  function wizardStep2(apiId) {
+    const db = initDatabase();
+    const api = db.apis.find(a => a.id === apiId);
+    if (!api) return;
+    const container = document.getElementById('cc-am-wizard-container');
+    if (!container) return;
+    container.innerHTML = `
+      <div class="cc-am-section">
+        <div style="display:flex;gap:8px;margin-bottom:20px;align-items:center">
+          <div style="width:32px;height:32px;border-radius:50%;background:#14b8a6;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;cursor:pointer" onclick="window.__ccAM.setView('connect')">✓</div>
+          <div style="font-size:14px;font-weight:700;color:#14b8a6">Select API</div>
+          <div style="flex:1;height:2px;background:#14b8a6"></div>
+          <div style="width:32px;height:32px;border-radius:50%;background:#14b8a6;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px">2</div>
+          <div style="font-size:14px;font-weight:700;color:#14b8a6">Configure</div>
+          <div style="flex:1;height:2px;background:rgba(255,255,255,0.06)"></div>
+          <div style="width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,0.05);color:#64748b;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px">3</div>
+          <div style="font-size:14px;font-weight:600;color:#64748b">Test</div>
+          <div style="flex:1;height:2px;background:rgba(255,255,255,0.06)"></div>
+          <div style="width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,0.05);color:#64748b;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px">4</div>
+          <div style="font-size:14px;font-weight:600;color:#64748b">Connect</div>
+        </div>
+        <div class="cc-am-section-title">${api.icon} Configure ${api.name} (${api.provider})</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
+          <div><label style="font-size:11px;color:#64748b;display:block;margin-bottom:4px">API Key / Token</label><input type="password" class="cc-am-search" style="width:100%" placeholder="Enter your ${api.provider} API key" value="demo_key_${api.id}_xxxx" /></div>
+          <div><label style="font-size:11px;color:#64748b;display:block;margin-bottom:4px">Environment</label><select class="cc-am-search" style="width:100%"><option>Production</option><option>Sandbox</option><option>Staging</option></select></div>
+          <div><label style="font-size:11px;color:#64748b;display:block;margin-bottom:4px">Sync Frequency</label><select class="cc-am-search" style="width:100%"><option>Real-time (WebSocket)</option><option>Every 30 seconds</option><option>Every 5 minutes</option><option>Hourly</option></select></div>
+          <div><label style="font-size:11px;color:#64748b;display:block;margin-bottom:4px">Data Retention</label><select class="cc-am-search" style="width:100%"><option>90 days</option><option>1 year</option><option>3 years</option><option>Indefinite</option></select></div>
+        </div>
+        <div style="padding:12px;background:rgba(6,182,212,0.06);border:1px solid rgba(6,182,212,0.15);border-radius:8px;margin-bottom:16px;font-size:12px;color:#67e8f9">
+          <strong>Endpoint:</strong> <code style="color:#14b8a6">${api.endpoint}</code><br>
+          <strong>Auth Method:</strong> ${api.auth} · <strong>Rate Limit:</strong> ${api.requests} · <strong>Avg Latency:</strong> ${api.latency}
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="cc-am-btn cc-am-btn-secondary" onclick="window.__ccAM.setView('connect')">← Back</button>
+          <button class="cc-am-btn cc-am-btn-primary" onclick="window.__ccAM.wizardStep3('${api.id}')">Test Connection →</button>
+        </div>
+      </div>
+    `;
+  }
+
+  function wizardStep3(apiId) {
+    const db = initDatabase();
+    const api = db.apis.find(a => a.id === apiId);
+    if (!api) return;
+    const container = document.getElementById('cc-am-wizard-container');
+    if (!container) return;
+    container.innerHTML = `
+      <div class="cc-am-section">
+        <div style="display:flex;gap:8px;margin-bottom:20px;align-items:center">
+          <div style="width:32px;height:32px;border-radius:50%;background:#14b8a6;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;cursor:pointer" onclick="window.__ccAM.setView('connect')">✓</div>
+          <div style="font-size:14px;font-weight:700;color:#14b8a6">Select API</div>
+          <div style="flex:1;height:2px;background:#14b8a6"></div>
+          <div style="width:32px;height:32px;border-radius:50%;background:#14b8a6;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;cursor:pointer" onclick="window.__ccAM.wizardStep2('${api.id}')">✓</div>
+          <div style="font-size:14px;font-weight:700;color:#14b8a6">Configure</div>
+          <div style="flex:1;height:2px;background:#14b8a6"></div>
+          <div style="width:32px;height:32px;border-radius:50%;background:#14b8a6;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px">3</div>
+          <div style="font-size:14px;font-weight:700;color:#14b8a6">Test</div>
+          <div style="flex:1;height:2px;background:rgba(255,255,255,0.06)"></div>
+          <div style="width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,0.05);color:#64748b;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px">4</div>
+          <div style="font-size:14px;font-weight:600;color:#64748b">Connect</div>
+        </div>
+        <div class="cc-am-section-title">🧪 Testing Connection to ${api.name}...</div>
+        <div id="cc-am-test-progress" style="padding:24px;text-align:center">
+          <div style="width:48px;height:48px;border-radius:50%;border:4px solid rgba(20,184,166,0.2);border-top-color:#14b8a6;animation:cc-am-spin 0.8s linear infinite;margin:0 auto 16px"></div>
+          <div style="color:#94a3b8;font-size:13px" id="cc-am-test-status">Authenticating with ${api.provider}...</div>
+        </div>
+      </div>
+      <style>@keyframes cc-am-spin{to{transform:rotate(360deg)}}</style>
+    `;
+    let step = 0;
+    const steps = [
+      'Authenticating with ' + api.provider + '...',
+      'Fetching endpoint metadata...',
+      'Testing rate limit headers...',
+      'Making sample request to ' + api.endpoint + '...',
+      'Validating response schema...',
+      'Connection test successful!'
+    ];
+    const interval = setInterval(function() {
+      step++;
+      const statusEl = document.getElementById('cc-am-test-status');
+      if (statusEl && step < steps.length) statusEl.textContent = steps[step];
+      if (step >= steps.length - 1) {
+        clearInterval(interval);
+        setTimeout(function() { wizardStep4(apiId); }, 800);
+      }
+    }, 600);
+  }
+
+  function wizardStep4(apiId) {
+    const db = initDatabase();
+    const api = db.apis.find(a => a.id === apiId);
+    if (!api) return;
+    const container = document.getElementById('cc-am-wizard-container');
+    if (!container) return;
+    container.innerHTML = `
+      <div class="cc-am-section" style="border-color:rgba(16,185,129,0.3)">
+        <div style="display:flex;gap:8px;margin-bottom:20px;align-items:center">
+          <div style="width:32px;height:32px;border-radius:50%;background:#14b8a6;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px">✓</div>
+          <div style="font-size:14px;font-weight:700;color:#14b8a6">Select API</div>
+          <div style="flex:1;height:2px;background:#14b8a6"></div>
+          <div style="width:32px;height:32px;border-radius:50%;background:#14b8a6;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px">✓</div>
+          <div style="font-size:14px;font-weight:700;color:#14b8a6">Configure</div>
+          <div style="flex:1;height:2px;background:#14b8a6"></div>
+          <div style="width:32px;height:32px;border-radius:50%;background:#14b8a6;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px">✓</div>
+          <div style="font-size:14px;font-weight:700;color:#14b8a6">Test</div>
+          <div style="flex:1;height:2px;background:#14b8a6"></div>
+          <div style="width:32px;height:32px;border-radius:50%;background:#10B981;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px">4</div>
+          <div style="font-size:14px;font-weight:700;color:#10B981">Connect</div>
+        </div>
+        <div style="text-align:center;padding:30px">
+          <div style="width:64px;height:64px;border-radius:50%;background:rgba(16,185,129,0.15);color:#10B981;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:32px">✓</div>
+          <div style="font-size:18px;font-weight:800;color:#10B981;margin-bottom:8px">Connection Successful!</div>
+          <div style="font-size:13px;color:#94a3b8;margin-bottom:20px">${api.name} (${api.provider}) is now connected and syncing data.</div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;max-width:500px;margin:0 auto 20px">
+            <div style="padding:10px;background:rgba(16,185,129,0.06);border:1px solid rgba(16,185,129,0.15);border-radius:8px;text-align:center"><div style="font-size:10px;color:#64748b;text-transform:uppercase">Response Time</div><div style="font-size:18px;font-weight:800;color:#10B981">${api.latency}</div></div>
+            <div style="padding:10px;background:rgba(16,185,129,0.06);border:1px solid rgba(16,185,129,0.15);border-radius:8px;text-align:center"><div style="font-size:10px;color:#64748b;text-transform:uppercase">Status Code</div><div style="font-size:18px;font-weight:800;color:#10B981">200 OK</div></div>
+            <div style="padding:10px;background:rgba(16,185,129,0.06);border:1px solid rgba(16,185,129,0.15);border-radius:8px;text-align:center"><div style="font-size:10px;color:#64748b;text-transform:uppercase">Schema Valid</div><div style="font-size:18px;font-weight:800;color:#10B981">✓ Yes</div></div>
+          </div>
+          <button class="cc-am-btn cc-am-btn-primary" onclick="alert('Demo: ${api.name} is now connected! Data sync will begin immediately.'); window.__ccAM.setView('health')">✅ Finish & View Health</button>
+        </div>
+      </div>
+    `;
+  }
+
+  // ------------------------------------------------------------------
+  // 8. USAGE ANALYTICS
+  // ------------------------------------------------------------------
+  function renderUsageAnalytics(container) {
+    const db = initDatabase();
+    const connected = db.apis.filter(a => a.status === 'connected');
+    container.innerHTML = `
+      <div class="cc-am-header">
+        <h2 class="cc-am-page-title">📈 API Usage Analytics <span class="cc-am-page-badge">7-DAY TRENDS</span></h2>
+        <div class="cc-am-live-indicator"><div class="cc-am-live-dot"></div> Analytics updating</div>
+      </div>
+      <div class="cc-am-cards">
+        <div class="cc-am-card"><div class="cc-am-card-label">Total Requests (7d)</div><div class="cc-am-card-value">${(Math.random()*500+300).toFixed(0)}k</div><div class="cc-am-card-delta">↑ 12% vs last week</div></div>
+        <div class="cc-am-card"><div class="cc-am-card-label">Peak Hour</div><div class="cc-am-card-value" style="color:#f59e0b">14:00</div><div class="cc-am-card-delta">avg ${Math.floor(Math.random()*5000+8000)} req/h</div></div>
+        <div class="cc-am-card"><div class="cc-am-card-label">Est. Monthly Cost</div><div class="cc-am-card-value" style="color:#06B6D4">$${(Math.random()*5+8).toFixed(1)}k</div><div class="cc-am-card-delta">across all APIs</div></div>
+        <div class="cc-am-card"><div class="cc-am-card-label">Cache Hit Rate</div><div class="cc-am-card-value" style="color:#10B981">${(Math.random()*15+80).toFixed(1)}%</div><div class="cc-am-card-delta">reducing API calls</div></div>
+      </div>
+      <div class="cc-am-section">
+        <div class="cc-am-section-title">📊 Request Volume — 7-Day Trend by API</div>
+        ${connected.slice(0, 6).map(api => {
+          const days = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+          const data = days.map(() => Math.floor(Math.random() * 4000) + 1000);
+          const maxVal = Math.max(...data, 1);
+          return `
+            <div style="margin-bottom:16px">
+              <div style="font-size:12px;font-weight:600;color:#14b8a6;margin-bottom:6px">${api.icon} ${api.name}</div>
+              <div class="cc-am-bars" style="height:50px">
+                ${data.map((v, i) => `
+                  <div class="cc-am-bar-wrap">
+                    <div class="cc-am-bar" style="height:${(v/maxVal)*100}%;background:linear-gradient(180deg,#14b8a6,#06B6D4)" title="${days[i]}: ${v.toLocaleString()} requests"></div>
+                    <div class="cc-am-bar-label" style="font-size:8px">${days[i]}</div>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          `;
+        }).join('')}
+      </div>
+      <div class="cc-am-section">
+        <div class="cc-am-section-title">⏱️ Requests by Hour (Today)</div>
+        <div class="cc-am-bars" style="height:80px">
+          ${Array.from({length: 24}, (_, h) => {
+            const peak = h >= 9 && h <= 17 ? 1.5 : 0.5;
+            const v = Math.floor(Math.random() * 3000 * peak) + 500;
+            const maxV = 5000;
+            return `
+              <div class="cc-am-bar-wrap">
+                <div class="cc-am-bar" style="height:${(v/maxV)*100}%;background:${h >= 9 && h <= 17 ? '#14b8a6' : '#475569'}" title="${h}:00 — ${v.toLocaleString()} requests"></div>
+                <div class="cc-am-bar-label" style="font-size:7px">${h%6===0 ? h : ''}</div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+        <div style="display:flex;gap:16px;margin-top:8px">
+          <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:#94a3b8"><div style="width:10px;height:10px;border-radius:2px;background:#14b8a6"></div> Business hours (9-17)</div>
+          <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:#94a3b8"><div style="width:10px;height:10px;border-radius:2px;background:#475569"></div> Off-hours</div>
+        </div>
+      </div>
+      <div class="cc-am-section">
+        <div class="cc-am-section-title">💰 Rate Limit Usage — Daily Quota Consumption</div>
+        <div class="cc-am-scroll">
+          <table class="cc-am-table">
+            <thead><tr><th>API</th><th>Daily Limit</th><th>Used Today</th><th>Remaining</th><th>Usage %</th><th>Projected Monthly Cost</th></tr></thead>
+            <tbody>
+              ${connected.map(a => {
+                const limit = parseInt((a.requests.match(/(\d+)/) || [0])[1]);
+                const used = Math.floor(limit * (0.3 + Math.random() * 0.5));
+                const pct = Math.round(used / limit * 100);
+                const cost = (used * 0.001).toFixed(2);
+                const color = pct > 80 ? '#ef4444' : pct > 60 ? '#f59e0b' : '#10B981';
+                return `
+                  <tr>
+                    <td style="font-weight:600;color:#14b8a6">${a.icon} ${a.name}</td>
+                    <td style="text-align:right">${limit.toLocaleString()}</td>
+                    <td style="text-align:right">${used.toLocaleString()}</td>
+                    <td style="text-align:right;color:${color}">${(limit - used).toLocaleString()}</td>
+                    <td style="text-align:center">
+                      <div style="display:flex;align-items:center;gap:4px;justify-content:center">
+                        <div style="width:60px;height:6px;border-radius:3px;background:rgba(255,255,255,0.08);overflow:hidden"><div style="height:100%;width:${pct}%;background:${color};border-radius:3px"></div></div>
+                        <span style="font-size:11px;font-weight:700;color:${color}">${pct}%</span>
+                      </div>
+                    </td>
+                    <td style="text-align:right;color:#06B6D4">$${cost}</td>
+                  </tr>
+                `;
+              }).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    `;
+  }
+
+  // ------------------------------------------------------------------
+  // 9. ERROR LOG VIEWER
+  // ------------------------------------------------------------------
+  function renderErrorLog(container) {
+    const db = initDatabase();
+    const connected = db.apis.filter(a => a.status === 'connected');
+    const errors = [];
+    connected.forEach(api => {
+      const errorCount = Math.floor(Math.random() * 5) + 1;
+      for (let i = 0; i < errorCount; i++) {
+        const codes = [400, 401, 403, 404, 429, 500, 502, 503];
+        const code = codes[Math.floor(Math.random() * codes.length)];
+        const messages = {
+          400: 'Bad Request — malformed query parameters',
+          401: 'Unauthorized — API key expired or invalid',
+          403: 'Forbidden — insufficient permissions for this endpoint',
+          404: 'Not Found — resource does not exist',
+          429: 'Rate Limit Exceeded — too many requests in window',
+          500: 'Internal Server Error — provider server error',
+          502: 'Bad Gateway — upstream provider unavailable',
+          503: 'Service Unavailable — provider maintenance'
+        };
+        errors.push({
+          id: 'err_' + api.id + '_' + i,
+          api: api.name, icon: api.icon, endpoint: api.endpoint,
+          code: code, message: messages[code],
+          timestamp: new Date(Date.now() - Math.random() * 86400000).toISOString(),
+          retryable: code >= 429 || code >= 500,
+          retried: Math.random() > 0.5,
+          resolved: Math.random() > 0.7
+        });
+      }
+    });
+    errors.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+    container.innerHTML = `
+      <div class="cc-am-header">
+        <h2 class="cc-am-page-title">⚠️ Error Log Viewer <span class="cc-am-page-badge">${errors.length} ERRORS (24H)</span></h2>
+      </div>
+      <div class="cc-am-cards">
+        <div class="cc-am-card"><div class="cc-am-card-label">Total Errors (24h)</div><div class="cc-am-card-value" style="color:#ef4444">${errors.length}</div></div>
+        <div class="cc-am-card"><div class="cc-am-card-label">Resolved</div><div class="cc-am-card-value" style="color:#10B981">${errors.filter(e => e.resolved).length}</div></div>
+        <div class="cc-am-card"><div class="cc-am-card-label">Unresolved</div><div class="cc-am-card-value" style="color:#f59e0b">${errors.filter(e => !e.resolved).length}</div></div>
+        <div class="cc-am-card"><div class="cc-am-card-label">Error Rate</div><div class="cc-am-card-value" style="color:#10B981">${(errors.length / 10000 * 100).toFixed(2)}%</div></div>
+      </div>
+      <div class="cc-am-section">
+        <div class="cc-am-section-title">⚠️ Recent API Errors</div>
+        <div class="cc-am-scroll">
+          <table class="cc-am-table">
+            <thead><tr><th>API</th><th>Endpoint</th><th>Status</th><th>Error Message</th><th>Time</th><th>Retryable</th><th>Status</th><th>Action</th></tr></thead>
+            <tbody>
+              ${errors.map(e => {
+                const codeColor = e.code >= 500 ? '#ef4444' : e.code >= 400 ? '#f59e0b' : '#3b82f6';
+                const timeAgo = Math.floor((Date.now() - new Date(e.timestamp).getTime()) / 60000);
+                return `
+                  <tr>
+                    <td style="font-weight:600">${e.icon} ${e.api}</td>
+                    <td style="font-family:monospace;font-size:10px;color:#64748b">${e.endpoint}</td>
+                    <td style="text-align:center"><span style="padding:3px 8px;border-radius:4px;background:${codeColor}20;color:${codeColor};font-weight:700;font-size:11px">${e.code}</span></td>
+                    <td style="font-size:11px;color:#94a3b8;max-width:250px">${e.message}</td>
+                    <td style="text-align:center;font-size:11px;color:#64748b">${timeAgo < 60 ? timeAgo + 'm ago' : Math.floor(timeAgo/60) + 'h ago'}</td>
+                    <td style="text-align:center">${e.retryable ? '✅ Yes' : '❌ No'}</td>
+                    <td><span class="cc-am-status cc-am-status-${e.resolved ? 'connected' : 'coming'}">${e.resolved ? 'resolved' : 'open'}</span></td>
+                    <td>${e.retryable && !e.resolved ? '<button class="cc-am-btn cc-am-btn-primary" style="font-size:10px;padding:3px 8px" onclick="alert(\'Demo: Retrying request to ' + e.api + '\')">🔄 Retry</button>' : e.retried ? '<span style="font-size:10px;color:#64748b">retried</span>' : '—'}</td>
+                  </tr>
+                `;
+              }).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    `;
+  }
+
+  // ------------------------------------------------------------------
+  // 10. SANDBOX MODE
+  // ------------------------------------------------------------------
+  function renderSandbox(container) {
+    const db = initDatabase();
+    const connected = db.apis.filter(a => a.status === 'connected');
+    container.innerHTML = `
+      <div class="cc-am-header">
+        <h2 class="cc-am-page-title">🧪 API Sandbox — Try Live API Calls <span class="cc-am-page-badge">INTERACTIVE</span></h2>
+        <div class="cc-am-live-indicator"><div class="cc-am-live-dot"></div> Sandbox ready</div>
+      </div>
+      <div class="cc-am-section">
+        <div class="cc-am-section-title">🧪 Make a Test API Call</div>
+        <div style="padding:12px;background:rgba(6,182,212,0.06);border:1px solid rgba(6,182,212,0.15);border-radius:8px;margin-bottom:16px;font-size:12px;color:#67e8f9">
+          💡 The sandbox lets you make a simulated API call to any connected integration. Select an API, customize parameters, and see a realistic response — all without affecting real data.
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
+          <div>
+            <label style="font-size:11px;color:#64748b;display:block;margin-bottom:4px">Select API</label>
+            <select class="cc-am-search" style="width:100%" id="cc-am-sandbox-api" onchange="window.__ccAM.updateSandboxParams(this.value)">
+              ${connected.map(a => '<option value="' + a.id + '">' + a.icon + ' ' + a.name + '</option>').join('')}
+            </select>
+          </div>
+          <div>
+            <label style="font-size:11px;color:#64748b;display:block;margin-bottom:4px">HTTP Method</label>
+            <select class="cc-am-search" style="width:100%" id="cc-am-sandbox-method">
+              <option>GET</option><option>POST</option><option>PUT</option><option>DELETE</option>
+            </select>
+          </div>
+        </div>
+        <div id="cc-am-sandbox-params" style="margin-bottom:16px"></div>
+        <div style="display:flex;gap:8px;margin-bottom:16px">
+          <button class="cc-am-btn cc-am-btn-primary" onclick="window.__ccAM.executeSandboxCall()">▶️ Execute Request</button>
+          <button class="cc-am-btn cc-am-btn-secondary" onclick="window.__ccAM.setView('sandbox')">Clear</button>
+        </div>
+        <div id="cc-am-sandbox-response" style="display:none">
+          <div style="font-size:13px;font-weight:700;color:#10B981;margin-bottom:8px">✅ Response (200 OK) — ${new Date().toLocaleTimeString()}</div>
+          <div style="background:#0d1117;border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:16px;font-family:'Monaco','Menlo','Courier New',monospace;font-size:11px;color:#e2e8f0;overflow-x:auto;line-height:1.6;white-space:pre" id="cc-am-sandbox-response-body"></div>
+          <div style="display:flex;gap:16px;margin-top:8px">
+            <span style="font-size:11px;color:#64748b">Latency: <strong style="color:#10B981" id="cc-am-sandbox-latency">—</strong></span>
+            <span style="font-size:11px;color:#64748b">Rate remaining: <strong style="color:#06B6D4" id="cc-am-sandbox-rate">—</strong></span>
+            <span style="font-size:11px;color:#64748b">Request ID: <strong style="color:#a78bfa" id="cc-am-sandbox-reqid">—</strong></span>
+          </div>
+        </div>
+      </div>
+      <div class="cc-am-section">
+        <div class="cc-am-section-title">📚 Recent Sandbox Calls</div>
+        <div class="cc-am-scroll" style="max-height:200px">
+          <table class="cc-am-table">
+            <thead><tr><th>API</th><th>Method</th><th>Endpoint</th><th>Status</th><th>Latency</th><th>Time</th></tr></thead>
+            <tbody>
+              ${Array.from({length: 5}, (_, i) => {
+                const api = connected[Math.floor(Math.random() * connected.length)];
+                return `<tr><td style="font-weight:600">${api.icon} ${api.name.split(' ').slice(0,2).join(' ')}</td><td style="text-align:center">GET</td><td style="font-family:monospace;font-size:10px;color:#64748b">${api.endpoint}</td><td style="text-align:center"><span style="color:#10B981;font-weight:600">200</span></td><td style="text-align:center">${api.latency}</td><td style="text-align:center;font-size:11px;color:#64748b">${Math.floor(Math.random()*55)+5}m ago</td></tr>`;
+              }).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    `;
+    if (connected.length > 0) updateSandboxParams(connected[0].id);
+  }
+
+  function updateSandboxParams(apiId) {
+    const db = initDatabase();
+    const api = db.apis.find(a => a.id === apiId);
+    if (!api) return;
+    const container = document.getElementById('cc-am-sandbox-params');
+    if (!container) return;
+    const params = {
+      'api01': [{name: 'port_id', value: 'SHN', desc: 'Port of Shanghai'}, {name: 'limit', value: '10', desc: 'Max results'}],
+      'api02': [{name: 'port_name', value: 'Rotterdam', desc: 'Port name'}, {name: 'days', value: '7', desc: 'Forecast horizon'}],
+      'api04': [{name: 'warehouse_id', value: 'wh01', desc: 'Warehouse ID'}, {name: 'operation', value: 'inbound', desc: 'Operation type'}],
+      'api07': [{name: 'tracking_number', value: 'MSCU1234567', desc: 'Container tracking #'}, {name: 'carrier', value: 'MSC', desc: 'Carrier code'}],
+      'api10': [{name: 'lat', value: '51.95', desc: 'Latitude'}, {name: 'lng', value: '4.48', desc: 'Longitude (Rotterdam)'}],
+      'api12': [{name: 'region', value: 'europe', desc: 'Geographic region'}, {name: 'severity', value: 'all', desc: 'Alert severity'}],
+      'api13': [{name: 'country', value: 'CN', desc: 'Country ISO code'}, {name: 'risk_type', value: 'all', desc: 'Risk dimension'}],
+      'api16': [{name: 'from', value: 'USD', desc: 'Source currency'}, {name: 'to', value: 'EUR', desc: 'Target currency'}],
+      'api17': [{name: 'commodity', value: 'crude_oil', desc: 'Commodity type'}, {name: 'unit', value: 'barrel', desc: 'Price unit'}]
+    };
+    const apiParams = params[apiId] || [{name: 'limit', value: '10', desc: 'Max results'}, {name: 'format', value: 'json', desc: 'Response format'}];
+    container.innerHTML = `
+      <div style="font-size:12px;font-weight:600;color:#94a3b8;margin-bottom:8px">Query Parameters:</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        ${apiParams.map(p => `
+          <div>
+            <label style="font-size:10px;color:#64748b;display:block;margin-bottom:2px">${p.name} — ${p.desc}</label>
+            <input type="text" class="cc-am-search" style="width:100%;font-size:12px" value="${p.value}" />
+          </div>
+        `).join('')}
+      </div>
+      <div style="margin-top:8px;padding:8px 12px;background:rgba(255,255,255,0.03);border-radius:6px;font-size:11px;color:#64748b">
+        Endpoint: <code style="color:#14b8a6">GET ${api.endpoint}</code>
+      </div>
+    `;
+  }
+
+  function executeSandboxCall() {
+    const apiSelect = document.getElementById('cc-am-sandbox-api');
+    if (!apiSelect) return;
+    const api = initDatabase().apis.find(a => a.id === apiSelect.value);
+    if (!api) return;
+    const responseDiv = document.getElementById('cc-am-sandbox-response');
+    const bodyDiv = document.getElementById('cc-am-sandbox-response-body');
+    const latencySpan = document.getElementById('cc-am-sandbox-latency');
+    const rateSpan = document.getElementById('cc-am-sandbox-rate');
+    const reqIdSpan = document.getElementById('cc-am-sandbox-reqid');
+    if (!responseDiv || !bodyDiv) return;
+    responseDiv.style.display = 'block';
+    bodyDiv.textContent = '⏳ Requesting...';
+    setTimeout(function() {
+      const latency = api.latency;
+      const rateRemaining = Math.floor(Math.random() * 9000) + 1000;
+      const reqId = 'req_' + Math.random().toString(36).substr(2, 12);
+      const response = generateSandboxResponse(api);
+      bodyDiv.textContent = JSON.stringify(response, null, 2);
+      if (latencySpan) latencySpan.textContent = latency;
+      if (rateSpan) rateSpan.textContent = rateRemaining.toLocaleString();
+      if (reqIdSpan) reqIdSpan.textContent = reqId;
+    }, 800);
+  }
+
+  function generateSandboxResponse(api) {
+    const responses = {
+      'api01': { status: 'success', data: [{ vessel_name: 'Ever Given', imo: 9811000, lat: 31.23, lng: 121.47, speed: 0.2, heading: 180, destination: 'Shanghai', eta: '2026-09-12T08:00:00Z', type: 'Container Ship', flag: 'Panama' }, { vessel_name: 'Maersk Seletar', imo: 9696234, lat: 1.29, lng: 103.76, speed: 12.5, heading: 45, destination: 'Singapore', eta: '2026-09-11T14:00:00Z', type: 'Container Ship', flag: 'Denmark' }], meta: { total: 2, page: 1 } },
+      'api02': { status: 'success', data: { port: 'Rotterdam', congestion_index: 0.72, avg_wait_hours: 14, vessels_in_queue: 28, trend: 'increasing', forecast_7d: [0.72, 0.75, 0.78, 0.80, 0.76, 0.70, 0.65] } },
+      'api04': { status: 'success', data: { warehouse_id: 'wh01', inbound_today: 15, pending_putaway: 8, completed_putaway: 7, avg_putaway_time: '3.2 min', locations_available: 1240 } },
+      'api07': { status: 'success', data: { tracking_number: 'MSCU1234567', carrier: 'MSC', status: 'In Transit', current_location: 'Suez Canal', eta: '2026-09-15T10:00:00Z', milestones: [{ time: '2026-09-08', location: 'Shanghai', event: 'Loaded' }, { time: '2026-09-10', location: 'Singapore', event: 'Transhipment' }, { time: '2026-09-11', location: 'Suez Canal', event: 'In Transit' }] } },
+      'api10': { status: 'success', data: { location: { lat: 51.95, lng: 4.48, name: 'Rotterdam' }, current: { temp: 14.2, wind_speed: 18, wind_dir: 'SW', visibility: 3500, pressure: 1015, humidity: 72 }, marine: { wave_height: 1.8, water_temp: 12.5, tide: 'rising' }, forecast: [{ time: '+3h', temp: 14, wind: 16, visibility: 4000 }, { time: '+6h', temp: 13, wind: 20, visibility: 2500 }] } },
+      'api12': { status: 'success', data: { alerts: [{ id: 'SW001', type: 'Storm Warning', severity: 'high', area: 'North Sea', effective: '2026-09-11T06:00:00Z', expires: '2026-09-12T06:00:00Z', description: 'Gale force winds expected 40-50 kn' }] } },
+      'api13': { status: 'success', data: { country: 'CN', country_name: 'China', risk_score: 35, risk_level: 'moderate', dimensions: { political: 30, economic: 25, security: 20, operational: 45 }, outlook: 'stable', last_updated: '2026-09-10T00:00:00Z' } },
+      'api16': { status: 'success', data: { from: 'USD', to: 'EUR', rate: 0.9234, change_24h: -0.0021, change_pct: -0.23, last_updated: '2026-09-10T12:00:00Z' } },
+      'api17': { status: 'success', data: { commodity: 'Crude Oil (Brent)', price: 78.45, currency: 'USD', unit: 'per barrel', change_24h: 1.23, change_pct: 1.59, last_updated: '2026-09-10T12:00:00Z' } }
+    };
+    return responses[api.id] || { status: 'success', data: { message: 'Sample response from ' + api.name, timestamp: new Date().toISOString() }, meta: { request_id: 'req_demo', rate_remaining: 99845 } };
+  }
+
+  // ------------------------------------------------------------------
   // API
   // ------------------------------------------------------------------
   function open() {
@@ -851,7 +1334,7 @@ curl -X GET 'https://api.aisupplychain-advanced.com/v1${api.endpoint}' \\
   // ------------------------------------------------------------------
   function init() {
     injectStyles();
-    window.__ccAM = { open, close, setView, setTab, search, filterByCategory, switchLang, copyCode };
+    window.__ccAM = { open, close, setView, setTab, search, filterByCategory, switchLang, copyCode, wizardStep2, wizardStep3, wizardStep4, updateSandboxParams, executeSandboxCall };
 
     function injectButton() {
       if (document.getElementById('cc-am-trigger-btn')) return;
